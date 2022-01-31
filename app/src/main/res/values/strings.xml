@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">Aplikasi Catatan pemasukan dan pengeluaran</string>
+    <string name="facebook_app_id">1393746047463516</string>
+    <string name="fb_login_protocol_scheme">fb1393746047463516</string>
+    <string name="loading">Loading...</string>
+    <string name="ucapan">Selamat malam, Jabbar</string>
+    <string name="email">reza.okovian@gmail.com</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <array name="category_pengeluaran">
+        <item>Belanja Umum</item>
+        <item>Makanan</item>
+        <item>Pulsa HP</item>
+        <item>Transportasi</item>
+        <item>Tagihan</item>
+        <item>Paket Internet</item>
+    </array>
+    <array name="category_pemasukan">
+        <item>Bonus</item>
+        <item>Gaji</item>
+        <item>Hasil Usaha</item>
+
+    </array>
+</resources>

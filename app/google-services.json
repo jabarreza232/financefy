@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "422194591623",
+    "firebase_url": "https://financefy-92a61.firebaseio.com",
+    "project_id": "financefy-92a61",
+    "storage_bucket": "financefy-92a61.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:422194591623:android:b20cee7163814f295c4522",
+        "android_client_info": {
+          "package_name": "id.co.evolution.financefy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "422194591623-775nceqtdpp18r5hii9itn9q36euie3s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "id.co.evolution.financefy",
+            "certificate_hash": "0c74208ba51563de77b2f1e1fd7016d8e658f158"
+          }
+        },
+        {
+          "client_id": "422194591623-6lq8nfef2oh6kdsh6vm8rd182n1r5n0g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdki5JhNRNfEqMgHhpzEryI2vSSJPPWOY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "422194591623-6lq8nfef2oh6kdsh6vm8rd182n1r5n0g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
