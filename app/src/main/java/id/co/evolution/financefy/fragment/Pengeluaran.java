@@ -22,8 +22,12 @@ import android.widget.TextView;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,6 +35,7 @@ import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.activity.UpdateFinance;
 import id.co.evolution.financefy.adapter.AdapterFinance;
+import id.co.evolution.financefy.asynctask.FilterMaxMonthAsynctask;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 
@@ -64,12 +69,9 @@ public class Pengeluaran extends Fragment {
         today.get(Calendar.MONTH);
         long date_ship_milis = today.getTimeInMillis();
         txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
-        placeMonth.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDialogMonthPicker();
-            }
-        });
+        loadDataByMonth(App.getDatabase(getActivity()).financeDao().loadAllbyMonth(Tools.getFormattedMonthSimple(date_ship_milis)));
+
+        placeMonth.setOnClickListener(v -> showDialogMonthPicker());
         return view;
     }
 
@@ -87,11 +89,15 @@ public class Pengeluaran extends Fragment {
                     }
                 }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
 
-        builder.setMinYear(today.get(Calendar.YEAR))
-                .setActivatedYear(today.get(Calendar.YEAR))
-                .setMaxMonth(today.get(Calendar.MONTH))
-                .setMaxYear((today.get(Calendar.YEAR)+20))
-                .build().show();
+        try {
+            builder.setMinYear(today.get(Calendar.YEAR))
+                    .setActivatedYear(today.get(Calendar.YEAR))
+                    .setMaxYear((today.get(Calendar.YEAR) + 20))
+                    .setMaxMonth(Integer.parseInt(new FilterMaxMonthAsynctask(today, dataFinance, getContext()).execute().get()));
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        builder.build().show();
     }
 
 
@@ -114,21 +120,12 @@ public class Pengeluaran extends Fragment {
             public void onChanged(@Nullable List<ModelFinance> modelFinances) {
                 if (modelFinances != null) {
                     dataFinance = loadDataPengeluaran(modelFinances);
-                }
-                AdapterFinance adapter = new AdapterFinance(getActivity(), dataFinance, new AdapterFinance.MethodCallback() {
-                    @Override
-                    public void onClick(List<ModelFinance> data, int position) {
-                        showDialog(data, position);
+                    Collections.sort(dataFinance, (modelFinance, modelFinance2) -> Integer.parseInt(modelFinance.getMonth().split("-")[0]) - Integer.parseInt(modelFinance2.getMonth().split("-")[0]));
+                    if (dataFinance.size() == 0) {
+                        imgEmpty.setVisibility(View.VISIBLE);
+                    } else {
+                        imgEmpty.setVisibility(View.GONE);
                     }
-                });
-                Log.e("jumlah", adapter.getItemCount() + "");
-                rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
-                rvList.setAdapter(adapter);
-                if (adapter.getItemCount() == 0) {
-                    imgEmpty.setVisibility(View.VISIBLE);
-                } else {
-                    imgEmpty.setVisibility(View.GONE);
-
                 }
             }
         });
@@ -136,9 +133,9 @@ public class Pengeluaran extends Fragment {
     }
 
     private void loadDataByMonth(List<ModelFinance> data) {
-        dataFinance.clear();
-        dataFinance.addAll(loadDataPengeluaran(data));
-        AdapterFinance adapter = new AdapterFinance(getActivity(), dataFinance, new AdapterFinance.MethodCallback() {
+        Collections.sort(loadDataPengeluaran(data), (modelFinance, modelFinance2) -> Integer.parseInt(Tools.convertDateFormat(modelFinance.getDate()).split("-")[0]) - Integer.parseInt(Tools.convertDateFormat(modelFinance2.getDate()).split("-")[0]));
+
+        AdapterFinance adapter = new AdapterFinance(getActivity(), loadDataPengeluaran(data), new AdapterFinance.MethodCallback() {
             @Override
             public void onClick(List<ModelFinance> data, int position) {
                 showDialog(data, position);

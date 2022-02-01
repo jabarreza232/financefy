@@ -1,5 +1,8 @@
 package id.co.evolution.financefy.activity;
 
+import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
+import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
+
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,6 +44,7 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import id.co.evolution.financefy.App;
+import id.co.evolution.financefy.BuildConfig;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.model.ModelFinance;
@@ -110,6 +114,9 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                         double parsed = Double.parseDouble(cleanString);
                         Locale localeID = new Locale("in", "ID");
                         String formatted = NumberFormat.getCurrencyInstance(localeID).format((parsed));
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            formatted = formatted.replaceAll(",00", "");
+                        }
                         jumlah = formatted;
                         etAmount.setText(formatted);
                         etAmount.setSelection(formatted.length());
@@ -126,15 +133,6 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
         });
     }
 
-    public static String getFormattedDateSimple(Long dateTime) {
-        SimpleDateFormat newFormat = new SimpleDateFormat("MMMM dd, yyyy");
-        return newFormat.format(new Date(dateTime));
-    }
-
-    public static String getFormattedMonthSimple(Long dateTime) {
-        SimpleDateFormat newFormat = new SimpleDateFormat("MM-yyyy");
-        return newFormat.format(new Date(dateTime));
-    }
 
     private void showDatePickerDialog() {
         DatePickerDialog datePickerDialog = DatePickerDialog.newInstance(new DatePickerDialog.OnDateSetListener() {

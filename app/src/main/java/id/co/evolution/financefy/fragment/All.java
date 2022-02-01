@@ -21,6 +21,7 @@ import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -63,6 +64,7 @@ public class All extends Fragment {
         today.get(Calendar.MONTH);
         long date_ship_milis = today.getTimeInMillis();
         txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
+        loadDataByMonth(App.getDatabase(getActivity()).financeDao().loadAllbyMonth(Tools.getFormattedMonthSimple(date_ship_milis)));
         placeMonth.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -113,31 +115,28 @@ public class All extends Fragment {
     }
 
     private void loadData() {
+
         App.getDatabase(getActivity()).financeDao().getAll().observe(getActivity(), new Observer<List<ModelFinance>>() {
             @Override
             public void onChanged(@Nullable List<ModelFinance> modelFinances) {
-                dataFinance = modelFinances;
-                AdapterFinance adapter = new AdapterFinance(getActivity(), dataFinance, new AdapterFinance.MethodCallback() {
-                    @Override
-                    public void onClick(List<ModelFinance> data, int position) {
-                        showDialog(data, position);
+                if (modelFinances != null) {
+                    dataFinance = modelFinances;
+                    Collections.sort(dataFinance, (modelFinance, modelFinance2) -> Integer.parseInt(modelFinance.getMonth().split("-")[0]) - Integer.parseInt(modelFinance2.getMonth().split("-")[0]));
+
+                    if (dataFinance.size() == 0) {
+                        imgEmpty.setVisibility(View.VISIBLE);
+                    } else {
+                        imgEmpty.setVisibility(View.GONE);
                     }
-                });
-                Log.e("jumlah", adapter.getItemCount() + "");
-                rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
-                rvList.setAdapter(adapter);
-                if (adapter.getItemCount() == 0) {
-                    imgEmpty.setVisibility(View.VISIBLE);
-                } else {
-                    imgEmpty.setVisibility(View.GONE);
                 }
             }
         });
     }
 
     private void loadDataByMonth(List<ModelFinance> data) {
-        dataFinance = data;
-        AdapterFinance adapter = new AdapterFinance(getActivity(), dataFinance, new AdapterFinance.MethodCallback() {
+        Collections.sort(data, (modelFinance, modelFinance2) -> Integer.parseInt(Tools.convertDateFormat(modelFinance.getDate()).split("-")[0]) - Integer.parseInt(Tools.convertDateFormat(modelFinance2.getDate()).split("-")[0]));
+
+        AdapterFinance adapter = new AdapterFinance(getActivity(), data, new AdapterFinance.MethodCallback() {
             @Override
             public void onClick(List<ModelFinance> data, int position) {
                 showDialog(data, position);

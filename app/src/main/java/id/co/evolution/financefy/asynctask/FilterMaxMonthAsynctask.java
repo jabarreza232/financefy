@@ -26,7 +26,8 @@ public class FilterMaxMonthAsynctask extends AsyncTask<Void, String, String> {
     Context context;
     List<ModelFinance> data;
     Calendar today;
-    public FilterMaxMonthAsynctask( Calendar today, List<ModelFinance> data, Context context) {
+
+    public FilterMaxMonthAsynctask(Calendar today, List<ModelFinance> data, Context context) {
         this.context = context;
         this.today = today;
         this.data = data;
@@ -46,8 +47,8 @@ public class FilterMaxMonthAsynctask extends AsyncTask<Void, String, String> {
         for (int i = 0; i < data.size(); i++) {
             Log.e("cek", "doInBackground: " + data.get(i).getMonth() + ":" + today.get(Calendar.MONTH));
 
-            if (today.get(Calendar.MONTH) < Integer.parseInt(data.get(i).getMonth().split("-")[0])) {
-                max = Integer.parseInt(data.get(i).getMonth().split("-")[0]);   // new maximum
+            if ((Integer.parseInt(data.get(i).getMonth().split("-")[0])- 1) > today.get(Calendar.MONTH)) {
+                max = (Integer.parseInt(data.get(i).getMonth().split("-")[0]) - 1);   // new maximum
                 month = String.valueOf(max);
             }
         }
@@ -62,6 +63,6 @@ public class FilterMaxMonthAsynctask extends AsyncTask<Void, String, String> {
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
-        Log.e("cek-lagi", "onPostExecute: "+s );
+        Log.e("cek-lagi", "onPostExecute: " + s);
     }
 }
