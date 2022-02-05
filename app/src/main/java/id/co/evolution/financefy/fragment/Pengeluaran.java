@@ -1,16 +1,20 @@
 package id.co.evolution.financefy.fragment;
 
-import android.arch.lifecycle.Observer;
-import android.content.Context;
+import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,58 +25,63 @@ import android.widget.TextView;
 
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
+
 import id.co.evolution.financefy.App;
+import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.activity.UpdateFinance;
 import id.co.evolution.financefy.adapter.AdapterFinance;
 import id.co.evolution.financefy.asynctask.FilterMaxMonthAsynctask;
+import id.co.evolution.financefy.databinding.FragmentPengeluaranBinding;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 
 public class Pengeluaran extends Fragment {
-    @BindView(R.id.rv_list)
-    RecyclerView rvList;
-    @BindView(R.id.place_month)
-    RelativeLayout placeMonth;
-    @BindView(R.id.txt_month)
-    TextView txtMonth;
-    @BindView(R.id.empty)
-    ImageView imgEmpty;
     Calendar today;
     List<ModelFinance> dataFinance = new ArrayList<>();
+    FragmentPengeluaranBinding binding;
+    ViewModelFinance viewModelFinance;
 
     public Pengeluaran() {
         // Required empty public constructor
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_pengeluaran, container, false);
-        ButterKnife.bind(this, view);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_pengeluaran, container, false);
+        dataFinance = ((MainActivity) requireActivity()).dataFinance;
         today = Calendar.getInstance();
-        loadData();
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         today.get(Calendar.YEAR);
         today.get(Calendar.MONTH);
         long date_ship_milis = today.getTimeInMillis();
-        txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
-        loadDataByMonth(App.getDatabase(getActivity()).financeDao().loadAllbyMonth(Tools.getFormattedMonthSimple(date_ship_milis)));
+        binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
 
-        placeMonth.setOnClickListener(v -> showDialogMonthPicker());
-        return view;
+        viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
+
+        viewModelFinance.getFinanceByMonth(getContext(), Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
+            if (modelFinances != null) {
+                loadDataByMonth(modelFinances);
+            }
+        });
+
+        binding.placeMonth.setOnClickListener(v -> showDialogMonthPicker());
     }
 
     private void showDialogMonthPicker() {
@@ -84,8 +93,13 @@ public class Pengeluaran extends Fragment {
                         calendar.set(Calendar.YEAR, selectedYear);
                         calendar.set(Calendar.MONTH, selectedMonth);
                         long date_ship_milis = calendar.getTimeInMillis();
-                        txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
-                        loadDataByMonth(App.getDatabase(getActivity()).financeDao().loadAllbyMonth(Tools.getFormattedMonthSimple(date_ship_milis)));
+                        binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
+
+                        viewModelFinance.getFinanceByMonth(getContext(), Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
+                            if (modelFinances != null) {
+                                loadDataByMonth(modelFinances);
+                            }
+                        });
                     }
                 }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
 
@@ -101,39 +115,12 @@ public class Pengeluaran extends Fragment {
     }
 
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        loadData();
 
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        loadData();
-    }
 
-    private void loadData() {
-        App.getDatabase(getActivity()).financeDao().getAll().observe(getActivity(), new Observer<List<ModelFinance>>() {
-            @Override
-            public void onChanged(@Nullable List<ModelFinance> modelFinances) {
-                if (modelFinances != null) {
-                    dataFinance = loadDataPengeluaran(modelFinances);
-                    Collections.sort(dataFinance, (modelFinance, modelFinance2) -> Integer.parseInt(modelFinance.getMonth().split("-")[0]) - Integer.parseInt(modelFinance2.getMonth().split("-")[0]));
-                    if (dataFinance.size() == 0) {
-                        imgEmpty.setVisibility(View.VISIBLE);
-                    } else {
-                        imgEmpty.setVisibility(View.GONE);
-                    }
-                }
-            }
-        });
-
-    }
 
     private void loadDataByMonth(List<ModelFinance> data) {
-        Collections.sort(loadDataPengeluaran(data), (modelFinance, modelFinance2) -> Integer.parseInt(Tools.convertDateFormat(modelFinance.getDate()).split("-")[0]) - Integer.parseInt(Tools.convertDateFormat(modelFinance2.getDate()).split("-")[0]));
+        Collections.sort(data, (modelFinance, modelFinance2) -> Integer.parseInt(Tools.convertDateFormat(modelFinance.getDate()).split("-")[0]) - Integer.parseInt(Tools.convertDateFormat(modelFinance2.getDate()).split("-")[0]));
 
         AdapterFinance adapter = new AdapterFinance(getActivity(), loadDataPengeluaran(data), new AdapterFinance.MethodCallback() {
             @Override
@@ -142,14 +129,14 @@ public class Pengeluaran extends Fragment {
             }
         });
         Log.e("jumlah", adapter.getItemCount() + "");
-        rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
-        rvList.setAdapter(adapter);
-        rvList.getAdapter().notifyDataSetChanged();
+        adapter.setType(AdapterFinance.TYPE_LAYOUT_MANAGER.VERTICAL);
+        binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
+        binding.rvList.setAdapter(adapter);
+        binding.rvList.getAdapter().notifyDataSetChanged();
         if (adapter.getItemCount() == 0) {
-            imgEmpty.setVisibility(View.VISIBLE);
+            binding.empty.setVisibility(View.VISIBLE);
         } else {
-            imgEmpty.setVisibility(View.GONE);
-
+            binding.empty.setVisibility(View.GONE);
         }
     }
 
@@ -181,7 +168,7 @@ public class Pengeluaran extends Fragment {
                         App.getDatabase(getActivity()).financeDao().delete(data.get(position));
                         App.getDatabase(getActivity()).financeDao().getAll();
                         dataFinance.remove(position);
-                        rvList.getAdapter().notifyDataSetChanged();
+                        binding.rvList.getAdapter().notifyDataSetChanged();
                         dialog.dismiss();
                         break;
                 }

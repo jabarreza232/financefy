@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,7 +16,7 @@
         android:background="?selectableItemBackgroundBorderless"
         android:padding="16dp"
         android:src="@drawable/ic_close"
-        android:tint="@color/white" />
+        app:tint="@color/white" />
 
     <TextView
         android:layout_width="match_parent"
@@ -63,20 +64,20 @@
                     android:layout_alignParentRight="true"
                     android:padding="16dp"
                     android:src="@drawable/ic_date_range"
-                    android:tint="@color/blackTextColor" />
+                    app:tint="@color/blackTextColor" />
 
 
             </RelativeLayout>
 
             <RelativeLayout
-                android:id="@+id/place_tipe"
+                android:id="@+id/place_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 android:background="@drawable/shape_date">
 
                 <TextView
-                    android:id="@+id/txt_tipe"
+                    android:id="@+id/txt_type"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
@@ -89,7 +90,7 @@
                     android:layout_alignParentRight="true"
                     android:padding="16dp"
                     android:src="@drawable/ic_arrow_drop_down"
-                    android:tint="@color/blackTextColor" />
+                    app:tint="@color/blackTextColor" />
 
 
             </RelativeLayout>
@@ -115,12 +116,12 @@
                     android:layout_alignParentRight="true"
                     android:padding="16dp"
                     android:src="@drawable/ic_arrow_drop_down"
-                    android:tint="@color/blackTextColor" />
+                    app:tint="@color/blackTextColor" />
 
 
             </RelativeLayout>
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_amount"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -128,15 +129,15 @@
                 android:hint="Amount of money"
                 app:errorEnabled="true">
 
-                <android.support.design.widget.TextInputEditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="numberDecimal"/>
 
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
+            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_description"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -144,14 +145,14 @@
                 android:hint="Description"
                 app:errorEnabled="true">
 
-                <android.support.design.widget.TextInputEditText
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
-            </android.support.design.widget.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <android.support.v7.widget.CardView
+            <androidx.cardview.widget.CardView
                 android:id="@+id/place_submit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -166,8 +167,9 @@
                     android:text="Submit"
                     android:textAlignment="center"
                     android:textColor="@android:color/white" />
-            </android.support.v7.widget.CardView>
+            </androidx.cardview.widget.CardView>
         </LinearLayout>
     </FrameLayout>
 
 </RelativeLayout>
+</layout>

@@ -3,103 +3,68 @@ package id.co.evolution.financefy.activity;
 import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
 
-import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.TextInputEditText;
-import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
+
+import androidx.cardview.widget.CardView;
+import androidx.databinding.DataBindingUtil;
+
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import id.co.evolution.financefy.App;
-import id.co.evolution.financefy.BuildConfig;
-import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
 import id.co.evolution.financefy.model.ModelFinance;
 
 public class CreateFinance extends AppCompatActivity implements View.OnClickListener {
-    @BindView(R.id.place_date)
-    RelativeLayout placeDate;
-    @BindView(R.id.place_category)
-    RelativeLayout placeCategory;
-    @BindView(R.id.place_tipe)
-    RelativeLayout placeType;
-    @BindView(R.id.txt_date)
-    TextView txtDate;
-    @BindView(R.id.txt_kategori)
-    TextView txtKategori;
-    @BindView(R.id.txt_tipe)
-    TextView txtTipe;
-    @BindView(R.id.til_amount)
-    TextInputLayout tilAmount;
-    @BindView(R.id.et_amount)
-    TextInputEditText etAmount;
-    @BindView(R.id.til_description)
-    TextInputLayout tilDescription;
-    @BindView(R.id.et_description)
-    TextInputEditText etDescription;
-    @BindView(R.id.img_back)
-    ImageView imgBack;
-    @BindView(R.id.place_submit)
-    CardView placeSubmit;
+
     String date = "";
     String category = "";
     String type = "";
     String[] kategori = null;
     private String jumlah = "";
     String month = "";
+    ActivityCreateFinanceBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_finance);
-        ButterKnife.bind(this);
-        placeDate.setOnClickListener(this);
-        placeCategory.setOnClickListener(this);
-        placeType.setOnClickListener(this);
-        imgBack.setOnClickListener(this);
-        placeSubmit.setOnClickListener(this);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
+
+        binding.placeDate.setOnClickListener(this);
+        binding.placeCategory.setOnClickListener(this);
+        binding.placeType.setOnClickListener(this);
+        binding.imgBack.setOnClickListener(this);
+        binding.placeSubmit.setOnClickListener(this);
         Calendar cur_calendar = Calendar.getInstance();
         cur_calendar.get(Calendar.YEAR);
         cur_calendar.get(Calendar.MONTH);
         cur_calendar.get(Calendar.DAY_OF_MONTH);
         long date_ship_milis = cur_calendar.getTimeInMillis();
-        txtDate.setText(getFormattedDateSimple(date_ship_milis));
+        binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
-        etAmount.addTextChangedListener(new TextWatcher() {
+        binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -108,7 +73,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().equals(jumlah)) {
-                    etAmount.removeTextChangedListener(this);
+                    binding.etAmount.removeTextChangedListener(this);
                     String cleanString = s.toString().replaceAll("[Rp,.]", "");
                     if (!cleanString.isEmpty()) {
                         double parsed = Double.parseDouble(cleanString);
@@ -118,11 +83,11 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                             formatted = formatted.replaceAll(",00", "");
                         }
                         jumlah = formatted;
-                        etAmount.setText(formatted);
-                        etAmount.setSelection(formatted.length());
+                        binding.etAmount.setText(formatted);
+                        binding.etAmount.setSelection(formatted.length());
                     }
 
-                    etAmount.addTextChangedListener(this);
+                    binding.etAmount.addTextChangedListener(this);
                 }
             }
 
@@ -143,7 +108,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                 calendar.set(Calendar.MONTH, monthOfYear);
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
                 long date_ship_milis = calendar.getTimeInMillis();
-                txtDate.setText(getFormattedDateSimple(date_ship_milis));
+                binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
                 date = getFormattedDateSimple(date_ship_milis);
                 month = getFormattedMonthSimple(date_ship_milis);
             }
@@ -153,7 +118,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
     }
 
     private void showDialogCategory() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         builder.setTitle("Pilih Kategori");
         if (type.equalsIgnoreCase("pengeluaran")) {
             kategori = getResources().getStringArray(R.array.category_pengeluaran);
@@ -188,7 +153,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
 
                     }
                     if (!category.isEmpty()) {
-                        txtKategori.setText(category);
+                        binding.txtKategori.setText(category);
                     }
                 }
             });
@@ -212,18 +177,18 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                             break;
                     }
                     if (!category.isEmpty()) {
-                        txtKategori.setText(category);
+                        binding.txtKategori.setText(category);
                     }
                 }
             });
         }
 
-        AlertDialog dialog = builder.create();
+        android.app.AlertDialog dialog = builder.create();
         dialog.show();
     }
 
     private void showDialogTipe() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         builder.setTitle("Pilih Tipe");
         final String[] tipe = {"Pengeluaran", "Pemasukan"};
         builder.setItems(tipe, new DialogInterface.OnClickListener() {
@@ -234,18 +199,18 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                         type = tipe[0];
                         dialog.dismiss();
                         kategori = getResources().getStringArray(R.array.category_pengeluaran);
-                        txtKategori.setText(kategori[0]);
+                        binding.txtKategori.setText(kategori[0]);
                         category = kategori[0];
                         break;
                     case 1:
                         type = tipe[1];
                         kategori = getResources().getStringArray(R.array.category_pemasukan);
-                        txtKategori.setText(kategori[0]);
+                        binding.txtKategori.setText(kategori[0]);
                         category = kategori[0];
                         dialog.dismiss();
                         break;
                 }
-                txtTipe.setText(type);
+                binding.txtType.setText(type);
             }
         });
         AlertDialog dialog = builder.create();
@@ -262,7 +227,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                     Toast.makeText(this, "Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
                 }
                 break;
-            case R.id.place_tipe:
+            case R.id.place_type:
                 showDialogTipe();
                 break;
 
@@ -275,17 +240,17 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
             case R.id.place_submit:
                 if (type.isEmpty()) {
                     Toast.makeText(this, "Silahkan Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
-                } else if (etAmount.getText().toString().isEmpty()) {
-                    tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
-                } else if (etDescription.getText().toString().isEmpty()) {
-                    tilDescription.setError("Silahkan isi deskripsi terlebih dahulu");
-                } else if (!etAmount.getText().toString().isEmpty()) {
-                    tilAmount.setError(null);
+                } else if (binding.etAmount.getText().toString().isEmpty()) {
+                    binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
+                } else if (binding.etDescription.getText().toString().isEmpty()) {
+                    binding.tilDescription.setError("Silahkan isi deskripsi terlebih dahulu");
+                } else if (!binding.etAmount.getText().toString().isEmpty()) {
+                    binding.tilAmount.setError(null);
                 } else {
-                    tilDescription.setError(null);
+                    binding.tilDescription.setError(null);
                 }
 
-                if (!type.isEmpty() && !etAmount.getText().toString().isEmpty() && !etDescription.getText().toString().isEmpty()) {
+                if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty() && !binding.etDescription.getText().toString().isEmpty()) {
 
                     new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                             .setTitleText("Submit")
@@ -299,10 +264,9 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                                     model.setJumlah(jumlah);
                                     model.setTipe(type);
                                     model.setKategori(category);
-                                    model.setKeterangan(etDescription.getText().toString().trim());
+                                    model.setKeterangan(binding.etDescription.getText().toString().trim());
                                     model.setMonth(month);
                                     App.getDatabase(CreateFinance.this).financeDao().insertAll(model);
-                                    App.getDatabase(CreateFinance.this).financeDao().getAll();
                                     finish();
                                 }
                             })

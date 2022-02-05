@@ -1,69 +1,67 @@
 package id.co.evolution.financefy;
 
 
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TabLayout;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.viewpager.widget.ViewPager;
+
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseAuth;
-import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.tabs.TabLayout;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import de.hdodenhof.circleimageview.CircleImageView;
 import id.co.evolution.financefy.activity.CreateFinance;
-import id.co.evolution.financefy.activity.Login;
 import id.co.evolution.financefy.adapter.ViewPagerAdapter;
+import id.co.evolution.financefy.databinding.ActivityMainBinding;
 import id.co.evolution.financefy.fragment.All;
 import id.co.evolution.financefy.fragment.Pemasukan;
 import id.co.evolution.financefy.fragment.Pengeluaran;
 import id.co.evolution.financefy.helper.TinyDb;
-import id.co.evolution.financefy.model.ModelUser;
+import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    @BindView(R.id.tabLayout)
-    TabLayout tabLayout;
-    @BindView(R.id.viewPager)
-    ViewPager viewPager;
 
     TinyDb tinyDb;
-    @BindView(R.id.fab_add)
-    FloatingActionButton fabAdd;
+    ActivityMainBinding binding;
+    ViewModelFinance viewModelFinance;
+    public List<ModelFinance> dataFinance = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        ButterKnife.bind(this);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
 
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new All(), "All");
-        adapter.addFragment(new Pemasukan(), "Pemasukan");
-        adapter.addFragment(new Pengeluaran(), "Pengeluaran");
-        Log.e("jumlah", adapter.getCount() + "");
-        viewPager.setAdapter(adapter);
-        tabLayout.setupWithViewPager(viewPager);
+        viewModelFinance.getAllFinance(this).observe(this, modelFinances -> {
+            dataFinance = modelFinances;
+            ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+            adapter.addFragment(new All(), "Semuanya");
+            adapter.addFragment(new Pemasukan(), "Pemasukan");
+            adapter.addFragment(new Pengeluaran(), "Pengeluaran");
+            Log.e("jumlah_size", modelFinances.size() + "");
+            binding.layout.viewPager.setAdapter(adapter);
+            binding.layout.tabLayout.setupWithViewPager(binding.layout.viewPager);
+        });
 
-        fabAdd.setOnClickListener(this);
+
+        binding.fabAdd.setOnClickListener(this);
     }
+
 
     @Override
     public void onClick(View v) {

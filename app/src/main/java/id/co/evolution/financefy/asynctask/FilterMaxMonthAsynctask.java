@@ -46,9 +46,16 @@ public class FilterMaxMonthAsynctask extends AsyncTask<Void, String, String> {
         int max;
         for (int i = 0; i < data.size(); i++) {
             Log.e("cek", "doInBackground: " + data.get(i).getMonth() + ":" + today.get(Calendar.MONTH));
+            int monthValue = (Integer.parseInt(data.get(i).getMonth().split("-")[0]) - 1);
+            if (monthValue > today.get(Calendar.MONTH)) {
+                max = (Integer.parseInt(data.get(0).getMonth().split("-")[0]) - 1);
+                for (int j = 1; j < data.size(); j++) {
+                    int monthValueMax = (Integer.parseInt(data.get(j).getMonth().split("-")[0]));
 
-            if ((Integer.parseInt(data.get(i).getMonth().split("-")[0])- 1) > today.get(Calendar.MONTH)) {
-                max = (Integer.parseInt(data.get(i).getMonth().split("-")[0]) - 1);   // new maximum
+                    if (monthValueMax > max) {
+                        max = (Integer.parseInt(data.get(j).getMonth().split("-")[0]) - 1);   // new maximum
+                    }
+                }
                 month = String.valueOf(max);
             }
         }
