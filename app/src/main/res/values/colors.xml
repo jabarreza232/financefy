@@ -9,6 +9,7 @@
     <color name="colorTextbiru">#29B6F6</color>
     <!-- dots inactive colors -->
     <color name="colorGrey50">#B4B1B1</color>
+    <color name="colorGrey30">#D6D4D4</color>
 
     <color name="dot_dark_screen">#d6410000</color>
     <!-- dots active colors -->

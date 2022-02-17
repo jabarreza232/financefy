@@ -1,9 +1,10 @@
 package id.co.evolution.financefy.fragment;
 
+import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,25 +12,26 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
 
 import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.MainActivity;
@@ -37,30 +39,41 @@ import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.activity.UpdateFinance;
 import id.co.evolution.financefy.adapter.AdapterFinance;
 import id.co.evolution.financefy.asynctask.FilterMaxMonthAsynctask;
-import id.co.evolution.financefy.databinding.FragmentPemasukanBinding;
+
+import id.co.evolution.financefy.asynctask.FilterMinYearAsynctask;
+import id.co.evolution.financefy.databinding.FragmentSpendingBinding;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelNestedFinance;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
-public class Pemasukan extends Fragment {
-    Calendar today;
-    FragmentPemasukanBinding binding;
-    public static List<ModelFinance> dataFinance = new ArrayList<>();
-    ViewModelFinance viewModelFinance;
 
-    public Pemasukan() {
+public class FragmentSpending extends Fragment {
+    Calendar today;
+    List<ModelFinance> dataFinance = new ArrayList<>();
+    FragmentSpendingBinding binding;
+    ViewModelFinance viewModelFinance;
+    AdapterFinance.TYPE_LAYOUT_MANAGER type_layout_manager = AdapterFinance.TYPE_LAYOUT_MANAGER.GRID;
+
+    public FragmentSpending() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_pemasukan, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_spending, container, false);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
-
         today = Calendar.getInstance();
+
+        setHasOptionsMenu(true);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         today.get(Calendar.YEAR);
         today.get(Calendar.MONTH);
         long date_ship_milis = today.getTimeInMillis();
@@ -74,13 +87,7 @@ public class Pemasukan extends Fragment {
             }
         });
 
-        binding.placeMonth.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDialogMonthPicker();
-            }
-        });
-        return binding.getRoot();
+        binding.placeMonth.setOnClickListener(v -> showDialogMonthPicker());
     }
 
     private void showDialogMonthPicker() {
@@ -93,6 +100,7 @@ public class Pemasukan extends Fragment {
                         calendar.set(Calendar.MONTH, selectedMonth);
                         long date_ship_milis = calendar.getTimeInMillis();
                         binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
+
                         viewModelFinance.getFinanceByMonth(getContext(), Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
                             if (modelFinances != null) {
                                 loadDataByMonth(modelFinances);
@@ -104,7 +112,8 @@ public class Pemasukan extends Fragment {
         try {
             builder.setMinYear(today.get(Calendar.YEAR))
                     .setActivatedYear(today.get(Calendar.YEAR))
-                    .setMaxYear((today.get(Calendar.YEAR) + 20))
+                    .setMaxYear((today.get(Calendar.YEAR)))
+                    .setMinYear(Integer.parseInt(new FilterMinYearAsynctask(today, dataFinance, getContext()).execute().get()))
                     .setMaxMonth(Integer.parseInt(new FilterMaxMonthAsynctask(today, dataFinance, getContext()).execute().get()));
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
@@ -113,10 +122,14 @@ public class Pemasukan extends Fragment {
     }
 
 
+
+
+
+
     private void loadDataByMonth(List<ModelFinance> data) {
         Collections.sort(data, (modelFinance, modelFinance2) -> Integer.parseInt(Tools.convertDateFormat(modelFinance.getDate()).split("-")[0]) - Integer.parseInt(Tools.convertDateFormat(modelFinance2.getDate()).split("-")[0]));
 
-        AdapterFinance adapter = new AdapterFinance(getActivity(), loadDataPemasukan(data), new AdapterFinance.MethodCallback() {
+        AdapterFinance adapter = new AdapterFinance(getActivity(), filterNestedFinance(loadDataPengeluaran(data)), new AdapterFinance.MethodCallback() {
             @Override
             public void onClick(List<ModelFinance> data, int position) {
                 showDialog(data, position);
@@ -124,22 +137,42 @@ public class Pemasukan extends Fragment {
         });
         Log.e("jumlah", adapter.getItemCount() + "");
         adapter.setType(AdapterFinance.TYPE_LAYOUT_MANAGER.VERTICAL);
-
         binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.rvList.setAdapter(adapter);
         binding.rvList.getAdapter().notifyDataSetChanged();
         if (adapter.getItemCount() == 0) {
             binding.empty.setVisibility(View.VISIBLE);
+            binding.txtEmpty.setVisibility(View.VISIBLE);
         } else {
             binding.empty.setVisibility(View.GONE);
-
+            binding.txtEmpty.setVisibility(View.GONE);
         }
     }
 
-    private List<ModelFinance> loadDataPemasukan(List<ModelFinance> finance) {
+    private List<ModelNestedFinance> filterNestedFinance(List<ModelFinance>data){
+        List<ModelNestedFinance> listData=new ArrayList<>();
+
+        for(ModelFinance modelFinance:data){
+            HashSet<String> hashset = new HashSet<>();
+            hashset.add(modelFinance.getDate());
+            for(String date:hashset){
+                ModelNestedFinance modelNestedFinance = new ModelNestedFinance();
+                modelNestedFinance.setDate(date);
+
+                if(modelFinance.getDate().contains(date)){
+                    List<ModelFinance> dataFinance = new ArrayList<>();
+                    dataFinance.add(modelFinance);
+                    modelNestedFinance.setFinances(dataFinance);
+                }
+                listData.add(modelNestedFinance);
+            }
+        }
+        return listData;
+    }
+    private List<ModelFinance> loadDataPengeluaran(List<ModelFinance> finance) {
         List<ModelFinance> data = new ArrayList<>();
         for (ModelFinance modelFinance : finance) {
-            if (modelFinance.getTipe().equalsIgnoreCase("pemasukan")) {
+            if (modelFinance.getTipe().equalsIgnoreCase("pengeluaran")) {
                 data.add(modelFinance);
             }
         }
@@ -172,6 +205,40 @@ public class Pemasukan extends Fragment {
         });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
 
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_finance, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+
+            case R.id.filter:
+
+                // Not implemented here
+                break;
+            case R.id.view_list:
+                if (type_layout_manager == AdapterFinance.TYPE_LAYOUT_MANAGER.GRID) {
+                    item.setIcon(R.drawable.ic_baseline_format_list_bulleted_24);
+                    type_layout_manager = AdapterFinance.TYPE_LAYOUT_MANAGER.VERTICAL;
+                    binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
+                } else if (type_layout_manager == AdapterFinance.TYPE_LAYOUT_MANAGER.VERTICAL) {
+                    item.setIcon(R.drawable.ic_baseline_grid_view_24);
+                    type_layout_manager = AdapterFinance.TYPE_LAYOUT_MANAGER.GRID;
+                    binding.rvList.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+                }
+
+                return true;
+
+            default:
+                break;
+        }
+        return true;
     }
 }

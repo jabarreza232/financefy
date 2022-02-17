@@ -21,7 +21,7 @@ public interface FinanceDao {
     List<ModelFinance> loadAllbyIds(int[] financeIds);
 
     @Query("SELECT * FROM finance WHERE date IN(:date)")
-    List<ModelFinance> loadAllbyDate(String date);
+    LiveData<List<ModelFinance>> loadAllbyDate(String date);
 
     @Query("SELECT * FROM finance WHERE month IN(:month)")
     LiveData<List<ModelFinance>> loadAllbyMonth(String month);

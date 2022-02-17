@@ -38,68 +38,12 @@
             android:textColor="@android:color/black"
             android:textSize="18sp" />
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/place_finance"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_finance"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            app:contentPadding="15dp">
+            android:layout_height="wrap_content">
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    android:id="@+id/img_edit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:padding="5dp"
-                    android:layout_below="@id/place_description"
-                    android:src="@drawable/ic_edit" />
-
-                <LinearLayout
-                    android:id="@+id/place_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-
-                    <TextView
-                        android:id="@+id/txt_judul"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:fontFamily="@font/lato_bold"
-                        android:textColor="@android:color/black"
-                        android:textSize="17sp"
-                        tools:text="Makanan" />
-
-                    <TextView
-                        android:id="@+id/keterangan"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:fontFamily="@font/ubuntu_r"
-                        android:textColor="@android:color/black"
-                        tools:text="Buat Sehari hari" />
-
-                    <TextView
-                        android:id="@+id/jumlah"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:fontFamily="@font/ubuntu_r"
-                        android:textColor="@android:color/black"
-                        tools:text="Rp.15000" />
-
-
-                </LinearLayout>
-            </RelativeLayout>
-
-        </androidx.cardview.widget.CardView>
+        </androidx.recyclerview.widget.RecyclerView>
 
     </LinearLayout>
 

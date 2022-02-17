@@ -16,6 +16,7 @@ import androidx.databinding.DataBindingUtil;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -45,6 +46,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
     private String jumlah = "";
     String month = "";
     ActivityCreateFinanceBinding binding;
+    Calendar cur_calendar = Calendar.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +58,6 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
         binding.placeType.setOnClickListener(this);
         binding.imgBack.setOnClickListener(this);
         binding.placeSubmit.setOnClickListener(this);
-        Calendar cur_calendar = Calendar.getInstance();
         cur_calendar.get(Calendar.YEAR);
         cur_calendar.get(Calendar.MONTH);
         cur_calendar.get(Calendar.DAY_OF_MONTH);
@@ -110,9 +111,13 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                 long date_ship_milis = calendar.getTimeInMillis();
                 binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
                 date = getFormattedDateSimple(date_ship_milis);
+
+                Log.e("TAG", "onDateSet: "+date);
                 month = getFormattedMonthSimple(date_ship_milis);
             }
         });
+
+        datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR),cur_calendar.get(Calendar.YEAR));
         datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
         datePickerDialog.show(getFragmentManager(), "PickerDialog");
     }

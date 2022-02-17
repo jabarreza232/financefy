@@ -15,9 +15,7 @@ import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.model.ModelFinance;
 
 public class FinanceRepository {
-    MutableLiveData<List<ModelFinance>> mutableLiveDataFinance = new MutableLiveData<>();
-    MutableLiveData<List<ModelFinance>> mutableLiveDataFinanceMonth = new MutableLiveData<>();
-    ExecutorService executors;
+   ExecutorService executors;
 
     public FinanceRepository() {
         executors = Executors.newSingleThreadExecutor();
