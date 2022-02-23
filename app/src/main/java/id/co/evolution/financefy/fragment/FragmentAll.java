@@ -61,6 +61,7 @@ import id.co.evolution.financefy.asynctask.FilterMaxMonthAsynctask;
 import id.co.evolution.financefy.asynctask.FilterMinYearAsynctask;
 import id.co.evolution.financefy.databinding.FragmentAllBinding;
 import id.co.evolution.financefy.helper.Tools;
+import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
@@ -271,23 +272,23 @@ public class FragmentAll extends Fragment {
         txtSubmit.setOnClickListener(v -> {
             dialog.dismiss();
         });
-        List<String> filterType = new ArrayList<>();
-        List<String> filterNominal = new ArrayList<>();
-        List<String> filterPeriod = new ArrayList<>();
+        List<ModelFilter> filterType = new ArrayList<>();
+        List<ModelFilter> filterNominal = new ArrayList<>();
+        List<ModelFilter> filterPeriod = new ArrayList<>();
 
-        filterType.add("Pengeluaran");
-        filterType.add("Pemasukan");
-        filterType.add("Semuanya");
+        filterType.add(new ModelFilter("Pengeluaran"));
+        filterType.add(new ModelFilter("Pemasukan"));
+        filterType.add(new ModelFilter("Semuanya"));
 
-        filterNominal.add("Tertinggi-Terendah");
-        filterNominal.add("Terendah-Tertinggi");
+        filterNominal.add(new ModelFilter("Tertinggi-Terendah"));
+        filterNominal.add(new ModelFilter("Terendah-Tertinggi"));
 
-        filterPeriod.add("Terbaru-Terlama");
-        filterPeriod.add("Terlama-Terbaru");
+        filterPeriod.add(new ModelFilter("Terbaru-Terlama"));
+        filterPeriod.add(new ModelFilter("Terlama-Terbaru"));
 
         AdapterFilter adapterFilterType = new AdapterFilter(getContext(), filterType, new AdapterFilter.MethodCallback() {
             @Override
-            public void onClick(List<String> data, int position) {
+            public void onClick(List<ModelFilter> data, int position) {
 
             }
         });
@@ -296,7 +297,7 @@ public class FragmentAll extends Fragment {
 
         AdapterFilter adapterFilterNominal = new AdapterFilter(getContext(), filterNominal, new AdapterFilter.MethodCallback() {
             @Override
-            public void onClick(List<String> data, int position) {
+            public void onClick(List<ModelFilter> data, int position) {
 
             }
         });
@@ -305,7 +306,7 @@ public class FragmentAll extends Fragment {
 
         AdapterFilter adapterFilterPeriod = new AdapterFilter(getContext(), filterPeriod, new AdapterFilter.MethodCallback() {
             @Override
-            public void onClick(List<String> data, int position) {
+            public void onClick(List<ModelFilter> data, int position) {
 
             }
         });
