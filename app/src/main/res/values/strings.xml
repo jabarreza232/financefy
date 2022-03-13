@@ -22,4 +22,9 @@
         <item>Hasil Usaha</item>
 
     </array>
+
+    <string name="record">Records</string>
+    <string name="analysis">Analysis</string>
+    <string name="account">Accounts</string>
+    <string name="settings">Settings</string>
 </resources>

@@ -26,4 +26,16 @@ public class ViewModelFinance extends ViewModel {
     public LiveData<List<ModelFinance>> getFinanceByMonth(Context context, String month) {
         return financeRepository.getFinanceByMonth(context, month);
     }
+
+    public LiveData<List<ModelFinance>> getFinanceByType(Context context, String type) {
+        return financeRepository.getFinanceByType(context, type);
+    }
+
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(Context context, String type,String month) {
+        return financeRepository.getFinanceByTypeAndMonth(context, type, month);
+    }
+
+    public void inputUpdateFinance(Context context, String type, ModelFinance modelFinance){
+       new FinanceRepository.InputUpdateFinance(modelFinance, type, context).execute();
+    }
 }

@@ -3,6 +3,7 @@ package id.co.evolution.financefy.activity;
 import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Build;
@@ -13,11 +14,15 @@ import android.os.Bundle;
 
 import androidx.cardview.widget.CardView;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -36,6 +41,8 @@ import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.repository.FinanceRepository;
+import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 public class CreateFinance extends AppCompatActivity implements View.OnClickListener {
 
@@ -47,12 +54,18 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
     String month = "";
     ActivityCreateFinanceBinding binding;
     Calendar cur_calendar = Calendar.getInstance();
+    ViewModelFinance viewModelFinance;
 
+    @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
-
+        //TODO HIDE STATUS BAR
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window w = getWindow();
+            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
         binding.placeDate.setOnClickListener(this);
         binding.placeCategory.setOnClickListener(this);
         binding.placeType.setOnClickListener(this);
@@ -62,6 +75,10 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
         cur_calendar.get(Calendar.MONTH);
         cur_calendar.get(Calendar.DAY_OF_MONTH);
         long date_ship_milis = cur_calendar.getTimeInMillis();
+
+        viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
+
+        binding.txtHeader.setText("Input data");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
@@ -118,6 +135,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
         });
 
         datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR),cur_calendar.get(Calendar.YEAR));
+        datePickerDialog.setMaxDate(cur_calendar);
         datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
         datePickerDialog.show(getFragmentManager(), "PickerDialog");
     }
@@ -271,7 +289,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                                     model.setKategori(category);
                                     model.setKeterangan(binding.etDescription.getText().toString().trim());
                                     model.setMonth(month);
-                                    App.getDatabase(CreateFinance.this).financeDao().insertAll(model);
+                                    viewModelFinance.inputUpdateFinance(CreateFinance.this,"Create",model);
                                     finish();
                                 }
                             })

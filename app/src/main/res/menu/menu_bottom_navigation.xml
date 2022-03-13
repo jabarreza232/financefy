@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/records"
+        android:title="@string/record"
+        android:icon="@drawable/ic_baseline_record_24"/>
+
+    <item
+        android:id="@+id/analysis"
+        android:title="@string/analysis"
+        android:icon="@drawable/ic_baseline_analytics_24"/>
+
+    <item
+        android:id="@+id/accounts"
+        android:title="@string/account"
+        android:icon="@drawable/ic_baseline_account_balance_wallet_24"/>
+    <item
+        android:id="@+id/settings"
+        android:title="@string/settings"
+        android:icon="@drawable/ic_baseline_settings_24"/>
+</menu>

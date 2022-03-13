@@ -11,6 +11,8 @@
     <color name="colorGrey50">#B4B1B1</color>
     <color name="colorGrey30">#D6D4D4</color>
 
+    <color name="colorNavigationIcon">#dae9f6</color>
+    <color name="colorNavigationText">#ffffff</color>
     <color name="dot_dark_screen">#d6410000</color>
     <!-- dots active colors -->
     <color name="dot_light_screen">#ff1a1a</color>

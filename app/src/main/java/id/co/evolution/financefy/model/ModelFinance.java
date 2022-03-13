@@ -5,6 +5,9 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
+import java.util.Comparator;
+
+import id.co.evolution.financefy.helper.Tools;
 
 @Entity(tableName = "finance")
 public class ModelFinance implements Serializable {
@@ -82,4 +85,20 @@ public class ModelFinance implements Serializable {
     public void setTipe(String tipe) {
         this.tipe = tipe;
     }
+
+    public static Comparator<ModelFinance> shortedNominalMinToMax = (jc1, jc2) -> {
+        String min=jc1.getJumlah().replaceAll("[Rp,.]","");
+        String max=jc2.getJumlah().replaceAll("[Rp,.]","");
+        return  (Integer.parseInt(min)-Integer.parseInt(max));
+    };
+
+    public static Comparator<ModelFinance> shortedNominalMaxToMin = new Comparator<ModelFinance>() {
+        @Override
+        public int compare(ModelFinance jc1, ModelFinance jc2) {
+            String min=jc1.getJumlah().replaceAll("[Rp,.]","");
+            String max=jc2.getJumlah().replaceAll("[Rp,.]","");
+            return  (Integer.parseInt(max)-Integer.parseInt(min));
+        }
+    };
+
 }

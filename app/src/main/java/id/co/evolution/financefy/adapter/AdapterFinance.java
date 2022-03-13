@@ -59,7 +59,6 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
         holder.setIsRecyclable(false);
         holder.binding.date.setText(data.get(i).getDate());
         holder.bindData(data.get(i));
-
     }
 
     @Override
@@ -79,8 +78,6 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
             binding = DataBindingUtil.bind(itemView);
             mTimelineView = itemView.findViewById(R.id.timeline);
             mTimelineView.initLine(viewType);
-
-
         }
 
         public void bindData(ModelNestedFinance modelNestedFinance){

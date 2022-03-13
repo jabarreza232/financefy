@@ -40,7 +40,8 @@ public class AdapterFilter extends RecyclerView.Adapter<AdapterFilter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.bindData(data.get(position));
+        holder.setIsRecyclable(false);
+        holder.bindData(data.get(position),position);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class AdapterFilter extends RecyclerView.Adapter<AdapterFilter.ViewHolder
             binding = DataBindingUtil.bind(itemView);
         }
 
-        public void bindData(ModelFilter modelFilter) {
+        public void bindData(ModelFilter modelFilter,int position) {
             binding.txtName.setText(modelFilter.getValue());
 
             if (modelFilter.isChecked()) {
@@ -70,7 +71,7 @@ public class AdapterFilter extends RecyclerView.Adapter<AdapterFilter.ViewHolder
             itemView.setOnClickListener(v -> {
                 modelFilter.setChecked(!modelFilter.isChecked());
                 logicClickCheck(modelFilter);
-                methodCallback.onClick(data, getAdapterPosition());
+                methodCallback.onClick(data, position);
             });
         }
 

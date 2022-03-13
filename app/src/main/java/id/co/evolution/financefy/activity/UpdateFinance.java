@@ -1,17 +1,22 @@
 package id.co.evolution.financefy.activity;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -32,6 +37,7 @@ import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 public class UpdateFinance extends AppCompatActivity implements View.OnClickListener {
 
@@ -43,17 +49,27 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
     String month = "";
     ModelFinance modelFinance;
     ActivityCreateFinanceBinding binding;
+    ViewModelFinance viewModelFinance;
+    Calendar cur_calendar = Calendar.getInstance();
 
+    @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
+        //TODO HIDE STATUS BAR
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window w = getWindow();
+            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
         modelFinance = App.getDatabase(this).financeDao().findById(getIntent().getIntExtra("id", 0));
         binding.placeDate.setOnClickListener(this);
         binding.placeCategory.setOnClickListener(this);
         binding.placeType.setOnClickListener(this);
         binding.imgBack.setOnClickListener(this);
         binding.placeSubmit.setOnClickListener(this);
+
+        viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         loadData();
         binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
@@ -90,12 +106,17 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
     }
 
     private void loadData() {
+        cur_calendar.get(Calendar.YEAR);
+        cur_calendar.get(Calendar.MONTH);
+        cur_calendar.get(Calendar.DAY_OF_MONTH);
+
         type = modelFinance.getTipe();
         category = modelFinance.getKategori();
         jumlah = modelFinance.getJumlah();
         date = modelFinance.getDate();
         month = modelFinance.getMonth();
 
+        binding.txtHeader.setText("Update data");
         binding.txtDate.setText(date);
         binding.txtType.setText(type);
         binding.txtKategori.setText(category);
@@ -118,7 +139,10 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
                 month = Tools.getFormattedMonthSimple((date_ship_milis));
             }
         });
+
+        datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR), cur_calendar.get(Calendar.YEAR));
         datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
+        datePickerDialog.setMaxDate(cur_calendar);
         datePickerDialog.show(getFragmentManager(), "PickerDialog");
     }
 
@@ -127,39 +151,36 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
         builder.setTitle("Pilih Kategori");
         if (type.equalsIgnoreCase("pengeluaran")) {
             kategori = getResources().getStringArray(R.array.category_pengeluaran);
-            builder.setItems(kategori, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case 0:
-                            dialog.dismiss();
-                            category = kategori[0];
-                            break;
-                        case 1:
-                            dialog.dismiss();
-                            category = kategori[1];
-                            break;
-                        case 2:
-                            dialog.dismiss();
-                            category = kategori[2];
-                            break;
-                        case 3:
-                            dialog.dismiss();
-                            category = kategori[3];
-                            break;
-                        case 4:
-                            dialog.dismiss();
-                            category = kategori[4];
-                            break;
-                        case 5:
-                            dialog.dismiss();
-                            category = kategori[5];
-                            break;
+            builder.setItems(kategori, (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        dialog.dismiss();
+                        category = kategori[0];
+                        break;
+                    case 1:
+                        dialog.dismiss();
+                        category = kategori[1];
+                        break;
+                    case 2:
+                        dialog.dismiss();
+                        category = kategori[2];
+                        break;
+                    case 3:
+                        dialog.dismiss();
+                        category = kategori[3];
+                        break;
+                    case 4:
+                        dialog.dismiss();
+                        category = kategori[4];
+                        break;
+                    case 5:
+                        dialog.dismiss();
+                        category = kategori[5];
+                        break;
 
-                    }
-                    if (!category.isEmpty()) {
-                        binding.txtKategori.setText(category);
-                    }
+                }
+                if (!category.isEmpty()) {
+                    binding.txtKategori.setText(category);
                 }
             });
         } else {
@@ -257,20 +278,17 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
                             .setTitleText("Update")
                             .setContentText("Apakah anda yakin ingin update data ?")
                             .setConfirmText("Ya")
-                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                @Override
-                                public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                    ModelFinance model = new ModelFinance();
-                                    model.setId(modelFinance.getId());
-                                    model.setDate(date);
-                                    model.setJumlah(jumlah);
-                                    model.setTipe(type);
-                                    model.setKategori(category);
-                                    model.setKeterangan(binding.etDescription.getText().toString().trim());
-                                    model.setMonth(month);
-                                    App.getDatabase(UpdateFinance.this).financeDao().update(model);
-                                    finish();
-                                }
+                            .setConfirmClickListener(sweetAlertDialog -> {
+                                ModelFinance model = new ModelFinance();
+                                model.setId(modelFinance.getId());
+                                model.setDate(date);
+                                model.setJumlah(jumlah);
+                                model.setTipe(type);
+                                model.setKategori(category);
+                                model.setKeterangan(binding.etDescription.getText().toString().trim());
+                                model.setMonth(month);
+                                viewModelFinance.inputUpdateFinance(UpdateFinance.this, "Update", model);
+                                finish();
                             })
                             .setCancelText("Tidak")
                             .show();

@@ -26,8 +26,12 @@ public interface FinanceDao {
     @Query("SELECT * FROM finance WHERE month IN(:month)")
     LiveData<List<ModelFinance>> loadAllbyMonth(String month);
 
-    @Query("SELECT * FROM finance WHERE category LIKE:category LIMIT 1")
-    ModelFinance findByName(String category);
+    @Query("SELECT * FROM finance WHERE type LIKE:type")
+    LiveData<List<ModelFinance>> findByType(String type);
+
+
+    @Query("SELECT * FROM finance WHERE type LIKE:type AND month IN(:month)")
+    LiveData<List<ModelFinance>> findByTypeAndMonth(String type,String month);
 
     @Query("SELECT * FROM finance WHERE id_finance =:id LIMIT 1")
     ModelFinance findById(int id);
