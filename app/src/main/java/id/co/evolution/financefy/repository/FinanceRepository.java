@@ -32,12 +32,20 @@ public class FinanceRepository {
         return App.getDatabase(context).financeDao().loadAllbyMonth(month);
     }
 
+    public LiveData<List<ModelFinance>> getFinanceByWeek(Context context, List<String> date) {
+        return App.getDatabase(context).financeDao().loadAllbyWeek(date);
+    }
+
     public LiveData<List<ModelFinance>> getFinanceByType(Context context, String type) {
         return App.getDatabase(context).financeDao().findByType(type);
     }
 
     public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(Context context, String type, String month) {
         return App.getDatabase(context).financeDao().findByTypeAndMonth(type, month);
+    }
+
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(Context context, String type, List<String> date) {
+        return App.getDatabase(context).financeDao().findByTypeAndWeek(type, date);
     }
 
 

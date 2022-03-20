@@ -24,6 +24,11 @@ public class Tools {
         return newFormat.format(new Date(dateTime));
     }
 
+    public static String getFormattedDateDefault(Long dateTime) {
+        SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return newFormat.format(new Date(dateTime));
+    }
+
     public static String convertToCurrency(int currency) {
         Locale localeID = new Locale("in", "ID");
         String formatted = NumberFormat.getCurrencyInstance(localeID).format(((double) currency));
@@ -47,6 +52,44 @@ public class Tools {
     public static String convertDateFormat(String date) {
         final String OLD_FORMAT = "MMMM dd, yyyy";
         final String NEW_FORMAT = "dd-MM-yyyy";
+
+// August 12, 2010
+        String newDateString;
+
+        SimpleDateFormat sdf = new SimpleDateFormat(OLD_FORMAT);
+        Date d = null;
+        try {
+            d = sdf.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        sdf.applyPattern(NEW_FORMAT);
+        newDateString = sdf.format(d);
+
+        return newDateString;
+    }
+
+    public static String convertDateFormatWeek(String date) {
+        final String OLD_FORMAT = "yyyy-MM-dd";
+        final String NEW_FORMAT = "MMMM dd, yyyy";
+
+// August 12, 2010
+        String newDateString;
+
+        SimpleDateFormat sdf = new SimpleDateFormat(OLD_FORMAT);
+        Date d = null;
+        try {
+            d = sdf.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        sdf.applyPattern(NEW_FORMAT);
+        newDateString = sdf.format(d);
+
+        return newDateString;
+    }public static String convertDateFormatWeekText(String date) {
+        final String OLD_FORMAT = "yyyy-MM-dd";
+        final String NEW_FORMAT = "dd MMM yyyy";
 
 // August 12, 2010
         String newDateString;

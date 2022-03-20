@@ -129,12 +129,12 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                 binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
                 date = getFormattedDateSimple(date_ship_milis);
 
-                Log.e("TAG", "onDateSet: "+date);
+                Log.e("TAG", "onDateSet: " + date);
                 month = getFormattedMonthSimple(date_ship_milis);
             }
         });
 
-        datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR),cur_calendar.get(Calendar.YEAR));
+        datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR), cur_calendar.get(Calendar.YEAR));
         datePickerDialog.setMaxDate(cur_calendar);
         datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
         datePickerDialog.show(getFragmentManager(), "PickerDialog");
@@ -289,7 +289,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                                     model.setKategori(category);
                                     model.setKeterangan(binding.etDescription.getText().toString().trim());
                                     model.setMonth(month);
-                                    viewModelFinance.inputUpdateFinance(CreateFinance.this,"Create",model);
+                                    viewModelFinance.inputUpdateFinance(CreateFinance.this, "Create", model);
                                     finish();
                                 }
                             })

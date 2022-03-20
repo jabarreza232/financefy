@@ -3,6 +3,7 @@ package id.co.evolution.financefy.fragment;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -42,12 +43,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -66,6 +70,7 @@ import id.co.evolution.financefy.asynctask.FilterMaxMonthAsynctask;
 import id.co.evolution.financefy.asynctask.FilterMinYearAsynctask;
 import id.co.evolution.financefy.databinding.FragmentAllBinding;
 import id.co.evolution.financefy.helper.FinanceFilter;
+import id.co.evolution.financefy.helper.LocalizedWeekHelper;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
@@ -84,8 +89,11 @@ public class FragmentAll extends Fragment {
     LayoutInflater inflater;
     View dialogView;
     FinanceFilter financeFilter;
-    String filterType, filterNominal, filterPeriod;
+    String filterType, filterNominal, filterPeriod = "Bulanan";
     String month;
+    LocalizedWeekHelper localizedWeekHelper;
+    int prevNextWeek = 0;
+    boolean nextWeekEnabled;
 
     public FragmentAll() {
         // Required empty public constructor
@@ -98,6 +106,9 @@ public class FragmentAll extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_all, container, false);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
         financeFilter = new FinanceFilter();
+        localizedWeekHelper = new LocalizedWeekHelper();
+        Log.e("cek_list_week: ", localizedWeekHelper.getFirstDay(-7).substring(0, (localizedWeekHelper.getFirstDay(-7).length() - 3)));
+
         setHasOptionsMenu(true);
         return binding.getRoot();
     }
@@ -112,10 +123,8 @@ public class FragmentAll extends Fragment {
         today.get(Calendar.MONTH);
         prevNextMonth = Calendar.getInstance();
         long date_ship_milis = today.getTimeInMillis();
-
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
 
-        Log.e("TAG", "onViewCreated: " + Tools.getFormattedMonthSimple(date_ship_milis));
         loadDataFinanceByMonth(date_ship_milis);
 
         binding.placeMonth.setOnClickListener(v -> showDialogMonthPicker());
@@ -124,22 +133,75 @@ public class FragmentAll extends Fragment {
         binding.btnNext.setEnabled(false);
 
         binding.btnPrev.setOnClickListener(v -> {
-            prevNextMonth.get(Calendar.YEAR);
-            prevNextMonth.add(Calendar.MONTH, -1);
-            long date_ship_milisecond = prevNextMonth.getTimeInMillis();
+            if (filterPeriod.equalsIgnoreCase("bulanan")) {
+                prevNextMonth.get(Calendar.YEAR);
+                prevNextMonth.add(Calendar.MONTH, -1);
+                long date_ship_milisecond = prevNextMonth.getTimeInMillis();
 
-            loadDataFinanceByMonth(date_ship_milisecond);
+                loadDataFinanceByMonth(date_ship_milisecond);
+            } else {
+                prevNextWeek = prevNextWeek - 7;
+                nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
+                if (nextWeekEnabled)
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.blackTextColor)));
+                else
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
+
+                binding.btnNext.setEnabled(nextWeekEnabled);
+                binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
+                binding.txtMonth.setEnabled(false);
+                viewModelFinance.getFinanceByWeek(getContext(), localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+                    if (modelFinances != null) {
+                        loadData(modelFinances);
+                    }
+                });
+            }
+
         });
 
         binding.btnNext.setOnClickListener(v -> {
-            prevNextMonth.get(Calendar.YEAR);
-            prevNextMonth.add(Calendar.MONTH, 1);
-            long date_ship_milisecond = prevNextMonth.getTimeInMillis();
+            if (filterPeriod.equalsIgnoreCase("bulanan")) {
+                prevNextMonth.get(Calendar.YEAR);
+                prevNextMonth.add(Calendar.MONTH, 1);
+                long date_ship_milisecond = prevNextMonth.getTimeInMillis();
 
-            loadDataFinanceByMonth(date_ship_milisecond);
+                loadDataFinanceByMonth(date_ship_milisecond);
+            } else {
+                prevNextWeek = prevNextWeek + 7;
+                nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
+                binding.btnNext.setEnabled(nextWeekEnabled);
+                if (nextWeekEnabled)
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.blackTextColor)));
+                else
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
+
+                binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
+                binding.txtMonth.setEnabled(false);
+                viewModelFinance.getFinanceByWeek(getContext(), localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+                    if (modelFinances != null) {
+                        loadData(modelFinances);
+                    }
+                });
+            }
         });
+
+        initiateSayHaloWithTime();
     }
 
+    private void initiateSayHaloWithTime() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+        String now = simpleDateFormat.format(new Date());
+        Log.e("waktu", now + " - " + now.substring(0, 1) + " - " + now.substring(0, 2));
+        if (Integer.parseInt(now.substring(0, 2)) >= 4 && Integer.parseInt(now.substring(0, 2)) < 10) {
+            binding.txtName.setText("Selamat Pagi, Jackson!");
+        } else if (Integer.parseInt(now.substring(0, 2)) >= 10 && Integer.parseInt(now.substring(0, 2)) < 15) {
+            binding.txtName.setText("Selamat Siang, Jackson!");
+        } else if (Integer.parseInt(now.substring(0, 2)) >= 15 && Integer.parseInt(now.substring(0, 2)) < 18) {
+            binding.txtName.setText("Selamat Sore, Jackson!");
+        } else {
+            binding.txtName.setText("Selamat Malam, Jackson!");
+        }
+    }
 
     private void showDialogMonthPicker() {
         MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
@@ -170,34 +232,6 @@ public class FragmentAll extends Fragment {
         builder.build().show();
     }
 
-
-    @SuppressLint("NotifyDataSetChanged")
-    private void loadData(List<ModelFinance> data) {
-        int total = (financeFilter.totalIncome(data) - financeFilter.totalExpense(data));
-        binding.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data)));
-        binding.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data)));
-        binding.txtTotalAll.setText(convertToCurrency(total));
-        binding.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.green));
-
-        if (filterNominal != null)
-            data = financeFilter.filterNominal(filterNominal, data);
-
-        List<ModelNestedFinance> listNestedFinance = financeFilter.filterNestedFinance(data);
-
-        if (filterPeriod != null)
-            listNestedFinance = financeFilter.filterPeriod(filterPeriod, listNestedFinance);
-        else listNestedFinance = financeFilter.filterPeriod("terbaru", listNestedFinance);
-
-        adapter = new AdapterFinance(getActivity(), listNestedFinance, (data1, position) -> showDialog(data1, position));
-        Log.e("jumlah", adapter.getItemCount() + "");
-        adapter.setType(type_layout_manager);
-        binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
-        binding.rvList.setAdapter(adapter);
-        adapter.notifyDataSetChanged();
-
-        binding.placeEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
-
-        }
 
     private void showDialog(final List<ModelFinance> data, final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -318,20 +352,64 @@ public class FragmentAll extends Fragment {
     }
 
     private void loadByType(String type) {
+        prevNextWeek = 0;
+        nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
+
         if (type.equalsIgnoreCase("semuanya")) {
-            viewModelFinance.getFinanceByMonth(getContext(), month).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
-                @Override
-                public void onChanged(List<ModelFinance> modelFinances) {
-                    if (modelFinances != null) loadData(modelFinances);
+            if (filterPeriod.equalsIgnoreCase("bulanan")) {
+                viewModelFinance.getFinanceByMonth(getContext(), month).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+                    @Override
+                    public void onChanged(List<ModelFinance> modelFinances) {
+                        if (modelFinances != null) loadData(modelFinances);
+                    }
+                });
+            } else {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (nextWeekEnabled)
+                        binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.blackTextColor)));
+                    else
+                        binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
                 }
-            });
+                binding.btnNext.setEnabled(nextWeekEnabled);
+                viewModelFinance.getFinanceByWeek(getContext(), localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+                    @Override
+                    public void onChanged(List<ModelFinance> modelFinances) {
+                        if (modelFinances != null) loadData(modelFinances);
+                    }
+                });
+            }
         } else {
-            viewModelFinance.getFinanceByTypeAndMonth(getContext(), type, month).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
-                @Override
-                public void onChanged(List<ModelFinance> modelFinances) {
-                    if (modelFinances != null) loadData(modelFinances);
+            if (filterPeriod.equalsIgnoreCase("bulanan")) {
+                viewModelFinance.getFinanceByTypeAndMonth(getContext(), type, month).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+                    @Override
+                    public void onChanged(List<ModelFinance> modelFinances) {
+                        if (modelFinances != null) loadData(modelFinances);
+                    }
+                });
+            } else {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    if (nextWeekEnabled)
+                        binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.blackTextColor)));
+                    else
+                        binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
                 }
-            });
+                binding.btnNext.setEnabled(nextWeekEnabled);
+                viewModelFinance.getFinanceByTypeAndWeek(getContext(), type, localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+                    @Override
+                    public void onChanged(List<ModelFinance> modelFinances) {
+                        if (modelFinances != null) loadData(modelFinances);
+                    }
+                });
+            }
+        }
+
+        if (filterPeriod.equalsIgnoreCase("bulanan")) {
+            binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(today.getTimeInMillis()));
+            binding.placeMonth.setEnabled(true);
+        } else {
+            binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
+            binding.placeMonth.setEnabled(false);
         }
     }
 
@@ -339,6 +417,7 @@ public class FragmentAll extends Fragment {
     private void loadDataFinanceByMonth(long date_ship_milis) {
         binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
         month = Tools.getFormattedMonthSimple(date_ship_milis);
+
         if (date_ship_milis != today.getTimeInMillis()) {
             binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.blackTextColor)));
             binding.btnNext.setEnabled(true);
@@ -352,5 +431,31 @@ public class FragmentAll extends Fragment {
                 loadData(modelFinances);
             }
         });
+
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void loadData(List<ModelFinance> data) {
+        int total = (financeFilter.totalIncome(data) - financeFilter.totalExpense(data));
+        binding.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data)));
+        binding.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data)));
+        binding.txtTotalAll.setText(convertToCurrency(total));
+        binding.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.green));
+        Log.e("cek: ", new Gson().toJson(data));
+
+        if (filterNominal != null)
+            data = financeFilter.filterNominal(filterNominal, data);
+
+        List<ModelNestedFinance> listNestedFinance = financeFilter.filterNestedFinance(data);
+        listNestedFinance = financeFilter.filterPeriod("terbaru", listNestedFinance);
+        adapter = new AdapterFinance(getActivity(), listNestedFinance, (data1, position) -> showDialog(data1, position));
+        Log.e("jumlah", adapter.getItemCount() + "");
+        adapter.setType(type_layout_manager);
+        binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
+        binding.rvList.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+
+        binding.placeEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+
     }
 }

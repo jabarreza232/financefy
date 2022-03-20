@@ -13,35 +13,35 @@ import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
 
 public class FinanceFilter {
-   public List<ModelFilter> filterType = new ArrayList<>();
-   public List<ModelFilter> filterNominal = new ArrayList<>();
-   public List<ModelFilter> filterPeriod = new ArrayList<>();
+    public List<ModelFilter> filterType = new ArrayList<>();
+    public List<ModelFilter> filterNominal = new ArrayList<>();
+    public List<ModelFilter> filterPeriod = new ArrayList<>();
 
     public FinanceFilter() {
         setUpFilter();
     }
 
-    public List<ModelFinance> filterNominal(String filterNominal, List<ModelFinance>list){
-        if (filterNominal.split("-")[0].equalsIgnoreCase("terendah")){
-            Collections.sort(list,ModelFinance.shortedNominalMinToMax);
-        }else{
-            Collections.sort(list,ModelFinance.shortedNominalMaxToMin);
+    public List<ModelFinance> filterNominal(String filterNominal, List<ModelFinance> list) {
+        if (filterNominal.split("-")[0].equalsIgnoreCase("terendah")) {
+            Collections.sort(list, ModelFinance.shortedNominalMinToMax);
+        } else {
+            Collections.sort(list, ModelFinance.shortedNominalMaxToMin);
         }
 
         return list;
     }
 
-    public List<ModelNestedFinance> filterPeriod(String filterPeriod, List<ModelNestedFinance>list){
-        if (filterPeriod.split("-")[0].equalsIgnoreCase("terlama")){
-            Collections.sort(list,ModelNestedFinance.shortedPeriodLongestToLatest);
-        }else{
-            Collections.sort(list,ModelNestedFinance.shortedPeriodLatestToLongest);
+    public List<ModelNestedFinance> filterPeriod(String filterPeriod, List<ModelNestedFinance> list) {
+        if (filterPeriod.split("-")[0].equalsIgnoreCase("terlama")) {
+            Collections.sort(list, ModelNestedFinance.shortedPeriodLongestToLatest);
+        } else {
+            Collections.sort(list, ModelNestedFinance.shortedPeriodLatestToLongest);
         }
 
         return list;
     }
 
-    public void setUpFilter(){
+    public void setUpFilter() {
         filterType.add(new ModelFilter("Pengeluaran"));
         filterType.add(new ModelFilter("Pemasukan"));
         filterType.add(new ModelFilter("Semuanya"));
@@ -49,18 +49,18 @@ public class FinanceFilter {
         filterNominal.add(new ModelFilter("Tertinggi-Terendah"));
         filterNominal.add(new ModelFilter("Terendah-Tertinggi"));
 
-        filterPeriod.add(new ModelFilter("Terbaru-Terlama"));
-        filterPeriod.add(new ModelFilter("Terlama-Terbaru"));
+        filterPeriod.add(new ModelFilter("Mingguan"));
+        filterPeriod.add(new ModelFilter("Bulanan"));
     }
 
-    public void resetFilter(){
+    public void resetFilter() {
         filterNominal.clear();
         filterType.clear();
         filterPeriod.clear();
         setUpFilter();
     }
 
-    public  List<ModelNestedFinance> filterNestedFinance(List<ModelFinance> data) {
+    public List<ModelNestedFinance> filterNestedFinance(List<ModelFinance> data) {
         List<ModelNestedFinance> listData = new ArrayList<>();
         HashSet<String> hashset = new HashSet<>();
 
@@ -82,20 +82,20 @@ public class FinanceFilter {
         return listData;
     }
 
-    public int totalExpense(List<ModelFinance>data){
-        int income=0;
-        for (ModelFinance modelFinance:data)
+    public int totalExpense(List<ModelFinance> data) {
+        int income = 0;
+        for (ModelFinance modelFinance : data)
             if (modelFinance.getTipe().equalsIgnoreCase("pengeluaran"))
-            income += Integer.parseInt(modelFinance.getJumlah().replaceAll("[Rp,.]",""));
+                income += Integer.parseInt(modelFinance.getJumlah().replaceAll("[Rp,.]", ""));
 
         return income;
     }
 
-    public int totalIncome(List<ModelFinance>data){
-        int income=0;
-        for (ModelFinance modelFinance:data)
+    public int totalIncome(List<ModelFinance> data) {
+        int income = 0;
+        for (ModelFinance modelFinance : data)
             if (modelFinance.getTipe().equalsIgnoreCase("pemasukan"))
-                income += Integer.parseInt(modelFinance.getJumlah().replaceAll("[Rp,.]",""));
+                income += Integer.parseInt(modelFinance.getJumlah().replaceAll("[Rp,.]", ""));
 
         return income;
     }
