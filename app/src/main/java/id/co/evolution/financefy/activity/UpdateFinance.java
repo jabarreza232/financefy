@@ -35,6 +35,7 @@ import java.util.Locale;
 import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
+import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
@@ -51,6 +52,7 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
     ActivityCreateFinanceBinding binding;
     ViewModelFinance viewModelFinance;
     Calendar cur_calendar = Calendar.getInstance();
+    DialogCalculator dialogCalculator;
 
     @SuppressLint("ObsoleteSdkInt")
     @Override
@@ -63,11 +65,6 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
             w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
         modelFinance = App.getDatabase(this).financeDao().findById(getIntent().getIntExtra("id", 0));
-        binding.placeDate.setOnClickListener(this);
-        binding.placeCategory.setOnClickListener(this);
-        binding.placeType.setOnClickListener(this);
-        binding.imgBack.setOnClickListener(this);
-        binding.placeSubmit.setOnClickListener(this);
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         loadData();
@@ -103,6 +100,13 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
 
             }
         });
+
+        binding.placeDate.setOnClickListener(this);
+        binding.placeCategory.setOnClickListener(this);
+        binding.placeType.setOnClickListener(this);
+        binding.imgBack.setOnClickListener(this);
+        binding.placeSubmit.setOnClickListener(this);
+        binding.btnCalculator.setOnClickListener(this);
     }
 
     private void loadData() {
@@ -252,7 +256,12 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
             case R.id.place_type:
                 showDialogTipe();
                 break;
+            case R.id.btn_calculator:
+                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
 
+                });
+                dialogCalculator.show();
+                break;
             case R.id.place_date:
                 showDatePickerDialog();
                 break;
@@ -264,16 +273,11 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
                     Toast.makeText(this, "Silahkan Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
                 } else if (binding.etAmount.getText().toString().isEmpty()) {
                     binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
-                } else if (binding.etDescription.getText().toString().isEmpty()) {
-                    binding.tilDescription.setError("Silahkan isi deskripsi terlebih dahulu");
                 } else if (!binding.etAmount.getText().toString().isEmpty()) {
                     binding.tilAmount.setError(null);
-                } else {
-                    binding.tilDescription.setError(null);
                 }
-                Log.e("month:", month);
-                if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty() && !binding.etDescription.getText().toString().isEmpty()) {
 
+                if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty()) {
                     new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                             .setTitleText("Update")
                             .setContentText("Apakah anda yakin ingin update data ?")

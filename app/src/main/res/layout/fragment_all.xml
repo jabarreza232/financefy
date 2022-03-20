@@ -78,19 +78,19 @@
                                     android:layout_height="wrap_content"
                                     android:layout_marginBottom="5dp"
                                     android:fontFamily="@font/ubuntu_b"
-                                    android:text="PENGELUARAN"
+                                    android:text="PEMASUKAN"
                                     android:textAlignment="center"
                                     android:textColor="@color/blackTextColor"
                                     android:textSize="13sp" />
 
                                 <TextView
-                                    android:id="@+id/txt_total_expense"
+                                    android:id="@+id/txt_total_income"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/ubuntu_r"
-                                    android:text="Rp.50.000"
+                                    android:text="Rp.0"
                                     android:textAlignment="center"
-                                    android:textColor="@color/red"
+                                    android:textColor="@color/green"
                                     android:textSize="13sp" />
 
                             </LinearLayout>
@@ -106,22 +106,23 @@
                                     android:layout_height="wrap_content"
                                     android:layout_marginBottom="5dp"
                                     android:fontFamily="@font/ubuntu_b"
-                                    android:text="PEMASUKAN"
+                                    android:text="PENGELUARAN"
                                     android:textAlignment="center"
                                     android:textColor="@color/blackTextColor"
                                     android:textSize="13sp" />
 
                                 <TextView
-                                    android:id="@+id/txt_total_income"
+                                    android:id="@+id/txt_total_expense"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/ubuntu_r"
-                                    android:text="Rp.50.000"
+                                    android:text="Rp.0"
                                     android:textAlignment="center"
-                                    android:textColor="@color/green"
+                                    android:textColor="@color/red"
                                     android:textSize="13sp" />
 
                             </LinearLayout>
+
 
                             <LinearLayout
                                 android:layout_width="0dp"
@@ -224,8 +225,8 @@
                 android:id="@+id/place_empty"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:layout_marginTop="36dp"
+                android:orientation="vertical"
                 android:visibility="gone">
 
                 <ImageView
@@ -246,8 +247,6 @@
                     android:textSize="19sp" />
             </LinearLayout>
         </LinearLayout>
-
-
 
 
     </RelativeLayout>

@@ -40,6 +40,7 @@ import java.util.Locale;
 import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
+import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
@@ -55,6 +56,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
     ActivityCreateFinanceBinding binding;
     Calendar cur_calendar = Calendar.getInstance();
     ViewModelFinance viewModelFinance;
+    DialogCalculator dialogCalculator;
 
     @SuppressLint("ObsoleteSdkInt")
     @Override
@@ -66,11 +68,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
             Window w = getWindow();
             w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
-        binding.placeDate.setOnClickListener(this);
-        binding.placeCategory.setOnClickListener(this);
-        binding.placeType.setOnClickListener(this);
-        binding.imgBack.setOnClickListener(this);
-        binding.placeSubmit.setOnClickListener(this);
+
         cur_calendar.get(Calendar.YEAR);
         cur_calendar.get(Calendar.MONTH);
         cur_calendar.get(Calendar.DAY_OF_MONTH);
@@ -114,6 +112,13 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
 
             }
         });
+
+        binding.placeDate.setOnClickListener(this);
+        binding.placeCategory.setOnClickListener(this);
+        binding.placeType.setOnClickListener(this);
+        binding.imgBack.setOnClickListener(this);
+        binding.placeSubmit.setOnClickListener(this);
+        binding.btnCalculator.setOnClickListener(this);
     }
 
 
@@ -260,20 +265,23 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
             case R.id.img_back:
                 finish();
                 break;
+
+            case R.id.btn_calculator:
+                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
+
+                });
+                dialogCalculator.show();
+                break;
             case R.id.place_submit:
                 if (type.isEmpty()) {
                     Toast.makeText(this, "Silahkan Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
                 } else if (binding.etAmount.getText().toString().isEmpty()) {
                     binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
-                } else if (binding.etDescription.getText().toString().isEmpty()) {
-                    binding.tilDescription.setError("Silahkan isi deskripsi terlebih dahulu");
                 } else if (!binding.etAmount.getText().toString().isEmpty()) {
                     binding.tilAmount.setError(null);
-                } else {
-                    binding.tilDescription.setError(null);
                 }
 
-                if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty() && !binding.etDescription.getText().toString().isEmpty()) {
+                if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty()) {
 
                     new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                             .setTitleText("Submit")
