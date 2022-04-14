@@ -2,6 +2,7 @@ package id.co.evolution.financefy.activity;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.text.Editable;
@@ -32,14 +34,22 @@ import java.util.Calendar;
 import java.util.Locale;
 
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
+import id.co.evolution.financefy.db.FinanceDB;
+import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.repository.FinanceRepository;
+import id.co.evolution.financefy.viewmodel.ViewModelFactory;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
+@AndroidEntryPoint
 public class UpdateFinance extends AppCompatActivity implements View.OnClickListener {
 
     String date = "";
@@ -53,7 +63,11 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
     ViewModelFinance viewModelFinance;
     Calendar cur_calendar = Calendar.getInstance();
     DialogCalculator dialogCalculator;
+    //    @Inject
+//    ViewModelFactory viewModelFactory;
 
+    @Inject
+    FinanceRepository financeRepository;
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,10 +78,16 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
             Window w = getWindow();
             w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
-        modelFinance = App.getDatabase(this).financeDao().findById(getIntent().getIntExtra("id", 0));
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
-        loadData();
+        viewModelFinance.init(financeRepository);
+
+        viewModelFinance.getFinanceById(getIntent().getIntExtra("id", 0)).observe(this, modelFinance -> {
+            this.modelFinance = modelFinance;
+            loadData();
+        });
+
+
         binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -258,7 +278,8 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
                 break;
             case R.id.btn_calculator:
                 dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
-
+                    jumlah = Tools.convertToCurrency(result);
+                    binding.etAmount.setText(jumlah);
                 });
                 dialogCalculator.show();
                 break;
@@ -291,7 +312,10 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
                                 model.setKategori(category);
                                 model.setKeterangan(binding.etDescription.getText().toString().trim());
                                 model.setMonth(month);
-                                viewModelFinance.inputUpdateFinance(UpdateFinance.this, "Update", model);
+                                viewModelFinance.inputUpdateFinance("Update", model);
+                                Intent intent = new Intent();
+                                intent.putExtra("finance", model);
+                                setResult(RESULT_OK, intent);
                                 finish();
                             })
                             .setCancelText("Tidak")

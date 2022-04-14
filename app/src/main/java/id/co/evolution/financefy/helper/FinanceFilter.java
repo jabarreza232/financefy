@@ -3,6 +3,8 @@ package id.co.evolution.financefy.helper;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,7 +33,7 @@ public class FinanceFilter {
         return list;
     }
 
-    public List<ModelNestedFinance> filterPeriod(String filterPeriod, List<ModelNestedFinance> list) {
+    public List<ModelNestedFinance> filterPeriod(@NonNull String filterPeriod, List<ModelNestedFinance> list) {
         if (filterPeriod.split("-")[0].equalsIgnoreCase("terlama")) {
             Collections.sort(list, ModelNestedFinance.shortedPeriodLongestToLatest);
         } else {
@@ -82,20 +84,20 @@ public class FinanceFilter {
         return listData;
     }
 
-    public int totalExpense(List<ModelFinance> data) {
-        int income = 0;
+    public long totalExpense(List<ModelFinance> data) {
+        long expense = 0;
         for (ModelFinance modelFinance : data)
             if (modelFinance.getTipe().equalsIgnoreCase("pengeluaran"))
-                income += Integer.parseInt(modelFinance.getJumlah().replaceAll("[Rp,.]", ""));
+                expense += Long.parseLong(modelFinance.getJumlah().replaceAll("[Rp,.]", ""));
 
-        return income;
+        return expense;
     }
 
-    public int totalIncome(List<ModelFinance> data) {
-        int income = 0;
+    public long totalIncome(List<ModelFinance> data) {
+        long income = 0;
         for (ModelFinance modelFinance : data)
             if (modelFinance.getTipe().equalsIgnoreCase("pemasukan"))
-                income += Integer.parseInt(modelFinance.getJumlah().replaceAll("[Rp,.]", ""));
+                income += Long.parseLong(modelFinance.getJumlah().replaceAll("[Rp,.]", ""));
 
         return income;
     }

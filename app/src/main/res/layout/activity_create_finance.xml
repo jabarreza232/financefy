@@ -163,8 +163,8 @@
                         android:layout_width="64dp"
                         android:layout_height="64dp"
                         android:layout_alignParentEnd="true"
-                        android:background="@drawable/ic_baseline_calculate_24"
-                        android:backgroundTint="@color/blackTextColor" />
+                        android:background="@drawable/ic_outline_calculate_24"
+                        android:backgroundTint="@color/colorPrimary" />
                 </RelativeLayout>
 
                 <com.google.android.material.textfield.TextInputLayout

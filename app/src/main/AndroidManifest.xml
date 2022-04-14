@@ -15,8 +15,11 @@
         tools:replace="android:icon">
         <activity
             android:name=".activity.CreateFinance"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
+            />
         <activity
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
             android:name=".activity.UpdateFinance"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

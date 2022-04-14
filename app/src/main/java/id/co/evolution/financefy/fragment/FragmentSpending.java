@@ -81,11 +81,11 @@ public class FragmentSpending extends Fragment {
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
 
-        viewModelFinance.getFinanceByMonth(getContext(), Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
-            if (modelFinances != null) {
-                loadDataByMonth(modelFinances);
-            }
-        });
+//        viewModelFinance.getFinanceByMonth( Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
+//            if (modelFinances != null) {
+//                loadDataByMonth(modelFinances);
+//            }
+//        });
 
         binding.placeMonth.setOnClickListener(v -> showDialogMonthPicker());
     }
@@ -101,11 +101,11 @@ public class FragmentSpending extends Fragment {
                         long date_ship_milis = calendar.getTimeInMillis();
                         binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
 
-                        viewModelFinance.getFinanceByMonth(getContext(), Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
-                            if (modelFinances != null) {
-                                loadDataByMonth(modelFinances);
-                            }
-                        });
+//                        viewModelFinance.getFinanceByMonth( Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
+//                            if (modelFinances != null) {
+//                                loadDataByMonth(modelFinances);
+//                            }
+//                        });
                     }
                 }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
 
@@ -194,8 +194,6 @@ public class FragmentSpending extends Fragment {
                         dialog.dismiss();
                         break;
                     case 1:
-                        App.getDatabase(getActivity()).financeDao().delete(data.get(position));
-                        App.getDatabase(getActivity()).financeDao().getAll();
                         dataFinance.remove(position);
                         binding.rvList.getAdapter().notifyDataSetChanged();
                         dialog.dismiss();

@@ -89,7 +89,7 @@ public class ModelFinance implements Serializable {
     public static Comparator<ModelFinance> shortedNominalMinToMax = (jc1, jc2) -> {
         String min=jc1.getJumlah().replaceAll("[Rp,.]","");
         String max=jc2.getJumlah().replaceAll("[Rp,.]","");
-        return  (Integer.parseInt(min)-Integer.parseInt(max));
+        return  ((int)(Long.parseLong(min)-Long.parseLong(max)));
     };
 
     public static Comparator<ModelFinance> shortedNominalMaxToMin = new Comparator<ModelFinance>() {
@@ -97,7 +97,7 @@ public class ModelFinance implements Serializable {
         public int compare(ModelFinance jc1, ModelFinance jc2) {
             String min=jc1.getJumlah().replaceAll("[Rp,.]","");
             String max=jc2.getJumlah().replaceAll("[Rp,.]","");
-            return  (Integer.parseInt(max)-Integer.parseInt(min));
+            return ((int) (Long.parseLong(max)-Long.parseLong(min)));
         }
     };
 

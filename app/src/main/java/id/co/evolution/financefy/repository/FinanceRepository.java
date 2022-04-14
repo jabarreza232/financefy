@@ -1,73 +1,97 @@
 package id.co.evolution.financefy.repository;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import id.co.evolution.financefy.App;
-import id.co.evolution.financefy.activity.CreateFinance;
-import id.co.evolution.financefy.activity.UpdateFinance;
+import javax.inject.Inject;
+
+import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.model.ModelFinance;
 
 public class FinanceRepository {
-    ExecutorService executors;
+   public FinanceDao financeDao;
 
-    public FinanceRepository() {
-        executors = Executors.newSingleThreadExecutor();
+    @Inject
+    public FinanceRepository(FinanceDao financeDao) {
+        this.financeDao = financeDao;
     }
 
-    public LiveData<List<ModelFinance>> getAllFinance(Context context) {
-        return App.getDatabase(context).financeDao().getAll();
+    public LiveData<List<ModelFinance>> getAllFinance() {
+        return financeDao.getAll();
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByMonth(Context context, String month) {
-        return App.getDatabase(context).financeDao().loadAllbyMonth(month);
+    public LiveData<List<ModelFinance>> getFinanceByMonth(String month) {
+        return financeDao.loadAllbyMonth(month);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByWeek(Context context, List<String> date) {
-        return App.getDatabase(context).financeDao().loadAllbyWeek(date);
+    public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date) {
+        return financeDao.loadAllbyWeek(date);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByType(Context context, String type) {
-        return App.getDatabase(context).financeDao().findByType(type);
+    public LiveData<List<ModelFinance>> getFinanceByType(String type) {
+        return financeDao.findByType(type);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(Context context, String type, String month) {
-        return App.getDatabase(context).financeDao().findByTypeAndMonth(type, month);
+    public LiveData<ModelFinance> getModelFinanceById(int id) {
+        return financeDao.findById(id);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(Context context, String type, List<String> date) {
-        return App.getDatabase(context).financeDao().findByTypeAndWeek(type, date);
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(String type, String month) {
+        return financeDao.findByTypeAndMonth(type, month);
     }
 
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(String type, List<String> date) {
+        return financeDao.findByTypeAndWeek(type, date);
+    }
 
     public static class InputUpdateFinance extends AsyncTask<Void, Void, Void> {
         ModelFinance modelFinance;
-        Context context;
         String type;
+        FinanceDao financeDao;
 
-        public InputUpdateFinance(ModelFinance modelFinance, String type, Context context) {
+        public InputUpdateFinance(ModelFinance modelFinance, String type, FinanceDao financeDao) {
             this.modelFinance = modelFinance;
-            this.context = context;
             this.type = type;
+            this.financeDao = financeDao;
         }
 
         @Override
         protected Void doInBackground(Void... voids) {
             if (type.toLowerCase().equals("create"))
-                App.getDatabase(context).financeDao().insertAll(modelFinance);
+                financeDao.insertAll(modelFinance);
             else
-                App.getDatabase(context).financeDao().update(modelFinance);
+                financeDao.update(modelFinance);
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
+        }
+    }
+
+    public static class RemoveFinance extends AsyncTask<Void, Void, Void> {
+        ModelFinance modelFinance;
+        FinanceDao financeDao;
+
+        public RemoveFinance(ModelFinance modelFinance, FinanceDao financeDao) {
+            this.modelFinance = modelFinance;
+            this.financeDao = financeDao;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            financeDao.delete(modelFinance);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            super.onPostExecute(unused);
         }
     }
 }

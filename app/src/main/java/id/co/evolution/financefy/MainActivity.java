@@ -1,6 +1,8 @@
 package id.co.evolution.financefy;
 
 
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.ColorStateListDrawable;
@@ -11,6 +13,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
@@ -22,34 +26,49 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.activity.CreateFinance;
 import id.co.evolution.financefy.adapter.ViewPagerAdapter;
 import id.co.evolution.financefy.databinding.ActivityMainBinding;
+import id.co.evolution.financefy.db.FinanceDB;
+import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.fragment.FragmentAll;
 import id.co.evolution.financefy.fragment.FragmentIncome;
 import id.co.evolution.financefy.fragment.FragmentSpending;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.repository.FinanceRepository;
+import id.co.evolution.financefy.viewmodel.ViewModelFactory;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
+@AndroidEntryPoint
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     TinyDb tinyDb;
     ActivityMainBinding binding;
-    ViewModelFinance viewModelFinance;
+    public ViewModelFinance viewModelFinance;
     public List<ModelFinance> dataFinance = new ArrayList<>();
+    public ModelFinance modelFinance;
+
+    @Inject
+    FinanceRepository financeRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
 
-        viewModelFinance.getAllFinance(this).observe(this, modelFinances -> {
+        viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
+        viewModelFinance.init(financeRepository);
+
+        viewModelFinance.getAllFinance().observe(this, modelFinances -> {
             dataFinance = modelFinances;
             Log.e("jumlah_size", modelFinances.size() + "");
 //            ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
@@ -91,25 +110,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return false;
             });
         });
-//
-//        binding.layout.viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-//            @Override
-//            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-//
-//            }
-//
-//            @Override
-//            public void onPageSelected(int position) {
-//                binding.layout.bnMain.getMenu().getItem(position).setChecked(true);
-//            }
-//
-//            @Override
-//            public void onPageScrollStateChanged(int state) {
-//
-//            }
-//        });
-
-
 
         binding.layout.fabAdd.setOnClickListener(this);
     }
@@ -133,11 +133,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == 3) {
+                modelFinance = (ModelFinance) data.getSerializableExtra("finance");
+                Log.e("TAG", "onActivityResult: " + new Gson().toJson((ModelFinance) data.getSerializableExtra("finance")));
+                changeFragment(new FragmentAll());
+            }
+        }
+    }
+
+    @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.fab_add:
-                startActivity(new Intent(this, CreateFinance.class));
-                break;
+        if (v.getId() == R.id.fab_add) {
+            startActivityForResult(new Intent(this, CreateFinance.class), 3);
         }
     }
 }

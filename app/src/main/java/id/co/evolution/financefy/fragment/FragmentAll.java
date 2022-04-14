@@ -1,7 +1,12 @@
 package id.co.evolution.financefy.fragment;
 
+import static android.app.Activity.RESULT_OK;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
@@ -11,6 +16,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -60,6 +66,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
@@ -68,19 +77,26 @@ import id.co.evolution.financefy.adapter.AdapterFilter;
 import id.co.evolution.financefy.adapter.AdapterFinance;
 import id.co.evolution.financefy.asynctask.FilterMaxMonthAsynctask;
 import id.co.evolution.financefy.asynctask.FilterMinYearAsynctask;
+import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAllBinding;
+import id.co.evolution.financefy.db.FinanceDB;
+import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.LocalizedWeekHelper;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
+import id.co.evolution.financefy.repository.FinanceRepository;
+import id.co.evolution.financefy.viewmodel.ViewModelFactory;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
-public class FragmentAll extends Fragment {
+@AndroidEntryPoint
+public class FragmentAll extends Fragment implements CallbackOnActivityResult.OnCallbackResult {
     Calendar today;
     Calendar prevNextMonth;
     List<ModelFinance> dataFinance = new ArrayList<>();
+    List<ModelFinance> financeData;
     FragmentAllBinding binding;
     ViewModelFinance viewModelFinance;
     AdapterFinance adapter;
@@ -94,9 +110,20 @@ public class FragmentAll extends Fragment {
     LocalizedWeekHelper localizedWeekHelper;
     int prevNextWeek = 0;
     boolean nextWeekEnabled;
+    @Inject
+    FinanceRepository financeRepository;
+    CallbackOnActivityResult mCallbackOnActivityResult;
+    int mPositionItem;
 
     public FragmentAll() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mCallbackOnActivityResult = new CallbackOnActivityResult(getContext(), requireActivity().getActivityResultRegistry(), this);
+        getLifecycle().addObserver(mCallbackOnActivityResult);
     }
 
     @Override
@@ -124,6 +151,7 @@ public class FragmentAll extends Fragment {
         prevNextMonth = Calendar.getInstance();
         long date_ship_milis = today.getTimeInMillis();
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
+        viewModelFinance.init(financeRepository);
 
         loadDataFinanceByMonth(date_ship_milis);
 
@@ -140,17 +168,19 @@ public class FragmentAll extends Fragment {
 
                 loadDataFinanceByMonth(date_ship_milisecond);
             } else {
-                prevNextWeek = prevNextWeek - 7;
-                nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
+
+                prevNextWeek =prevNextWeek -7;
+
+                nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay( prevNextWeek) <= today.getTimeInMillis();
                 if (nextWeekEnabled)
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.blackTextColor)));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
                 binding.btnNext.setEnabled(nextWeekEnabled);
-                binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
+                binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek-7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByWeek(getContext(), localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByWeek(localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek-7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -168,6 +198,7 @@ public class FragmentAll extends Fragment {
                 loadDataFinanceByMonth(date_ship_milisecond);
             } else {
                 prevNextWeek = prevNextWeek + 7;
+
                 nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
                 binding.btnNext.setEnabled(nextWeekEnabled);
                 if (nextWeekEnabled)
@@ -175,9 +206,9 @@ public class FragmentAll extends Fragment {
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
-                binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
+                binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByWeek(getContext(), localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByWeek(localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -187,6 +218,7 @@ public class FragmentAll extends Fragment {
 
         initiateSayHaloWithTime();
     }
+
 
     private void initiateSayHaloWithTime() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
@@ -240,13 +272,12 @@ public class FragmentAll extends Fragment {
         builder.setItems(tipe, (dialog, which) -> {
             switch (which) {
                 case 0:
-                    Intent i = new Intent(getActivity(), UpdateFinance.class);
-                    i.putExtra("id", data.get(position).getId());
-                    startActivity(i);
+                    mPositionItem = position;
+                    mCallbackOnActivityResult.updateDataFinance(data, position);
                     dialog.dismiss();
                     break;
                 case 1:
-                    App.getDatabase(getActivity()).financeDao().delete(data.get(position));
+                    viewModelFinance.removeFinance(data.get(position));
                     dataFinance.remove(position);
                     binding.rvList.getAdapter().notifyDataSetChanged();
                     dialog.dismiss();
@@ -269,17 +300,16 @@ public class FragmentAll extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-
             case R.id.filter:
                 showDialogFilter();
                 // Not implemented here
                 break;
             case R.id.view_list:
                 if (type_layout_manager == AdapterFinance.TYPE_LAYOUT_MANAGER.GRID) {
-                    item.setIcon(R.drawable.ic_baseline_format_list_bulleted_24);
+                    item.setIcon(R.drawable.ic_baseline_grid_view_24);
                     type_layout_manager = AdapterFinance.TYPE_LAYOUT_MANAGER.VERTICAL;
                 } else if (type_layout_manager == AdapterFinance.TYPE_LAYOUT_MANAGER.VERTICAL) {
-                    item.setIcon(R.drawable.ic_baseline_grid_view_24);
+                    item.setIcon(R.drawable.ic_baseline_format_list_bulleted_24);
                     type_layout_manager = AdapterFinance.TYPE_LAYOUT_MANAGER.GRID;
                 }
                 if (adapter != null) {
@@ -327,10 +357,6 @@ public class FragmentAll extends Fragment {
         rvListPeriod.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         rvListPeriod.setAdapter(adapterFilterPeriod);
 
-//        dialog.setCancelable(true);
-//        dialog.setIcon(R.mipmap.ic_launcher);
-//        dialog.setTitle("Form Biodata");
-//
         txtSubmit.setOnClickListener(v -> {
             if (filterType == null) {
                 Toast.makeText(getContext(), "Mohon untuk pilih tipe terlebih dahulu!", Toast.LENGTH_SHORT).show();
@@ -353,15 +379,13 @@ public class FragmentAll extends Fragment {
 
     private void loadByType(String type) {
         prevNextWeek = 0;
+
         nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
 
         if (type.equalsIgnoreCase("semuanya")) {
             if (filterPeriod.equalsIgnoreCase("bulanan")) {
-                viewModelFinance.getFinanceByMonth(getContext(), month).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
-                    @Override
-                    public void onChanged(List<ModelFinance> modelFinances) {
-                        if (modelFinances != null) loadData(modelFinances);
-                    }
+                viewModelFinance.getFinanceByMonth(month).observe(getViewLifecycleOwner(), modelFinances -> {
+                    if (modelFinances != null) loadData(modelFinances);
                 });
             } else {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -371,7 +395,7 @@ public class FragmentAll extends Fragment {
                         binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
                 }
                 binding.btnNext.setEnabled(nextWeekEnabled);
-                viewModelFinance.getFinanceByWeek(getContext(), localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+                viewModelFinance.getFinanceByWeek(localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek-7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
                     @Override
                     public void onChanged(List<ModelFinance> modelFinances) {
                         if (modelFinances != null) loadData(modelFinances);
@@ -380,7 +404,7 @@ public class FragmentAll extends Fragment {
             }
         } else {
             if (filterPeriod.equalsIgnoreCase("bulanan")) {
-                viewModelFinance.getFinanceByTypeAndMonth(getContext(), type, month).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+                viewModelFinance.getFinanceByTypeAndMonth(type, month).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
                     @Override
                     public void onChanged(List<ModelFinance> modelFinances) {
                         if (modelFinances != null) loadData(modelFinances);
@@ -395,11 +419,8 @@ public class FragmentAll extends Fragment {
                         binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
                 }
                 binding.btnNext.setEnabled(nextWeekEnabled);
-                viewModelFinance.getFinanceByTypeAndWeek(getContext(), type, localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
-                    @Override
-                    public void onChanged(List<ModelFinance> modelFinances) {
-                        if (modelFinances != null) loadData(modelFinances);
-                    }
+                viewModelFinance.getFinanceByTypeAndWeek(type, localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek-7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+                    if (modelFinances != null) loadData(modelFinances);
                 });
             }
         }
@@ -408,7 +429,7 @@ public class FragmentAll extends Fragment {
             binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(today.getTimeInMillis()));
             binding.placeMonth.setEnabled(true);
         } else {
-            binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
+            binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek-7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek )));
             binding.placeMonth.setEnabled(false);
         }
     }
@@ -426,7 +447,7 @@ public class FragmentAll extends Fragment {
             binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             binding.btnNext.setEnabled(false);
         }
-        viewModelFinance.getFinanceByMonth(getContext(), Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
+        viewModelFinance.getFinanceByMonth(Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
             if (modelFinances != null) {
                 loadData(modelFinances);
             }
@@ -436,7 +457,8 @@ public class FragmentAll extends Fragment {
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadData(List<ModelFinance> data) {
-        int total = (financeFilter.totalIncome(data) - financeFilter.totalExpense(data));
+        financeData = new ArrayList<>(data);
+        long total = (financeFilter.totalIncome(data) - financeFilter.totalExpense(data));
         binding.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data)));
         binding.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data)));
         binding.txtTotalAll.setText(convertToCurrency(total));
@@ -448,7 +470,7 @@ public class FragmentAll extends Fragment {
 
         List<ModelNestedFinance> listNestedFinance = financeFilter.filterNestedFinance(data);
         listNestedFinance = financeFilter.filterPeriod("terbaru", listNestedFinance);
-        adapter = new AdapterFinance(getActivity(), listNestedFinance, (data1, position) -> showDialog(data1, position));
+        adapter = new AdapterFinance(getActivity(), listNestedFinance, this::showDialog);
         Log.e("jumlah", adapter.getItemCount() + "");
         adapter.setType(type_layout_manager);
         binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -457,5 +479,12 @@ public class FragmentAll extends Fragment {
 
         binding.placeEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
 
+    }
+
+    @Override
+    public void result(Intent intent) {
+        ModelFinance modelFinance = (ModelFinance) intent.getSerializableExtra("finance");
+        financeData.set(mPositionItem, modelFinance);
+        loadData(financeData);
     }
 }

@@ -2,13 +2,18 @@ package id.co.evolution.financefy.helper;
 
 import android.os.Build;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Tools {
+    public static int REQUEST_CODE_CALLBACK = 3;
+
     public static String getFormattedMonthSimple(Long dateTime) {
         SimpleDateFormat newFormat = new SimpleDateFormat("MM-yyyy");
         return newFormat.format(new Date(dateTime));
@@ -29,9 +34,97 @@ public class Tools {
         return newFormat.format(new Date(dateTime));
     }
 
+    public static boolean isSpecialCharacterInMyString(String value) {
+        Pattern p = Pattern.compile("[!@#$%&x/()_+=|<>?{}\\[\\]~-]");
+        Matcher m = p.matcher(value);
+        return m.find();
+    }
+
+    public static String replaceStringNumberFormat(String value) {
+
+        return value.replaceAll("[,.]", "");
+    }
+
+    public static String numberFormat(long number) {
+        DecimalFormat format;
+        String lengthNumber = String.valueOf(number);
+        String result = "";
+        if (lengthNumber.length() == 4) {
+            format = new DecimalFormat("#,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 5) {
+            format = new DecimalFormat("##,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 6) {
+            format = new DecimalFormat("###,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 7) {
+            format = new DecimalFormat("#,###,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 8) {
+            format = new DecimalFormat("##,###,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 9) {
+            format = new DecimalFormat("###,###,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 10) {
+            format = new DecimalFormat("#,###,###,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 11) {
+            format = new DecimalFormat("##,###,###,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 12) {
+            format = new DecimalFormat("###,###,###,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 13) {
+            format = new DecimalFormat("#,###,###,###,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 14) {
+            format = new DecimalFormat("##,###,###,###,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 15) {
+            format = new DecimalFormat("###,###,###,###,###");
+            result = format.format(number);
+        } else if (lengthNumber.length() == 16) {
+            format = new DecimalFormat("#,###,###,###,###,###");
+            result = format.format(number);
+        } else {
+            result = String.valueOf(number);
+        }
+
+        return result;
+    }
+
+    public static String getSpecialCharacterInMyString(String value) {
+
+
+        return value.replaceAll("[^+\\-*x/]", "");
+    }
+
+    public static String removeLastChar(String s) {
+        return s.substring(0, s.length() - 1);
+    }
+
+    public static String getLastChar(String s) {
+        return s.substring(s.length() - 1);
+    }
+
+    public static String currencyConvertToValue(String value) {
+        return value.replaceAll("[Rp,.]", "");
+    }
+
     public static String convertToCurrency(int currency) {
         Locale localeID = new Locale("in", "ID");
         String formatted = NumberFormat.getCurrencyInstance(localeID).format(((double) currency));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            formatted = formatted.replaceAll(",00", "");
+        }
+        return formatted;
+    }
+
+    public static String convertToCurrency(long currency) {
+        Locale localeID = new Locale("in", "ID");
+        String formatted = NumberFormat.getCurrencyInstance(localeID).format(currency);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             formatted = formatted.replaceAll(",00", "");
         }
@@ -87,7 +180,9 @@ public class Tools {
         newDateString = sdf.format(d);
 
         return newDateString;
-    }public static String convertDateFormatWeekText(String date) {
+    }
+
+    public static String convertDateFormatWeekText(String date) {
         final String OLD_FORMAT = "yyyy-MM-dd";
         final String NEW_FORMAT = "dd MMM yyyy";
 

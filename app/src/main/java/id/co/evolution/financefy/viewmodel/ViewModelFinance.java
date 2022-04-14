@@ -1,49 +1,63 @@
 package id.co.evolution.financefy.viewmodel;
 
-import android.content.Context;
-
+import androidx.hilt.Assisted;
+import androidx.hilt.lifecycle.ViewModelInject;
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.SavedStateHandle;
 import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
-import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
 
 public class ViewModelFinance extends ViewModel {
     FinanceRepository financeRepository;
 
-    public ViewModelFinance() {
-        financeRepository = new FinanceRepository();
+
+    public void init(FinanceRepository financeRepository) {
+        this.financeRepository = financeRepository;
     }
 
-    public LiveData<List<ModelFinance>> getAllFinance(Context context) {
-        return financeRepository.getAllFinance(context);
+    public LiveData<List<ModelFinance>> getAllFinance() {
+        return financeRepository.getAllFinance();
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByMonth(Context context, String month) {
-        return financeRepository.getFinanceByMonth(context, month);
+
+    public LiveData<List<ModelFinance>> getFinanceByMonth(String month) {
+        return financeRepository.getFinanceByMonth(month);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByWeek(Context context, List<String> date) {
-        return financeRepository.getFinanceByWeek(context, date);
+    public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date) {
+        return financeRepository.getFinanceByWeek(date);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByType(Context context, String type) {
-        return financeRepository.getFinanceByType(context, type);
+    public LiveData<List<ModelFinance>> getFinanceByType(String type) {
+        return financeRepository.getFinanceByType(type);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(Context context, String type, String month) {
-        return financeRepository.getFinanceByTypeAndMonth(context, type, month);
+    public LiveData<ModelFinance> getFinanceById(int id) {
+        return financeRepository.getModelFinanceById(id);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(Context context, String type, List<String> date) {
-        return financeRepository.getFinanceByTypeAndWeek(context, type, date);
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(String type, String month) {
+        return financeRepository.getFinanceByTypeAndMonth(type, month);
     }
 
-    public void inputUpdateFinance(Context context, String type, ModelFinance modelFinance) {
-        new FinanceRepository.InputUpdateFinance(modelFinance, type, context).execute();
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(String type, List<String> date) {
+        return financeRepository.getFinanceByTypeAndWeek(type, date);
+    }
+
+    public void inputUpdateFinance(String type, ModelFinance modelFinance) {
+        new FinanceRepository.InputUpdateFinance(modelFinance, type,financeRepository.financeDao).execute();
+    }
+
+    public void removeFinance(ModelFinance modelFinance) {
+        new FinanceRepository.RemoveFinance(modelFinance,financeRepository.financeDao).execute();
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
     }
 }

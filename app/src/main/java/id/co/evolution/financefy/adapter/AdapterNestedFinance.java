@@ -41,9 +41,9 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int i) {
         holder.binding.txtJudul.setText(data.get(i).getKategori());
+        holder.binding.keterangan.setVisibility(!data.get(i).getKeterangan().isEmpty() ? View.VISIBLE : View.GONE);
         holder.binding.keterangan.setText(data.get(i).getKeterangan());
         holder.binding.jumlah.setText(data.get(i).getJumlah());
-
 
         if (data.get(i).getTipe().equalsIgnoreCase("pengeluaran")) {
             holder.binding.jumlah.setTextColor(ContextCompat.getColor(context, R.color.red));

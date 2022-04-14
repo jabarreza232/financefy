@@ -20,7 +20,7 @@ public class DummyCalculator {
         data.add("8");
         data.add("9");
         data.add("x");
-        data.add("+/-");
+        data.add("C");
         data.add("0");
         data.add("=");
         data.add("/");

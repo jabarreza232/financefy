@@ -6,6 +6,7 @@ import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 
 import androidx.cardview.widget.CardView;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -30,21 +32,32 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.gson.Gson;
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
+import id.co.evolution.financefy.db.FinanceDB;
+import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
+import id.co.evolution.financefy.viewmodel.ViewModelFactory;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
+@AndroidEntryPoint
 public class CreateFinance extends AppCompatActivity implements View.OnClickListener {
 
     String date = "";
@@ -57,6 +70,11 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
     Calendar cur_calendar = Calendar.getInstance();
     ViewModelFinance viewModelFinance;
     DialogCalculator dialogCalculator;
+    //    @Inject
+//    ViewModelFactory viewModelFactory;
+    List<ModelFinance> listFinance;
+    @Inject
+    FinanceRepository financeRepository;
 
     @SuppressLint("ObsoleteSdkInt")
     @Override
@@ -75,11 +93,14 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
         long date_ship_milis = cur_calendar.getTimeInMillis();
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
+        viewModelFinance.init(financeRepository);
 
         binding.txtHeader.setText("Input data");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
+
+
         binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -268,7 +289,8 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
 
             case R.id.btn_calculator:
                 dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
-
+                    jumlah = Tools.convertToCurrency(result);
+                    binding.etAmount.setText(jumlah);
                 });
                 dialogCalculator.show();
                 break;
@@ -297,7 +319,11 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                                     model.setKategori(category);
                                     model.setKeterangan(binding.etDescription.getText().toString().trim());
                                     model.setMonth(month);
-                                    viewModelFinance.inputUpdateFinance(CreateFinance.this, "Create", model);
+
+                                    viewModelFinance.inputUpdateFinance("Create", model);
+                                    Intent intent = new Intent();
+                                    intent.putExtra("finance", model);
+                                    setResult(RESULT_OK, intent);
                                     finish();
                                 }
                             })
