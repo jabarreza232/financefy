@@ -45,6 +45,11 @@ public class Tools {
         return value.replaceAll("[,.]", "");
     }
 
+    public static double replaceCurrencyStringToDouble(String value) {
+
+        return Double.parseDouble(value.replaceAll("[Rp,.]", ""));
+    }
+
     public static String numberFormat(long number) {
         DecimalFormat format;
         String lengthNumber = String.valueOf(number);
@@ -101,6 +106,12 @@ public class Tools {
         return value.replaceAll("[^+\\-*x/]", "");
     }
 
+    public static double calculatePercentage(double value, double total) {
+        double values=value * 100 / total;
+
+        return Math.round(values*100.0)/100.0;
+    }
+
     public static String removeLastChar(String s) {
         return s.substring(0, s.length() - 1);
     }
@@ -123,6 +134,13 @@ public class Tools {
     }
 
     public static String convertToCurrency(long currency) {
+        Locale localeID = new Locale("in", "ID");
+        String formatted = NumberFormat.getCurrencyInstance(localeID).format(currency);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            formatted = formatted.replaceAll(",00", "");
+        }
+        return formatted;
+    }public static String convertToCurrency(double currency) {
         Locale localeID = new Locale("in", "ID");
         String formatted = NumberFormat.getCurrencyInstance(localeID).format(currency);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {

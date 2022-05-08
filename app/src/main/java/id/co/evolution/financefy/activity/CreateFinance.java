@@ -8,36 +8,24 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
-
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
-
-import androidx.cardview.widget.CardView;
-import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-import com.google.gson.Gson;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -45,16 +33,12 @@ import java.util.Locale;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
-import id.co.evolution.financefy.db.FinanceDB;
-import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
-import id.co.evolution.financefy.viewmodel.ViewModelFactory;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 @AndroidEntryPoint
@@ -91,9 +75,11 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
         cur_calendar.get(Calendar.MONTH);
         cur_calendar.get(Calendar.DAY_OF_MONTH);
         long date_ship_milis = cur_calendar.getTimeInMillis();
-
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
+        viewModelFinance.getAllFinance().observe(this, modelFinances -> {
+            listFinance = modelFinances;
+        });
 
         binding.txtHeader.setText("Input data");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
@@ -320,7 +306,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                                     model.setKeterangan(binding.etDescription.getText().toString().trim());
                                     model.setMonth(month);
 
-                                    viewModelFinance.inputUpdateFinance("Create", model);
+                                    onSubmit(model);
                                     Intent intent = new Intent();
                                     intent.putExtra("finance", model);
                                     setResult(RESULT_OK, intent);
@@ -334,4 +320,20 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    private void onSubmit(ModelFinance model) {
+        boolean isUpdate = false;
+        for (ModelFinance modelFinance : listFinance) {
+            if (modelFinance.getKategori().contains(model.getKategori()) && modelFinance.getDate().contains(model.getDate())) {
+                double jumlahValue = modelFinance.getJumlahValue() + model.getJumlahValue();
+                model.setId(modelFinance.getId());
+                model.setJumlah(Tools.convertToCurrency(jumlahValue));
+                isUpdate = true;
+            }
+        }
+        if (isUpdate)
+            viewModelFinance.inputUpdateFinance("Update", model);
+        else
+            viewModelFinance.inputUpdateFinance("Create", model);
+
+    }
 }

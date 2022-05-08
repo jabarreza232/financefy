@@ -12,21 +12,21 @@ import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.vipulasri.timelineview.TimelineView;
-
 import java.util.List;
 
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.databinding.ListAnalysisBinding;
 import id.co.evolution.financefy.databinding.ListFinanceBinding;
 import id.co.evolution.financefy.databinding.ListNestedFinanceBinding;
+import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 
-public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFinance.ViewHolder> {
+public class AdapterAnalysisFinance extends RecyclerView.Adapter<AdapterAnalysisFinance.ViewHolder> {
     Context context;
     List<ModelFinance> data;
     MethodCallback methodCallback;
 
-    public AdapterNestedFinance(Context context, List<ModelFinance> data, MethodCallback methodCallback) {
+    public AdapterAnalysisFinance(Context context, List<ModelFinance> data, MethodCallback methodCallback) {
         this.context = context;
         this.data = data;
         this.methodCallback = methodCallback;
@@ -36,7 +36,7 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(context).inflate(R.layout.list_nested_finance, viewGroup, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.list_analysis, viewGroup, false);
 
         return new ViewHolder(view, i);
     }
@@ -47,27 +47,22 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
         return super.getItemViewType(position);
     }
 
-    @SuppressLint("RecyclerView")
+    @SuppressLint({"RecyclerView", "SetTextI18n"})
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int i) {
-        holder.binding.txtJudul.setText(data.get(i).getKategori());
-        holder.binding.keterangan.setVisibility(!data.get(i).getKeterangan().isEmpty() ? View.VISIBLE : View.GONE);
-        holder.binding.keterangan.setText(data.get(i).getKeterangan());
-        holder.binding.jumlah.setText(data.get(i).getJumlah());
-
+        holder.binding.txtKategori.setText(data.get(i).getKategori());
+        holder.binding.txtJumlah.setText(data.get(i).getJumlah());
+        holder.binding.txtPercentage.setText(Tools.calculatePercentage(data.get(i).getJumlahValue(), data.get(i).getTotalValue()) + "% ");
+        holder.binding.progressFinance.setProgress((int)Tools.calculatePercentage(data.get(i).getJumlahValue(), data.get(i).getTotalValue()));
+        holder.binding.progressFinance.setMax(100);
+        Log.e("TAG", "onBindViewHolder: "+data.get(i).getTotalValue());
         if (data.get(i).getTipe().equalsIgnoreCase("pengeluaran")) {
-            holder.binding.jumlah.setTextColor(ContextCompat.getColor(context, R.color.red));
+            holder.binding.txtJumlah.setTextColor(ContextCompat.getColor(context, R.color.red));
+            holder.binding.progressFinance.setProgressDrawable(ContextCompat.getDrawable(context,R.drawable.progress_expense_drawable));
         } else {
-            holder.binding.jumlah.setTextColor(ContextCompat.getColor(context, R.color.green));
+            holder.binding.txtJumlah.setTextColor(ContextCompat.getColor(context, R.color.green));
+            holder.binding.progressFinance.setProgressDrawable(ContextCompat.getDrawable(context,R.drawable.progress_income_drawable));
         }
-
-
-        holder.binding.imgEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                methodCallback.onClick(data, i);
-            }
-        });
 
     }
 
@@ -79,7 +74,7 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        ListNestedFinanceBinding binding;
+        ListAnalysisBinding binding;
 
         public ViewHolder(@NonNull View itemView, int viewType) {
             super(itemView);

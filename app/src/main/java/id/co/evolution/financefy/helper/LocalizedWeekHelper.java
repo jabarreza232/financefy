@@ -23,7 +23,7 @@ public class LocalizedWeekHelper {
     public String getFirstDay(int prevNext) {
         Calendar calendar = Calendar.getInstance();
         while (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-            calendar.add(Calendar.DATE, -1);
+            calendar.add(Calendar.DATE, 1);
         }
         if (prevNext < 0) {
             calendar.add(Calendar.DAY_OF_MONTH, prevNext);

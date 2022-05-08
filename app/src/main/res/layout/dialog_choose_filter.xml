@@ -59,6 +59,7 @@
                 android:layout_marginBottom="10dp"
                 android:fontFamily="@font/ubuntu_b"
                 android:text="Nominal"
+                android:id="@+id/txt_nominal"
                 android:textColor="@color/blackTextColor"
                 android:textSize="15sp" />
 

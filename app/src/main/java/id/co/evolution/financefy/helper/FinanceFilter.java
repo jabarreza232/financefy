@@ -69,6 +69,7 @@ public class FinanceFilter {
         for (ModelFinance modelFinance : data) {
             hashset.add(modelFinance.getDate());
         }
+
         for (String date : hashset) {
             Log.e("TAG", "filterNestedFinance: " + date);
             ModelNestedFinance modelNestedFinance = new ModelNestedFinance();
@@ -78,9 +79,11 @@ public class FinanceFilter {
                 if (date.contains(modelFinance.getDate()))
                     dataFinance.add(modelFinance);
             }
+
             modelNestedFinance.setFinances(dataFinance);
             listData.add(modelNestedFinance);
         }
+
         return listData;
     }
 
@@ -88,7 +91,7 @@ public class FinanceFilter {
         long expense = 0;
         for (ModelFinance modelFinance : data)
             if (modelFinance.getTipe().equalsIgnoreCase("pengeluaran"))
-                expense += Long.parseLong(modelFinance.getJumlah().replaceAll("[Rp,.]", ""));
+                expense += (long) modelFinance.getJumlahValue();
 
         return expense;
     }
@@ -97,8 +100,52 @@ public class FinanceFilter {
         long income = 0;
         for (ModelFinance modelFinance : data)
             if (modelFinance.getTipe().equalsIgnoreCase("pemasukan"))
-                income += Long.parseLong(modelFinance.getJumlah().replaceAll("[Rp,.]", ""));
+                income += (long) modelFinance.getJumlahValue();
 
         return income;
+    }
+
+    public long totalValueByType(List<ModelFinance> data, String type) {
+        long value = 0;
+        for (ModelFinance modelFinance : data)
+            if (modelFinance.getTipe().equalsIgnoreCase(type))
+                value += (long) modelFinance.getJumlahValue();
+
+        return value;
+    }
+
+    public List<ModelFinance> listIncome(List<ModelFinance> data) {
+        List<ModelFinance> list = new ArrayList<>();
+        for (ModelFinance modelFinance : data) {
+            if (modelFinance.getTipe().equalsIgnoreCase("pemasukan")) {
+                list.add(modelFinance);
+            }
+        }
+        return list;
+    }
+
+    public List<ModelFinance> listAnalysis(List<ModelFinance> data,String type) {
+        List<ModelFinance> list = new ArrayList<>();
+        HashSet<String> hashsetCategory = new HashSet<>();
+
+        for (ModelFinance modelFinance : data) {
+            hashsetCategory.add(modelFinance.getKategori());
+        }
+
+        for (String category : hashsetCategory) {
+            ModelFinance modelFinance = new ModelFinance();
+            modelFinance.setKategori(category);
+            double totalValue = 0;
+            for (ModelFinance finance : data) {
+                if (category.contains(finance.getKategori())) {
+                    totalValue = totalValue+finance.getJumlahValue();
+                }
+            }
+            modelFinance.setJumlah(Tools.convertToCurrency(totalValue));
+            modelFinance.setTotalValue(totalValueByType(data,type));
+            modelFinance.setTipe(type);
+            list.add(modelFinance);
+        }
+        return list;
     }
 }

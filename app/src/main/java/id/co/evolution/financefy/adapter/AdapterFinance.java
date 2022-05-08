@@ -30,11 +30,16 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
     List<ModelNestedFinance> data;
     MethodCallback methodCallback;
     TYPE_LAYOUT_MANAGER type;
+    TYPE_NESTED_FINANCE type_nested_finance=TYPE_NESTED_FINANCE.DEFAULT;
 
     public enum TYPE_LAYOUT_MANAGER {
         GRID,
         HORIZONTAL,
         VERTICAL
+    }
+    public enum TYPE_NESTED_FINANCE {
+        ANALYSIS,
+        DEFAULT
     }
 
     public AdapterFinance(Context context, List<ModelNestedFinance> data, MethodCallback methodCallback) {
@@ -45,6 +50,10 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
 
     public void setType(TYPE_LAYOUT_MANAGER type) {
         this.type = type;
+    }
+
+    public void setType(TYPE_NESTED_FINANCE type) {
+        this.type_nested_finance = type;
     }
 
     @NonNull
@@ -81,19 +90,29 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
         }
 
         public void bindData(ModelNestedFinance modelNestedFinance){
+            if(type_nested_finance==TYPE_NESTED_FINANCE.ANALYSIS)
+                showAnalysis(modelNestedFinance);
+                else
+                showNestedFinance(modelNestedFinance);
 
-            AdapterNestedFinance adapterFinance = new AdapterNestedFinance(context, modelNestedFinance.getFinances(), new AdapterNestedFinance.MethodCallback() {
-                @Override
-                public void onClick(List<ModelFinance> data, int position) {
-                    methodCallback.onClick(data,position);
-                }
-            });
-            if (type == AdapterFinance.TYPE_LAYOUT_MANAGER.GRID) {
+        }
+
+        private void showNestedFinance(ModelNestedFinance modelNestedFinance){
+            AdapterNestedFinance adapterFinance = new AdapterNestedFinance(context, modelNestedFinance.getFinances(), (data, position) -> methodCallback.onClick(data,position));
+
+            if (type == TYPE_LAYOUT_MANAGER.GRID) {
                 binding.rvFinance.setLayoutManager(new GridLayoutManager(context, 2));
-            } else if (type == AdapterFinance.TYPE_LAYOUT_MANAGER.VERTICAL) {
+            } else if (type == TYPE_LAYOUT_MANAGER.VERTICAL) {
                 binding.rvFinance.setLayoutManager(new LinearLayoutManager(context));
             }
             binding.rvFinance.setNestedScrollingEnabled(false);
+            binding.rvFinance.setAdapter(adapterFinance);
+        }
+
+        private void showAnalysis(ModelNestedFinance modelNestedFinance){
+            AdapterAnalysisFinance adapterFinance = new AdapterAnalysisFinance(context, modelNestedFinance.getFinances(), (data, position) -> methodCallback.onClick(data,position));
+            binding.rvFinance.setLayoutManager(new LinearLayoutManager(context));
+            binding.rvFinance.setNestedScrollingEnabled(true);
             binding.rvFinance.setAdapter(adapterFinance);
         }
     }

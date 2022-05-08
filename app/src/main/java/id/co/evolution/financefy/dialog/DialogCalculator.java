@@ -58,16 +58,12 @@ public class DialogCalculator {
         dialogView = inflater.inflate(R.layout.dialog_calculator, null);
         dialog.setContentView(dialogView);
         binding = DataBindingUtil.bind(dialogView);
-        String typeCalculate[] = HelperCalculator.getSymbolCalculate();
 
         AdapterCalculator adapterCalculator = new AdapterCalculator(context, DummyCalculator.getDataCalculator(), (data, position) -> {
             if (result.equals("0") && !data.get(position).equals("0"))
                 result = "";
-            boolean canInput = result.replaceAll("[,.]", "").length() < 10;
             boolean checkSymbol = result.length() > 0 && Tools.isSpecialCharacterInMyString(Tools.getLastChar(result));
 
-            if (result.length() > 1)
-                Log.e("cek:", "" + checkSymbol + " : " + Tools.getLastChar(result));
 
             switch (data.get(position)) {
                 case "0":
@@ -172,7 +168,7 @@ public class DialogCalculator {
                             if (j % 2 == 0) {
                                 valueStart = Long.parseLong(result.split(symbolCalculate)[j].isEmpty() ? "0" : result.split(symbolCalculate)[j]);
                             } else {
-                                valueEnd = Integer.parseInt(result.split(symbolCalculate)[j].isEmpty() ? "0" : result.split(symbolCalculate)[j]);
+                                valueEnd = Long.parseLong(result.split(symbolCalculate)[j].isEmpty() ? "0" : result.split(symbolCalculate)[j]);
                             }
 
 //                            if (valueStart == 0) {
@@ -205,9 +201,9 @@ public class DialogCalculator {
                             } else if (j > 0) {
 
                                 if (j % 2 == 1)
-                                    valueResult = Integer.parseInt(HelperCalculator.calculate(valueResult, valueEnd, value));
+                                    valueResult = Long.parseLong(HelperCalculator.calculate(valueResult, valueEnd, value));
                                 else
-                                    valueResult = Integer.parseInt(HelperCalculator.calculate(valueResult, valueStart, value));
+                                    valueResult = Long.parseLong(HelperCalculator.calculate(valueResult, valueStart, value));
                             }
 
 
@@ -222,16 +218,13 @@ public class DialogCalculator {
 
 
                         }
-                        result = String.valueOf(Tools.numberFormat(valueResult));
-
+                        result = String.valueOf(valueResult);
                     }
 
                     break;
                 default:
                     break;
             }
-
-
             resultToNumberFormat();
         });
         binding.rvCalculator.setLayoutManager(new GridLayoutManager(context, 4));

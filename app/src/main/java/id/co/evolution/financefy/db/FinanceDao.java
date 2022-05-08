@@ -37,7 +37,7 @@ public interface FinanceDao {
     LiveData<List<ModelFinance>> findByTypeAndWeek(String type, List<String> date);
 
     @Query("SELECT * FROM finance WHERE id_finance =:id LIMIT 1")
-    ModelFinance findById(int id);
+    LiveData<ModelFinance> findById(int id);
 
     @Insert
     void insertAll(ModelFinance... user);

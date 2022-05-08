@@ -2,6 +2,7 @@ package id.co.evolution.financefy.model;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
@@ -26,6 +27,8 @@ public class ModelFinance implements Serializable {
     String tipe;
     @ColumnInfo(name = "month")
     String month;
+    @Ignore
+    long totalValue;
 
     public ModelFinance() {
     }
@@ -50,6 +53,9 @@ public class ModelFinance implements Serializable {
         return jumlah;
     }
 
+    public double getJumlahValue(){
+        return Tools.replaceCurrencyStringToDouble(jumlah);
+    }
     public void setJumlah(String jumlah) {
         this.jumlah = jumlah;
     }
@@ -84,6 +90,14 @@ public class ModelFinance implements Serializable {
 
     public void setTipe(String tipe) {
         this.tipe = tipe;
+    }
+
+    public long getTotalValue() {
+        return totalValue;
+    }
+
+    public void setTotalValue(long totalValue) {
+        this.totalValue = totalValue;
     }
 
     public static Comparator<ModelFinance> shortedNominalMinToMax = (jc1, jc2) -> {
