@@ -180,6 +180,11 @@ public class Tools {
         return newDateString;
     }
 
+    public static Integer getDateFromDateFormat(String date){
+
+        return Integer.parseInt(date.split("-")[0]);
+    }
+
     public static String convertDateFormatWeek(String date) {
         final String OLD_FORMAT = "yyyy-MM-dd";
         final String NEW_FORMAT = "MMMM dd, yyyy";
@@ -202,6 +207,27 @@ public class Tools {
 
     public static String convertDateFormatWeekText(String date) {
         final String OLD_FORMAT = "yyyy-MM-dd";
+        final String NEW_FORMAT = "dd MMM yyyy";
+
+// August 12, 2010
+        String newDateString;
+
+        SimpleDateFormat sdf = new SimpleDateFormat(OLD_FORMAT);
+        Date d = null;
+        try {
+            d = sdf.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        sdf.applyPattern(NEW_FORMAT);
+        newDateString = sdf.format(d);
+
+        return newDateString;
+    }
+
+
+    public static String convertDateFormatAnalysis(String date) {
+        final String OLD_FORMAT = "dd-MM-yyyy";
         final String NEW_FORMAT = "dd MMM yyyy";
 
 // August 12, 2010

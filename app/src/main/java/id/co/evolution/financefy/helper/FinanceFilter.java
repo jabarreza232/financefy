@@ -34,10 +34,19 @@ public class FinanceFilter {
     }
 
     public List<ModelNestedFinance> filterPeriod(@NonNull String filterPeriod, List<ModelNestedFinance> list) {
-        if (filterPeriod.split("-")[0].equalsIgnoreCase("terlama")) {
+        if (filterPeriod.equalsIgnoreCase("terlama")) {
             Collections.sort(list, ModelNestedFinance.shortedPeriodLongestToLatest);
         } else {
             Collections.sort(list, ModelNestedFinance.shortedPeriodLatestToLongest);
+        }
+
+        return list;
+    }
+    public List<ModelFinance> filterPeriodFinance(@NonNull String filterPeriod, List<ModelFinance> list) {
+        if (filterPeriod.equalsIgnoreCase("terlama")) {
+            Collections.sort(list, ModelFinance.shortedPeriodLongestToLatest);
+        } else {
+            Collections.sort(list, ModelFinance.shortedPeriodLatestToLongest);
         }
 
         return list;
@@ -136,14 +145,17 @@ public class FinanceFilter {
             ModelFinance modelFinance = new ModelFinance();
             modelFinance.setKategori(category);
             double totalValue = 0;
+            String date=null;
             for (ModelFinance finance : data) {
                 if (category.contains(finance.getKategori())) {
                     totalValue = totalValue+finance.getJumlahValue();
+                    date=finance.getDate();
                 }
             }
             modelFinance.setJumlah(Tools.convertToCurrency(totalValue));
             modelFinance.setTotalValue(totalValueByType(data,type));
             modelFinance.setTipe(type);
+            modelFinance.setDate(date);
             list.add(modelFinance);
         }
         return list;

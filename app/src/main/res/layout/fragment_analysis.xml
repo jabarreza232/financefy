@@ -217,10 +217,18 @@
 
 
                 <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/chart_analysis"
+                    android:id="@+id/pie_chart_analysis"
                     android:layout_width="match_parent"
                     android:layout_height="250dp"
-                    android:layout_marginBottom="10dp" />
+                    android:layout_marginBottom="10dp"
+                    android:visibility="gone"/>
+
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/bar_chart_analysis"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_marginBottom="10dp"
+                    />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_list"

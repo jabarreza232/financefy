@@ -80,6 +80,9 @@ public class ModelFinance implements Serializable {
         return date;
     }
 
+    public String getDefaultDate(){
+        return Tools.convertDateFormat(date);
+    }
     public void setDate(String date) {
         this.date = date;
     }
@@ -114,5 +117,17 @@ public class ModelFinance implements Serializable {
             return ((int) (Long.parseLong(max)-Long.parseLong(min)));
         }
     };
+    public static Comparator<ModelFinance> shortedPeriodLatestToLongest = new Comparator<ModelFinance>() {
+        @Override
+        public int compare(ModelFinance jc1, ModelFinance jc2) {
+            return  Tools.getDateFromDateFormat(jc2.getDefaultDate()) - Tools.getDateFromDateFormat(jc1.getDefaultDate());
+        }
+    };
 
+    public static Comparator<ModelFinance> shortedPeriodLongestToLatest = new Comparator<ModelFinance>() {
+        @Override
+        public int compare(ModelFinance jc1, ModelFinance jc2) {
+            return  Tools.getDateFromDateFormat(jc1.getDefaultDate()) - Tools.getDateFromDateFormat(jc2.getDefaultDate());
+        }
+    };
 }

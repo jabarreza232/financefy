@@ -26,18 +26,21 @@ public class ModelNestedFinance {
         this.finances = finances;
     }
 
+    public String getDefaultDate(){
+        return Tools.convertDateFormat(date);
+    }
 
     public static Comparator<ModelNestedFinance> shortedPeriodLatestToLongest = new Comparator<ModelNestedFinance>() {
         @Override
         public int compare(ModelNestedFinance jc1, ModelNestedFinance jc2) {
-            return  Integer.parseInt(Tools.convertDateFormat(jc2.getDate()).split("-")[0]) - Integer.parseInt(Tools.convertDateFormat(jc1.getDate()).split("-")[0]);
+            return  Tools.getDateFromDateFormat(jc2.getDefaultDate()) - Tools.getDateFromDateFormat(jc1.getDefaultDate());
         }
     };
 
     public static Comparator<ModelNestedFinance> shortedPeriodLongestToLatest = new Comparator<ModelNestedFinance>() {
         @Override
         public int compare(ModelNestedFinance jc1, ModelNestedFinance jc2) {
-            return  Integer.parseInt(Tools.convertDateFormat(jc1.getDate()).split("-")[0]) - Integer.parseInt(Tools.convertDateFormat(jc2.getDate()).split("-")[0]);
+            return  Tools.getDateFromDateFormat(jc1.getDefaultDate()) - Tools.getDateFromDateFormat(jc2.getDefaultDate());
         }
     };
 }

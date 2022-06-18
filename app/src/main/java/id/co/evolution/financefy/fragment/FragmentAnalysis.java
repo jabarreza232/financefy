@@ -43,16 +43,29 @@ import android.widget.Toast;
 
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LegendEntry;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.LargeValueFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -74,6 +87,7 @@ import id.co.evolution.financefy.databinding.FragmentAllBinding;
 import id.co.evolution.financefy.databinding.FragmentAnalysisBinding;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.LocalizedWeekHelper;
+import id.co.evolution.financefy.helper.MyValueFormatter;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
@@ -89,12 +103,12 @@ public class FragmentAnalysis extends Fragment {
     FragmentAnalysisBinding binding;
     ViewModelFinance viewModelFinance;
     AdapterAnalysisFinance adapter;
-    AdapterFinance.TYPE_LAYOUT_MANAGER type_layout_manager = AdapterFinance.TYPE_LAYOUT_MANAGER.GRID;
+    TYPE_CHART typeChart = TYPE_CHART.PIE_CHART;
     Dialog dialog;
     LayoutInflater inflater;
     View dialogView;
     FinanceFilter financeFilter;
-    String filterType,  filterPeriod = "Bulanan";
+    String filterType, filterPeriod = "Bulanan";
     String month;
     LocalizedWeekHelper localizedWeekHelper;
     int prevNextWeek = 0;
@@ -104,6 +118,11 @@ public class FragmentAnalysis extends Fragment {
     CallbackOnActivityResult mCallbackOnActivityResult;
     int mPositionItem;
     long date_ship_millis;
+
+    public enum TYPE_CHART {
+        PIE_CHART,
+        BAR_CHART
+    }
 
     public FragmentAnalysis() {
         // Required empty public constructor
@@ -273,6 +292,8 @@ public class FragmentAnalysis extends Fragment {
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.menu_finance, menu);
+        MenuItem item = menu.getItem(1);
+        item.setIcon(ContextCompat.getDrawable(getContext(), R.drawable.ic_baseline_bar_chart_24));
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -286,15 +307,12 @@ public class FragmentAnalysis extends Fragment {
                 // Not implemented here
                 break;
             case R.id.view_list:
-                if (type_layout_manager == AdapterFinance.TYPE_LAYOUT_MANAGER.GRID) {
-                    item.setIcon(R.drawable.ic_baseline_grid_view_24);
-                    type_layout_manager = AdapterFinance.TYPE_LAYOUT_MANAGER.VERTICAL;
-                } else if (type_layout_manager == AdapterFinance.TYPE_LAYOUT_MANAGER.VERTICAL) {
-                    item.setIcon(R.drawable.ic_baseline_format_list_bulleted_24);
-                    type_layout_manager = AdapterFinance.TYPE_LAYOUT_MANAGER.GRID;
-                }
-                if (adapter != null) {
-                    adapter.notifyDataSetChanged();
+                if (typeChart == TYPE_CHART.PIE_CHART) {
+                    item.setIcon(R.drawable.ic_baseline_bar_chart_24);
+                    typeChart = TYPE_CHART.BAR_CHART;
+                } else if (typeChart == TYPE_CHART.BAR_CHART) {
+                    item.setIcon(R.drawable.ic_baseline_pie_chart_24);
+                    typeChart = TYPE_CHART.PIE_CHART;
                 }
                 return true;
 
@@ -422,7 +440,7 @@ public class FragmentAnalysis extends Fragment {
 
 
         loadDataHeader(data);
-
+        showBarChartData(data);
         data = financeFilter.listAnalysis(data, filterType);
         adapter = new AdapterAnalysisFinance(getActivity(), data, this::showDialog);
         binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -431,9 +449,11 @@ public class FragmentAnalysis extends Fragment {
 
         binding.placeEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
 //        binding.txtType.setVisibility(adapter.getItemCount() > 0 ? View.VISIBLE : View.GONE);
-        binding.chartAnalysis.setVisibility(adapter.getItemCount() > 0 ? View.VISIBLE : View.GONE);
-        showPieChartData(data);
+//        binding.pieChartAnalysis.setVisibility(adapter.getItemCount() > 0 ? View.VISIBLE : View.GONE);
+//        showPieChartData(data);
+
     }
+
 
     private void loadDataHeader(List<ModelFinance> data) {
         long total = (financeFilter.totalIncome(data) - financeFilter.totalExpense(data));
@@ -448,7 +468,7 @@ public class FragmentAnalysis extends Fragment {
         List<LegendEntry> legendEntries = new ArrayList<>();
         for (ModelFinance modelIncome : data) {
             if (modelIncome.getTipe().contains(filterType))
-                entries.add(new PieEntry((float) modelIncome.getJumlahValue(),  Tools.calculatePercentage(modelIncome.getJumlahValue(), financeFilter.totalValueByType(data, filterType)) + "%"));
+                entries.add(new PieEntry((float) modelIncome.getJumlahValue(), Tools.calculatePercentage(modelIncome.getJumlahValue(), financeFilter.totalValueByType(data, filterType)) + "%"));
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "");
@@ -464,9 +484,9 @@ public class FragmentAnalysis extends Fragment {
         dataSet.setSelectionShift(3f);
 
         ArrayList<Integer> colors = new ArrayList<Integer>();
-        colors.add(Color.rgb(0,128,0));
-        colors.add(Color.rgb(139,0,0));
-        colors.add(Color.rgb(218,165,32));
+        colors.add(Color.rgb(0, 128, 0));
+        colors.add(Color.rgb(139, 0, 0));
+        colors.add(Color.rgb(218, 165, 32));
         colors.add(Color.rgb(0, 128, 128));
         colors.add(Color.rgb(255, 69, 0));
         colors.add(Color.rgb(46, 139, 87));
@@ -477,7 +497,7 @@ public class FragmentAnalysis extends Fragment {
             legendEntries.add(new LegendEntry(data.get(i).getKategori(), Legend.LegendForm.SQUARE, 10f, 2f, null, colors.get(i % colors.size())));
         }
 
-        Legend l = binding.chartAnalysis.getLegend();
+        Legend l = binding.pieChartAnalysis.getLegend();
         l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
         l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
         l.setOrientation(Legend.LegendOrientation.VERTICAL);
@@ -488,35 +508,214 @@ public class FragmentAnalysis extends Fragment {
         l.setTextSize(13);
 
         l.setCustom(legendEntries);
-        binding.chartAnalysis.animateXY(2000, 2000);
-        binding.chartAnalysis.getDescription().setEnabled(false);
-        binding.chartAnalysis.setCenterText(filterType);
-        binding.chartAnalysis.setCenterTextSize(17);
-        binding.chartAnalysis.setCenterTextColor(ContextCompat.getColor(getContext(), R.color.blackTextColor));
-        binding.chartAnalysis.setCenterTextTypeface(Typeface.DEFAULT_BOLD);
-        binding.chartAnalysis.setPaddingRelative(10, 10, 10, 10);
+        binding.pieChartAnalysis.animateXY(2000, 2000);
+        binding.pieChartAnalysis.getDescription().setEnabled(false);
+        binding.pieChartAnalysis.setCenterText(filterType);
+        binding.pieChartAnalysis.setCenterTextSize(17);
+        binding.pieChartAnalysis.setCenterTextColor(ContextCompat.getColor(getContext(), R.color.blackTextColor));
+        binding.pieChartAnalysis.setCenterTextTypeface(Typeface.DEFAULT_BOLD);
+        binding.pieChartAnalysis.setPaddingRelative(10, 10, 10, 10);
 
-        binding.chartAnalysis.offsetLeftAndRight(0);
-        binding.chartAnalysis.setExtraOffsets(0,0,30,0);
-        binding.chartAnalysis.getCircleBox().offset(0,0);
+        binding.pieChartAnalysis.offsetLeftAndRight(0);
+        binding.pieChartAnalysis.setExtraOffsets(0, 0, 30, 0);
+        binding.pieChartAnalysis.getCircleBox().offset(0, 0);
 
-        binding.chartAnalysis.setDrawHoleEnabled(true);
-        binding.chartAnalysis.setHoleColor(Color.WHITE);
+        binding.pieChartAnalysis.setDrawHoleEnabled(true);
+        binding.pieChartAnalysis.setHoleColor(Color.WHITE);
 
-        binding.chartAnalysis.setTransparentCircleColor(Color.WHITE);
-        binding.chartAnalysis.setTransparentCircleAlpha(110);
+        binding.pieChartAnalysis.setTransparentCircleColor(Color.WHITE);
+        binding.pieChartAnalysis.setTransparentCircleAlpha(110);
 
-        binding.chartAnalysis.setHoleRadius(58f);
-        binding.chartAnalysis.setTransparentCircleRadius(61f);
+        binding.pieChartAnalysis.setHoleRadius(58f);
+        binding.pieChartAnalysis.setTransparentCircleRadius(61f);
 
-        binding.chartAnalysis.setDrawCenterText(true);
-        binding.chartAnalysis.setEntryLabelColor(Color.WHITE);
-        binding.chartAnalysis.setRotationAngle(0);
-        // enable rotation of the binding.chartAnalysis by touch
-        binding.chartAnalysis.setRotationEnabled(true);
-        binding.chartAnalysis.setHighlightPerTapEnabled(true);
-        binding.chartAnalysis.setData(pieData);
-        binding.chartAnalysis.invalidate();
+        binding.pieChartAnalysis.setDrawCenterText(true);
+        binding.pieChartAnalysis.setEntryLabelColor(Color.WHITE);
+        binding.pieChartAnalysis.setRotationAngle(0);
+        // enable rotation of the binding.pieChartAnalysis by touch
+        binding.pieChartAnalysis.setRotationEnabled(true);
+        binding.pieChartAnalysis.setHighlightPerTapEnabled(true);
+        binding.pieChartAnalysis.setData(pieData);
+        binding.pieChartAnalysis.invalidate();
     }
 
+    private void showBarChartData(List<ModelFinance> data) {
+        float groupSpace = 0.04f;
+        float barSpace = 0.02f; // x3 DataSet
+        float barWidth = 0.28f; // x3 DataSet
+        // (0.2 + 0.03) * 4 + 0.08 = 1.00 -> interval per "group"
+
+        List<ModelNestedFinance> listNestedFinance = financeFilter.filterNestedFinance(data);
+//        float barWidth = (1 - groupSpace) / listNestedFinance.size() - barSpace; // x3 DataSet
+        listNestedFinance = financeFilter.filterPeriod("terlama", listNestedFinance);
+        ArrayList<BarEntry> entriesCompanyResults = new ArrayList<>();
+        ArrayList<BarEntry> entriesBonus = new ArrayList<>();
+        ArrayList<BarEntry> entriesSalary = new ArrayList<>();
+
+
+        List<IBarDataSet> barDataSets = new ArrayList<>();
+        List<String> listDate = new ArrayList<>();
+
+
+        for (int i = 0; i < listNestedFinance.size(); i++) {
+            ModelNestedFinance modelNestedFinance = listNestedFinance.get(i);
+            List<ModelFinance> listData = financeFilter.listAnalysis(modelNestedFinance.getFinances(), filterType);
+
+            listDate.add(modelNestedFinance.getDefaultDate());
+            float fGaji=0;
+            float fBonus=0;
+            float fHasilUsaha=0;
+            int dateHasilUsaha=Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate());
+            int dateGaji=Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate());
+            int dateBonus=Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate());
+
+            for (ModelFinance modelIncome : listData) {
+                Log.e("cek_date", modelNestedFinance.getDefaultDate() + " : " + modelIncome.getDefaultDate() + " : " + modelIncome.getKategori() + " : " + modelIncome.getJumlahValue());
+                if (modelIncome.getKategori().contains("Hasil Usaha")) {
+                    fHasilUsaha = (float) modelIncome.getJumlahValue();
+                    dateHasilUsaha = Tools.getDateFromDateFormat(modelIncome.getDefaultDate());
+                }
+                if (modelIncome.getKategori().contains("Gaji")) {
+                    fGaji = (float) modelIncome.getJumlahValue();
+                    dateGaji = Tools.getDateFromDateFormat(modelIncome.getDefaultDate());
+                }
+
+                if (modelIncome.getKategori().contains("Bonus")) {
+                    fBonus = (float) modelIncome.getJumlahValue();
+                    dateBonus = Tools.getDateFromDateFormat(modelIncome.getDefaultDate());
+                }
+           }
+            entriesCompanyResults.add(new BarEntry(dateHasilUsaha, fHasilUsaha, "Hasil Usaha"));
+            entriesBonus.add(new BarEntry(dateBonus, fBonus, "Bonus"));
+            entriesSalary.add(new BarEntry(dateGaji,fGaji, "Gaji"));
+
+
+//            try {
+//
+//            } catch (ConcurrentModificationException e) {
+//                e.printStackTrace();
+//
+//            }
+//            for (BarEntry barEntry : entriesBonus) {
+//                int x = (int) barEntry.getX();
+//                Log.e("TAG", "barEntryBonus: " + x + " : " + Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()));
+//                if (Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()) != x)
+//                    entriesTempBonus.add(new BarEntry(Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()), 0, "Bonus"));
+//
+//            }
+//            for (BarEntry barEntry : entriesCompanyResults) {
+//                int x = (int) barEntry.getX();
+//                Log.e("TAG", "barEntryCompanyResult: " + x + " : " + Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()));
+//
+//                if (Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()) != x)
+//                    entriesTempCompanyResults.add(new BarEntry(Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()), 0, "Hasil Usaha"));
+//            }
+//            for (BarEntry barEntry : entriesSalary) {
+//                int x = (int) barEntry.getX();
+//                if (Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()) != x)
+//                    entriesTempSalary.add(new BarEntry(Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()), 0, "Gaji"));
+//            }
+        }
+
+//        entriesBonus.addAll(entriesTempBonus);
+//        entriesSalary.addAll(entriesTempSalary);
+//        entriesCompanyResults.addAll(entriesTempCompanyResults);
+
+        BarDataSet barDataSetCompanyResult = new BarDataSet(entriesCompanyResults, "Hasil Usaha");
+        BarDataSet barDataSetBonus = new BarDataSet(entriesBonus, "Bonus");
+        BarDataSet barDataSetSalary = new BarDataSet(entriesSalary, "Gaji");
+
+
+        barDataSetBonus.setColor(ContextCompat.getColor(getContext(), R.color.blueColor));
+        barDataSetCompanyResult.setColor(ContextCompat.getColor(getContext(), R.color.red));
+        barDataSetSalary.setColor(ContextCompat.getColor(getContext(), R.color.colorTextkuning));
+
+
+        barDataSets.add(barDataSetCompanyResult);
+        barDataSets.add(barDataSetBonus);
+        barDataSets.add(barDataSetSalary);
+        //fit the data into a bar
+//        for (int i = 0; i < valueList.size(); i++) {
+//            BarEntry barEntry = new BarEntry(i, valueList.get(i).floatValue());
+//            entries.add(barEntry);
+//        }
+
+//        BarDataSet barDataSet = new BarDataSet(entries, filterType);
+//        barDataSet.setDrawValues(false);
+//        barDataSet.setValueTextSize(13);
+
+
+        BarData barData = new BarData(barDataSets);
+        barData.setValueFormatter(new LargeValueFormatter());
+        barData.setValueTextSize(13);
+        binding.barChartAnalysis.setData(barData);
+        // scaling can now only be done on x- and y-axis separately
+        binding.barChartAnalysis.setPinchZoom(false);
+
+        binding.barChartAnalysis.setDrawBarShadow(false);
+
+        binding.barChartAnalysis.setDrawGridBackground(false);
+
+
+        binding.barChartAnalysis.getDescription().setEnabled(false);
+        Legend l = binding.barChartAnalysis.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.LEFT);
+        l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        l.setDrawInside(false);
+        l.setForm(Legend.LegendForm.SQUARE);
+        l.setFormSize(9f);
+        l.setTextSize(11f);
+        l.setXEntrySpace(4f);
+
+        XAxis xAxis = binding.barChartAnalysis.getXAxis();
+        xAxis.setGranularity(1f);
+        xAxis.setCenterAxisLabels(true);
+        xAxis.setEnabled(true);
+        xAxis.setDrawGridLines(false);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setAxisMaximum(Tools.getDateFromDateFormat(listDate.get(0)));
+        xAxis.setAxisMaximum(Tools.getDateFromDateFormat(listDate.get(listDate.size()-1)));
+//        xAxis.setLabelCount(listDate.size(),false);
+        xAxis.setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                Log.e("cek_value", value + "");
+                String date = "";
+                for (String hashDate : listDate) {
+                    if (Integer.parseInt(hashDate.split("-")[0]) == (int) value) {
+                        date = Tools.convertDateFormatAnalysis(hashDate);
+                    }
+                }
+                return date;
+            }
+        });
+//        binding.barChartAnalysis.setDrawValueAboveBar(false);
+        binding.barChartAnalysis.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                Log.e("cek_entry", (String) e.getData());
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
+        // specify the width each bar should have
+        binding.barChartAnalysis.getBarData().setBarWidth(barWidth);
+        binding.barChartAnalysis.getXAxis().setAxisMinimum(Tools.getDateFromDateFormat(listDate.get(0)));
+        // restrict the x-axis range
+        binding.barChartAnalysis.getXAxis().setAxisMaximum(Tools.getDateFromDateFormat(listDate.get(0)) + binding.barChartAnalysis.getBarData().getGroupWidth(groupSpace, barSpace) * listDate.size());
+        binding.barChartAnalysis.groupBars(Tools.getDateFromDateFormat(listDate.get(0)), groupSpace, barSpace);
+
+
+        YAxis leftAxis = binding.barChartAnalysis.getAxisLeft();
+
+        leftAxis.setDrawGridLines(false);
+        leftAxis.setSpaceTop(35f);
+        leftAxis.setAxisMinimum(0f); // this replaces setStartAtZero(true)
+        binding.barChartAnalysis.getAxisRight().setEnabled(false);
+        binding.barChartAnalysis.invalidate();
+    }
 }
