@@ -7,8 +7,10 @@ import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
@@ -18,7 +20,8 @@ public class FinanceFilter {
     public List<ModelFilter> filterType = new ArrayList<>();
     public List<ModelFilter> filterNominal = new ArrayList<>();
     public List<ModelFilter> filterPeriod = new ArrayList<>();
-
+    public HashMap<String, String>mapIncome=new HashMap<>();
+    public HashMap<String, String>mapExpense=new HashMap<>();
     public FinanceFilter() {
         setUpFilter();
     }
@@ -62,6 +65,18 @@ public class FinanceFilter {
 
         filterPeriod.add(new ModelFilter("Mingguan"));
         filterPeriod.add(new ModelFilter("Bulanan"));
+
+        mapIncome.put("hasil_usaha","Hasil Usaha");
+        mapIncome.put("bonus","Bonus");
+        mapIncome.put("gaji","Gaji");
+
+        mapExpense.put("belanja_umum","Belanja Umum");
+        mapExpense.put("makanan","Makanan");
+        mapExpense.put("pulsa_hp","Pulsa HP");
+        mapExpense.put("transportasi","Transportasi");
+        mapExpense.put("tagihan","Tagihan");
+        mapExpense.put("paket_internet","Paket Internet");
+
     }
 
     public void resetFilter() {

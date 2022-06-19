@@ -228,7 +228,7 @@ public class Tools {
 
     public static String convertDateFormatAnalysis(String date) {
         final String OLD_FORMAT = "dd-MM-yyyy";
-        final String NEW_FORMAT = "dd MMM yyyy";
+        final String NEW_FORMAT = "dd MMM";
 
 // August 12, 2010
         String newDateString;

@@ -5,8 +5,11 @@
     <color name="colorAccent">#0960CA</color>
     <color name="colorDefaultText">#808080</color>
     <color name="colorText">#DE595E</color>
-    <color name="colorTextkuning">#ffea00</color>
-    <color name="colorTextbiru">#29B6F6</color>
+    <color name="colorTextYellow">#ffea00</color>
+    <color name="colorTextBlue">#29B6F6</color>
+    <color name="colorTextGreen">#0E9713</color>
+    <color name="colorTextOrange">#EC4009</color>
+
     <!-- dots inactive colors -->
     <color name="colorGrey50">#B4B1B1</color>
     <color name="colorGrey30">#D6D4D4</color>

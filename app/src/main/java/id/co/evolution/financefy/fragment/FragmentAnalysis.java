@@ -151,7 +151,7 @@ public class FragmentAnalysis extends Fragment {
         today.get(Calendar.MONTH);
         prevNextMonth = Calendar.getInstance();
         date_ship_millis = today.getTimeInMillis();
-        filterType = "Pemasukan";
+        filterType = "Pengeluaran";
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
 
@@ -540,7 +540,7 @@ public class FragmentAnalysis extends Fragment {
     }
 
     private void showBarChartData(List<ModelFinance> data) {
-        float groupSpace = 0.04f;
+        float groupSpace = 0.08f;
         float barSpace = 0.02f; // x3 DataSet
         float barWidth = 0.28f; // x3 DataSet
         // (0.2 + 0.03) * 4 + 0.08 = 1.00 -> interval per "group"
@@ -548,106 +548,144 @@ public class FragmentAnalysis extends Fragment {
         List<ModelNestedFinance> listNestedFinance = financeFilter.filterNestedFinance(data);
 //        float barWidth = (1 - groupSpace) / listNestedFinance.size() - barSpace; // x3 DataSet
         listNestedFinance = financeFilter.filterPeriod("terlama", listNestedFinance);
-        ArrayList<BarEntry> entriesCompanyResults = new ArrayList<>();
-        ArrayList<BarEntry> entriesBonus = new ArrayList<>();
-        ArrayList<BarEntry> entriesSalary = new ArrayList<>();
 
 
-        List<IBarDataSet> barDataSets = new ArrayList<>();
         List<String> listDate = new ArrayList<>();
 
+        List<IBarDataSet> barDataSetsIncome = new ArrayList<>();
+        List<IBarDataSet> barDataSetsExpense = new ArrayList<>();
 
-        for (int i = 0; i < listNestedFinance.size(); i++) {
-            ModelNestedFinance modelNestedFinance = listNestedFinance.get(i);
-            List<ModelFinance> listData = financeFilter.listAnalysis(modelNestedFinance.getFinances(), filterType);
+        if (filterType.equalsIgnoreCase("Pemasukan")){
+            ArrayList<BarEntry> entriesCompanyResults = new ArrayList<>();
+            ArrayList<BarEntry> entriesBonus = new ArrayList<>();
+            ArrayList<BarEntry> entriesSalary = new ArrayList<>();
 
-            listDate.add(modelNestedFinance.getDefaultDate());
-            float fGaji=0;
-            float fBonus=0;
-            float fHasilUsaha=0;
-            int dateHasilUsaha=Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate());
-            int dateGaji=Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate());
-            int dateBonus=Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate());
+            for (int i = 0; i < listNestedFinance.size(); i++) {
+                ModelNestedFinance modelNestedFinance = listNestedFinance.get(i);
+                List<ModelFinance> listData = financeFilter.listAnalysis(modelNestedFinance.getFinances(), filterType);
 
-            for (ModelFinance modelIncome : listData) {
-                Log.e("cek_date", modelNestedFinance.getDefaultDate() + " : " + modelIncome.getDefaultDate() + " : " + modelIncome.getKategori() + " : " + modelIncome.getJumlahValue());
-                if (modelIncome.getKategori().contains("Hasil Usaha")) {
-                    fHasilUsaha = (float) modelIncome.getJumlahValue();
-                    dateHasilUsaha = Tools.getDateFromDateFormat(modelIncome.getDefaultDate());
+                listDate.add(modelNestedFinance.getDefaultDate());
+                float fGaji=0;
+                float fBonus=0;
+                float fHasilUsaha=0;
+
+                for (ModelFinance modelIncome : listData) {
+                    Log.e("cek_date", modelNestedFinance.getDefaultDate() + " : " + modelIncome.getDefaultDate() + " : " + modelIncome.getKategori() + " : " + modelIncome.getJumlahValue());
+                    if (modelIncome.getKategori().contains(financeFilter.mapIncome.get("hasil_usaha"))) {
+                        fHasilUsaha = (float) modelIncome.getJumlahValue();
+                    }
+                    if (modelIncome.getKategori().contains(financeFilter.mapIncome.get("gaji"))) {
+                        fGaji = (float) modelIncome.getJumlahValue();
+                    }
+
+                    if (modelIncome.getKategori().contains(financeFilter.mapIncome.get("bonus"))) {
+                        fBonus = (float) modelIncome.getJumlahValue();
+                    }
                 }
-                if (modelIncome.getKategori().contains("Gaji")) {
-                    fGaji = (float) modelIncome.getJumlahValue();
-                    dateGaji = Tools.getDateFromDateFormat(modelIncome.getDefaultDate());
+
+                entriesCompanyResults.add(new BarEntry(i, fHasilUsaha, financeFilter.mapIncome.get("hasil_usaha")));
+                entriesBonus.add(new BarEntry(i, fBonus, financeFilter.mapIncome.get("bonus")));
+                entriesSalary.add(new BarEntry(i,fGaji, financeFilter.mapIncome.get("gaji")));
+            }
+
+            BarDataSet barDataSetCompanyResult = new BarDataSet(entriesCompanyResults, financeFilter.mapIncome.get("hasil_usaha"));
+            BarDataSet barDataSetBonus = new BarDataSet(entriesBonus, financeFilter.mapIncome.get("bonus"));
+            BarDataSet barDataSetSalary = new BarDataSet(entriesSalary, financeFilter.mapIncome.get("gaji"));
+
+
+            barDataSetBonus.setColor(ContextCompat.getColor(getContext(), R.color.blueColor));
+            barDataSetCompanyResult.setColor(ContextCompat.getColor(getContext(), R.color.red));
+            barDataSetSalary.setColor(ContextCompat.getColor(getContext(), R.color.colorTextYellow));
+
+            barDataSetsIncome.add(barDataSetCompanyResult);
+            barDataSetsIncome.add(barDataSetBonus);
+            barDataSetsIncome.add(barDataSetSalary);
+        }else{
+            ArrayList<BarEntry> entriesGeneralShopping = new ArrayList<>();
+            ArrayList<BarEntry> entriesFood = new ArrayList<>();
+            ArrayList<BarEntry> entriesPulse = new ArrayList<>();
+            ArrayList<BarEntry> entriesTransportation = new ArrayList<>();
+            ArrayList<BarEntry> entriesBill = new ArrayList<>();
+            ArrayList<BarEntry> entriesInternetPackages = new ArrayList<>();
+             barSpace = 0.02f; // x3 DataSet
+             barWidth = 0.14f; // x3 DataSet
+            for (int i = 0; i < listNestedFinance.size(); i++) {
+                ModelNestedFinance modelNestedFinance = listNestedFinance.get(i);
+                List<ModelFinance> listData = financeFilter.listAnalysis(modelNestedFinance.getFinances(), filterType);
+
+                listDate.add(modelNestedFinance.getDefaultDate());
+                float fGeneralShopping=0,fFood=0,fPulse=0,fTransportation=0,fBill=0,fInternetPackages=0;
+
+
+                for (ModelFinance modelExpense : listData) {
+                    Log.e("cek_date", modelNestedFinance.getDefaultDate() + " : " + modelExpense.getDefaultDate() + " : " + modelExpense.getKategori() + " : " + modelExpense.getJumlahValue());
+                    if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("belanja_umum"))) {
+                        fGeneralShopping = (float) modelExpense.getJumlahValue();
+                    }
+                    if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("makanan"))) {
+                        fFood = (float) modelExpense.getJumlahValue();
+                    }
+
+                    if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("pulsa_hp"))) {
+                        fPulse = (float) modelExpense.getJumlahValue();
+                    }
+                    if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("transportasi"))) {
+                        fTransportation = (float) modelExpense.getJumlahValue();
+                    }
+                    if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("paket_internet"))) {
+                        fInternetPackages = (float) modelExpense.getJumlahValue();
+                    }
+                    if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("tagihan"))) {
+                        fBill = (float) modelExpense.getJumlahValue();
+                    }
                 }
 
-                if (modelIncome.getKategori().contains("Bonus")) {
-                    fBonus = (float) modelIncome.getJumlahValue();
-                    dateBonus = Tools.getDateFromDateFormat(modelIncome.getDefaultDate());
-                }
-           }
-            entriesCompanyResults.add(new BarEntry(dateHasilUsaha, fHasilUsaha, "Hasil Usaha"));
-            entriesBonus.add(new BarEntry(dateBonus, fBonus, "Bonus"));
-            entriesSalary.add(new BarEntry(dateGaji,fGaji, "Gaji"));
+                entriesGeneralShopping.add(new BarEntry(i, fGeneralShopping, financeFilter.mapExpense.get("belanja_umum")));
+                entriesFood.add(new BarEntry(i, fFood, financeFilter.mapExpense.get("makanan")));
+                entriesPulse.add(new BarEntry(i, fPulse, financeFilter.mapExpense.get("pulsa_hp")));
+                entriesTransportation.add(new BarEntry(i, fTransportation, financeFilter.mapExpense.get("transportasi")));
+                entriesBill.add(new BarEntry(i, fBill, financeFilter.mapExpense.get("tagihan")));
+                entriesInternetPackages.add(new BarEntry(i,fInternetPackages, financeFilter.mapExpense.get("paket_internet")));
+            }
+
+            BarDataSet barDataSetGeneralShopping = new BarDataSet(entriesGeneralShopping, financeFilter.mapExpense.get("belanja_umum"));
+            BarDataSet barDataSetFood = new BarDataSet(entriesFood, financeFilter.mapExpense.get("makanan"));
+            BarDataSet barDataSetPulse = new BarDataSet(entriesPulse, financeFilter.mapExpense.get("pulsa_hp"));
+            BarDataSet barDataSetTransportation = new BarDataSet(entriesTransportation, financeFilter.mapExpense.get("transportasi"));
+            BarDataSet barDataSetBill = new BarDataSet(entriesBill, financeFilter.mapExpense.get("tagihan"));
+            BarDataSet barDataSetInternetPackages = new BarDataSet(entriesInternetPackages, financeFilter.mapExpense.get("paket_internet"));
 
 
-//            try {
-//
-//            } catch (ConcurrentModificationException e) {
-//                e.printStackTrace();
-//
-//            }
-//            for (BarEntry barEntry : entriesBonus) {
-//                int x = (int) barEntry.getX();
-//                Log.e("TAG", "barEntryBonus: " + x + " : " + Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()));
-//                if (Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()) != x)
-//                    entriesTempBonus.add(new BarEntry(Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()), 0, "Bonus"));
-//
-//            }
-//            for (BarEntry barEntry : entriesCompanyResults) {
-//                int x = (int) barEntry.getX();
-//                Log.e("TAG", "barEntryCompanyResult: " + x + " : " + Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()));
-//
-//                if (Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()) != x)
-//                    entriesTempCompanyResults.add(new BarEntry(Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()), 0, "Hasil Usaha"));
-//            }
-//            for (BarEntry barEntry : entriesSalary) {
-//                int x = (int) barEntry.getX();
-//                if (Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()) != x)
-//                    entriesTempSalary.add(new BarEntry(Tools.getDateFromDateFormat(modelNestedFinance.getDefaultDate()), 0, "Gaji"));
-//            }
+            barDataSetGeneralShopping.setColor(ContextCompat.getColor(getContext(), R.color.blueColor));
+            barDataSetFood.setColor(ContextCompat.getColor(getContext(), R.color.red));
+            barDataSetPulse.setColor(ContextCompat.getColor(getContext(), R.color.colorTextYellow));
+            barDataSetTransportation.setColor(ContextCompat.getColor(getContext(), R.color.colorTextGreen));
+            barDataSetBill.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
+            barDataSetInternetPackages.setColor(ContextCompat.getColor(getContext(), R.color.colorTextOrange));
+
+
+            barDataSetsExpense.add(barDataSetGeneralShopping);
+            barDataSetsExpense.add(barDataSetFood);
+            barDataSetsExpense.add(barDataSetPulse);
+            barDataSetsExpense.add(barDataSetTransportation);
+            barDataSetsExpense.add(barDataSetBill);
+            barDataSetsExpense.add(barDataSetInternetPackages);
         }
 
-//        entriesBonus.addAll(entriesTempBonus);
-//        entriesSalary.addAll(entriesTempSalary);
-//        entriesCompanyResults.addAll(entriesTempCompanyResults);
-
-        BarDataSet barDataSetCompanyResult = new BarDataSet(entriesCompanyResults, "Hasil Usaha");
-        BarDataSet barDataSetBonus = new BarDataSet(entriesBonus, "Bonus");
-        BarDataSet barDataSetSalary = new BarDataSet(entriesSalary, "Gaji");
 
 
-        barDataSetBonus.setColor(ContextCompat.getColor(getContext(), R.color.blueColor));
-        barDataSetCompanyResult.setColor(ContextCompat.getColor(getContext(), R.color.red));
-        barDataSetSalary.setColor(ContextCompat.getColor(getContext(), R.color.colorTextkuning));
 
 
-        barDataSets.add(barDataSetCompanyResult);
-        barDataSets.add(barDataSetBonus);
-        barDataSets.add(barDataSetSalary);
-        //fit the data into a bar
-//        for (int i = 0; i < valueList.size(); i++) {
-//            BarEntry barEntry = new BarEntry(i, valueList.get(i).floatValue());
-//            entries.add(barEntry);
-//        }
 
-//        BarDataSet barDataSet = new BarDataSet(entries, filterType);
-//        barDataSet.setDrawValues(false);
-//        barDataSet.setValueTextSize(13);
+        BarData barData;
 
+        if(filterType.equalsIgnoreCase("Pemasukan"))
+            barData= new BarData(barDataSetsIncome);
+        else
+            barData= new BarData(barDataSetsExpense);
 
-        BarData barData = new BarData(barDataSets);
         barData.setValueFormatter(new LargeValueFormatter());
-        barData.setValueTextSize(13);
+        barData.setValueTextSize(11);
         binding.barChartAnalysis.setData(barData);
         // scaling can now only be done on x- and y-axis separately
         binding.barChartAnalysis.setPinchZoom(false);
@@ -667,26 +705,32 @@ public class FragmentAnalysis extends Fragment {
         l.setFormSize(9f);
         l.setTextSize(11f);
         l.setXEntrySpace(4f);
+        l.setWordWrapEnabled(true);
+        l.setYOffset(6f);
+
 
         XAxis xAxis = binding.barChartAnalysis.getXAxis();
         xAxis.setGranularity(1f);
         xAxis.setCenterAxisLabels(true);
-        xAxis.setEnabled(true);
-        xAxis.setDrawGridLines(false);
+
+        xAxis.setDrawGridLines(true);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setAxisMaximum(Tools.getDateFromDateFormat(listDate.get(0)));
-        xAxis.setAxisMaximum(Tools.getDateFromDateFormat(listDate.get(listDate.size()-1)));
-//        xAxis.setLabelCount(listDate.size(),false);
+
+        xAxis.setLabelCount(listDate.size());
         xAxis.setValueFormatter(new ValueFormatter() {
             @Override
             public String getFormattedValue(float value) {
                 Log.e("cek_value", value + "");
                 String date = "";
-                for (String hashDate : listDate) {
-                    if (Integer.parseInt(hashDate.split("-")[0]) == (int) value) {
-                        date = Tools.convertDateFormatAnalysis(hashDate);
-                    }
+                if(value>-1&&value<listDate.size()){
+                    date=Tools.convertDateFormatAnalysis(listDate.get((int)value));
                 }
+
+//                for (String hashDate : listDate) {
+//                    if (Integer.parseInt(hashDate.split("-")[0]) == ((int) value)) {
+//                        date = Tools.convertDateFormatAnalysis(hashDate);
+//                    }
+//                }
                 return date;
             }
         });
@@ -704,10 +748,11 @@ public class FragmentAnalysis extends Fragment {
         });
         // specify the width each bar should have
         binding.barChartAnalysis.getBarData().setBarWidth(barWidth);
-        binding.barChartAnalysis.getXAxis().setAxisMinimum(Tools.getDateFromDateFormat(listDate.get(0)));
+        binding.barChartAnalysis.getXAxis().setAxisMinimum(0);
+//        Tools.getDateFromDateFormat(listDate.get(0))
         // restrict the x-axis range
-        binding.barChartAnalysis.getXAxis().setAxisMaximum(Tools.getDateFromDateFormat(listDate.get(0)) + binding.barChartAnalysis.getBarData().getGroupWidth(groupSpace, barSpace) * listDate.size());
-        binding.barChartAnalysis.groupBars(Tools.getDateFromDateFormat(listDate.get(0)), groupSpace, barSpace);
+        binding.barChartAnalysis.getXAxis().setAxisMaximum(0 + binding.barChartAnalysis.getBarData().getGroupWidth(groupSpace, barSpace) * listDate.size());
+        binding.barChartAnalysis.groupBars(0, groupSpace, barSpace);
 
 
         YAxis leftAxis = binding.barChartAnalysis.getAxisLeft();
