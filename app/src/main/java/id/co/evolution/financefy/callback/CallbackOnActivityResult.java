@@ -46,6 +46,7 @@ public class CallbackOnActivityResult implements DefaultLifecycleObserver {
     public void updateDataFinance(List<ModelFinance> data, int position) {
         Intent i = new Intent(mContext, UpdateFinance.class);
         i.putExtra("id", data.get(position).getId());
+        i.putExtra("position",position);
         mStartForResult.launch(i);
     }
 

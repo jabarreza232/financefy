@@ -1,39 +1,13 @@
 package id.co.evolution.financefy.fragment;
 
-import static android.app.Activity.RESULT_OK;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
-import androidx.core.content.ContextCompat;
-import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-
-import androidx.appcompat.app.AlertDialog;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -44,43 +18,42 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.google.gson.Gson;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
-import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.activity.UpdateFinance;
 import id.co.evolution.financefy.adapter.AdapterFilter;
 import id.co.evolution.financefy.adapter.AdapterFinance;
 import id.co.evolution.financefy.asynctask.FilterMaxMonthAsynctask;
 import id.co.evolution.financefy.asynctask.FilterMinYearAsynctask;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAllBinding;
-import id.co.evolution.financefy.db.FinanceDB;
-import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.LocalizedWeekHelper;
 import id.co.evolution.financefy.helper.Tools;
@@ -88,7 +61,6 @@ import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
-import id.co.evolution.financefy.viewmodel.ViewModelFactory;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 @AndroidEntryPoint
@@ -166,22 +138,24 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 prevNextMonth.get(Calendar.YEAR);
                 prevNextMonth.add(Calendar.MONTH, -1);
                 long date_ship_milisecond = prevNextMonth.getTimeInMillis();
-
+                this.date_ship_millis = date_ship_milisecond;
                 loadDataFinanceByMonth(date_ship_milisecond);
             } else {
 
-                prevNextWeek =prevNextWeek -7;
-
-                nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay( prevNextWeek) <= today.getTimeInMillis();
+                prevNextWeek = prevNextWeek - 7;
+                /*TODO
+                    jika sudah sampai minggu saat ini di bulan sekarang  maka tombol next tidak berfungsi
+                 */
+                nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
                 if (nextWeekEnabled)
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
                 binding.btnNext.setEnabled(nextWeekEnabled);
-                binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek-7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
+                binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByTypeAndWeek(filterType,localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek-7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(filterType, localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -195,7 +169,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 prevNextMonth.get(Calendar.YEAR);
                 prevNextMonth.add(Calendar.MONTH, 1);
                 long date_ship_milisecond = prevNextMonth.getTimeInMillis();
-
+                this.date_ship_millis = date_ship_milisecond;
                 loadDataFinanceByMonth(date_ship_milisecond);
             } else {
                 prevNextWeek = prevNextWeek + 7;
@@ -209,7 +183,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByTypeAndWeek(filterType,localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(filterType, localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -247,6 +221,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                         prevNextMonth.set(Calendar.YEAR, selectedYear);
                         prevNextMonth.set(Calendar.MONTH, selectedMonth);
                         long date_ship_milis = calendar.getTimeInMillis();
+                        FragmentAll.this.date_ship_millis = date_ship_milis;
                         financeFilter.resetFilter();
                         loadDataFinanceByMonth(date_ship_milis);
                     }
@@ -397,7 +372,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                         binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
                 }
                 binding.btnNext.setEnabled(nextWeekEnabled);
-                viewModelFinance.getFinanceByWeek(localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek-7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+                viewModelFinance.getFinanceByWeek(localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
                     @Override
                     public void onChanged(List<ModelFinance> modelFinances) {
                         if (modelFinances != null) loadData(modelFinances);
@@ -421,19 +396,22 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                         binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
                 }
                 binding.btnNext.setEnabled(nextWeekEnabled);
-                viewModelFinance.getFinanceByTypeAndWeek(type, localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek-7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(type, localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) loadData(modelFinances);
                 });
             }
         }
 
         if (filterPeriod.equalsIgnoreCase("bulanan")) {
-            binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(today.getTimeInMillis()));
+            binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_millis));
             binding.placeMonth.setEnabled(true);
-            binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
-            binding.btnNext.setEnabled(false);
+            if (date_ship_millis < today.getTimeInMillis())
+                binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+            else
+                binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
+            binding.btnNext.setEnabled(date_ship_millis < today.getTimeInMillis());
         } else {
-            binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek-7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek )));
+            binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
             binding.placeMonth.setEnabled(false);
         }
     }
@@ -458,8 +436,8 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                     loadData(modelFinances);
                 }
             });
-        }else{
-            viewModelFinance.getFinanceByTypeAndMonth(filterType,Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
+        } else {
+            viewModelFinance.getFinanceByTypeAndMonth(filterType, Tools.getFormattedMonthSimple(date_ship_milis)).observe(getViewLifecycleOwner(), modelFinances -> {
                 if (modelFinances != null) {
                     loadData(modelFinances);
                 }
@@ -488,6 +466,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
         binding.placeEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
 
     }
+
     private void loadDataHeader(List<ModelFinance> data) {
         long total = (financeFilter.totalIncome(data) - financeFilter.totalExpense(data));
         binding.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data)));
@@ -499,7 +478,12 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     @Override
     public void result(Intent intent) {
         ModelFinance modelFinance = (ModelFinance) intent.getSerializableExtra("finance");
-        financeData.set(mPositionItem, modelFinance);
+        for (int i = 0; i < financeData.size(); i++) {
+            if (financeData.get(i).getId() == modelFinance.getId())
+                financeData.set(i, modelFinance);
+        }
+
+        Log.e("TAG", "result: " + new Gson().toJson(financeData));
         loadData(financeData);
     }
 }

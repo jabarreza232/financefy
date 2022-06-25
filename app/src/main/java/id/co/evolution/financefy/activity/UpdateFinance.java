@@ -65,6 +65,7 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
     DialogCalculator dialogCalculator;
     //    @Inject
 //    ViewModelFactory viewModelFactory;
+    int position;
 
     @Inject
     FinanceRepository financeRepository;
@@ -81,7 +82,7 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
-
+        position = getIntent().getIntExtra("position",0);
         viewModelFinance.getFinanceById(getIntent().getIntExtra("id", 0)).observe(this, modelFinance -> {
             this.modelFinance = modelFinance;
             loadData();
@@ -203,9 +204,9 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
                         break;
 
                 }
-                if (!category.isEmpty()) {
+                if (!category.isEmpty())
                     binding.txtKategori.setText(category);
-                }
+
             });
         } else {
             kategori = getResources().getStringArray(R.array.category_pemasukan);
@@ -267,6 +268,7 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
         dialog.show();
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -277,7 +279,7 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
                 showDialogTipe();
                 break;
             case R.id.btn_calculator:
-                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
+                dialogCalculator = new DialogCalculator(this, getLayoutInflater(),Tools.convertCurrencyToValue(jumlah), result -> {
                     jumlah = Tools.convertToCurrency(result);
                     binding.etAmount.setText(jumlah);
                 });
@@ -315,6 +317,7 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
                                 viewModelFinance.inputUpdateFinance("Update", model);
                                 Intent intent = new Intent();
                                 intent.putExtra("finance", model);
+                                intent.putExtra("position",position);
                                 setResult(RESULT_OK, intent);
                                 finish();
                             })

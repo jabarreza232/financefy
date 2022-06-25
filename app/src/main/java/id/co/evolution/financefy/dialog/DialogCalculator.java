@@ -52,12 +52,21 @@ public class DialogCalculator {
         this.dialogInterfaceCallback = dialogInterfaceCallback;
         initCalculator();
     }
+    public DialogCalculator(Context context, LayoutInflater layoutInflater,String result, DialogInterfaceCallback dialogInterfaceCallback) {
+        this.context = context;
+        this.inflater = layoutInflater;
+        this.dialogInterfaceCallback = dialogInterfaceCallback;
+        this.result = result;
+        initCalculator();
+    }
 
     public void initCalculator() {
         dialog = new Dialog(context);
         dialogView = inflater.inflate(R.layout.dialog_calculator, null);
         dialog.setContentView(dialogView);
         binding = DataBindingUtil.bind(dialogView);
+        if(!result.equals("0"))
+        binding.etAmount.setText(result);
 
         AdapterCalculator adapterCalculator = new AdapterCalculator(context, DummyCalculator.getDataCalculator(), (data, position) -> {
             if (result.equals("0") && !data.get(position).equals("0"))
@@ -258,7 +267,7 @@ public class DialogCalculator {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                             formatted = formatted.replaceAll(",00", "");
                         }
-                        formatted = Tools.currencyConvertToValue(formatted);
+                        formatted = Tools.convertCurrencyToValue(formatted);
                         result = formatted;
                         binding.etAmount.setText(formatted);
                         binding.etAmount.setSelection(formatted.length());

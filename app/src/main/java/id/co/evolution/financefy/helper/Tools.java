@@ -120,7 +120,7 @@ public class Tools {
         return s.substring(s.length() - 1);
     }
 
-    public static String currencyConvertToValue(String value) {
+    public static String convertCurrencyToValue(String value) {
         return value.replaceAll("[Rp,.]", "");
     }
 
@@ -226,9 +226,11 @@ public class Tools {
     }
 
 
-    public static String convertDateFormatAnalysis(String date) {
+    public static String convertDateFormatAnalysis(int size,String date) {
         final String OLD_FORMAT = "dd-MM-yyyy";
-        final String NEW_FORMAT = "dd MMM";
+        final String NEW_FORMAT;
+
+        NEW_FORMAT = size<=10?"dd MMM":"dd";
 
 // August 12, 2010
         String newDateString;
