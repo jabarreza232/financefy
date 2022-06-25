@@ -15,11 +15,13 @@ import id.co.evolution.financefy.R;
 
 public class MyMarkView extends MarkerView {
     private final TextView tvContent;
+    private final TextView tvTitle;
 
     public MyMarkView(Context context, int layoutResource) {
         super(context, layoutResource);
 
         tvContent = findViewById(R.id.tvContent);
+        tvTitle = findViewById(R.id.tvTitle);
     }
 
     // runs every time the MarkerView is redrawn, can be used to update the
@@ -31,10 +33,12 @@ public class MyMarkView extends MarkerView {
         if (e instanceof CandleEntry) {
 
             CandleEntry ce = (CandleEntry) e;
-
-            tvContent.setText(ce.getData() +"\n"+Utils.formatNumber(ce.getHigh(), 0, true));
+            tvTitle.setText((String)ce.getData());
+            tvContent.setText(Tools.convertToCurrency(ce.getHigh()));
         } else {
-            tvContent.setText(e.getData() +"\n"+Utils.formatNumber(e.getY(), 0, true));
+            tvTitle.setText((String)e.getData());
+//            tvContent.setText(Utils.formatNumber(e.getY(), 0, true));
+            tvContent.setText(Tools.convertToCurrency(e.getY()));
         }
 
         super.refreshContent(e, highlight);
