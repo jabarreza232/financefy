@@ -33,14 +33,28 @@ public class ModelNestedFinance {
     public static Comparator<ModelNestedFinance> shortedPeriodLatestToLongest = new Comparator<ModelNestedFinance>() {
         @Override
         public int compare(ModelNestedFinance jc1, ModelNestedFinance jc2) {
-            return  Tools.getDateFromDateFormat(jc2.getDefaultDate()) - Tools.getDateFromDateFormat(jc1.getDefaultDate());
+            int result =Tools.getDateFromDateFormat(jc2.getDefaultDate(),"year") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"year");
+            if(result == 0)
+                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"month") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"month");
+
+            if(result ==0)
+                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"date") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"date");
+
+            return  result;
         }
     };
 
     public static Comparator<ModelNestedFinance> shortedPeriodLongestToLatest = new Comparator<ModelNestedFinance>() {
         @Override
         public int compare(ModelNestedFinance jc1, ModelNestedFinance jc2) {
-            return  Tools.getDateFromDateFormat(jc1.getDefaultDate()) - Tools.getDateFromDateFormat(jc2.getDefaultDate());
+            int result =Tools.getDateFromDateFormat(jc2.getDefaultDate(),"year") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"year");
+            if(result == 0)
+                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"month") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"month");
+
+            if(result ==0)
+                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"date") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"date");
+
+            return result;
         }
     };
 }

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:orientation="vertical"
+            tools:context=".fragment.FragmentAll">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
+                android:drawablePadding="5dp"
+                android:fontFamily="@font/ubuntu_r"
+                android:padding="16dp"
+                android:text="Pilih Akun"
+                android:textColor="@color/blackTextColor" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/shape_line_black">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:id="@+id/txt_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toStartOf="@id/img_edit"
+                        android:fontFamily="@font/ubuntu_b"
+                        android:text="@string/sample_name"
+                        android:textColor="@color/blackTextColor"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:id="@+id/img_edit"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_alignParentEnd="true"
+                        android:src="@drawable/ic_edit" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/txt_name"
+                        android:fontFamily="@font/ubuntu_r"
+                        android:text="Pribadi - Menabung"
+                        android:textColor="@color/blackTextColor"
+                        android:textSize="13sp" />
+
+                </RelativeLayout>
+
+
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <FrameLayout
+                    android:id="@+id/place_target"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="5dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/shape_line_black">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:drawableStart="@drawable/ic_baseline_gps_fixed_24"
+                        android:drawablePadding="5dp"
+                        android:fontFamily="@font/calibri"
+                        android:padding="10dp"
+                        android:text="Rp.50.000"
+                        android:textColor="@color/blackTextColor"
+
+                        />
+
+                </FrameLayout>
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/shape_line_black"
+
+                    >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:orientation="vertical">
+
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp">
+
+
+                            <TextView
+                                android:id="@+id/txt_jumlah"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="7dp"
+                                android:layout_marginBottom="5dp"
+                                android:layout_toStartOf="@id/txt_percentage"
+                                android:fontFamily="@font/ubuntu_r"
+                                android:textColor="@android:color/black"
+                                android:textSize="13sp"
+                                android:text="Rp.15.000"/>
+
+
+                            <ProgressBar
+                                android:id="@+id/progress_finance"
+                                style="@android:style/Widget.ProgressBar.Horizontal"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_below="@id/txt_jumlah"
+                                android:layout_marginBottom="10dp"
+                                android:layout_toStartOf="@id/txt_percentage"
+                                android:progressDrawable="@drawable/progress_income_drawable"
+                                tools:ignore="UnusedAttribute" />
+
+                            <TextView
+                                android:id="@+id/txt_percentage"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:fontFamily="@font/lato_bold"
+                                android:padding="10dp"
+                                android:text="17%"
+                                android:textColor="@android:color/black"
+                                android:textSize="13sp" />
+
+                        </RelativeLayout>
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+
+
+    </RelativeLayout>
+</layout>

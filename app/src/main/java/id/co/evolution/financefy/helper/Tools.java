@@ -6,6 +6,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -107,9 +108,9 @@ public class Tools {
     }
 
     public static double calculatePercentage(double value, double total) {
-        double values=value * 100 / total;
+        double values = value * 100 / total;
 
-        return Math.round(values*100.0)/100.0;
+        return Math.round(values * 100.0) / 100.0;
     }
 
     public static String removeLastChar(String s) {
@@ -119,6 +120,25 @@ public class Tools {
     public static String getLastChar(String s) {
         return s.substring(s.length() - 1);
     }
+
+    public static String getLastDateChar(String s) {
+        return s.substring(s.length() - 2);
+    }
+
+    public static int getFirstLastDate(String date, boolean isFirst) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date convertedDate = null;
+        try {
+            convertedDate = dateFormat.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar c = Calendar.getInstance();
+        c.setTime(convertedDate);
+
+        return isFirst ? c.getActualMinimum(Calendar.DAY_OF_MONTH) : c.getActualMaximum(Calendar.DAY_OF_MONTH);
+    }
+
 
     public static String convertCurrencyToValue(String value) {
         return value.replaceAll("[Rp,.]", "");
@@ -140,7 +160,9 @@ public class Tools {
             formatted = formatted.replaceAll(",00", "");
         }
         return formatted;
-    }public static String convertToCurrency(double currency) {
+    }
+
+    public static String convertToCurrency(double currency) {
         Locale localeID = new Locale("in", "ID");
         String formatted = NumberFormat.getCurrencyInstance(localeID).format(currency);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -180,9 +202,13 @@ public class Tools {
         return newDateString;
     }
 
-    public static Integer getDateFromDateFormat(String date){
-
-        return Integer.parseInt(date.split("-")[0]);
+    public static Integer getDateFromDateFormat(String date, String type) {
+        if (type.equalsIgnoreCase("year"))
+            return Integer.parseInt(date.split("-")[2]);
+        else if (type.equalsIgnoreCase("month"))
+            return Integer.parseInt(date.split("-")[1]);
+        else
+            return Integer.parseInt(date.split("-")[0]);
     }
 
     public static String convertDateFormatWeek(String date) {
@@ -226,11 +252,11 @@ public class Tools {
     }
 
 
-    public static String convertDateFormatAnalysis(int size,String date) {
+    public static String convertDateFormatAnalysis(int size, String date) {
         final String OLD_FORMAT = "dd-MM-yyyy";
         final String NEW_FORMAT;
 
-        NEW_FORMAT = size<=10?"dd MMM":"dd";
+        NEW_FORMAT = size <= 10 ? "dd MMM" : "dd";
 
 // August 12, 2010
         String newDateString;

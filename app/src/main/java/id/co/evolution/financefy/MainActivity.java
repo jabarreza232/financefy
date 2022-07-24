@@ -16,7 +16,6 @@ import android.view.View;
 
 import com.google.gson.Gson;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,7 @@ import id.co.evolution.financefy.activity.CreateFinance;
 import id.co.evolution.financefy.databinding.ActivityMainBinding;
 import id.co.evolution.financefy.fragment.FragmentAll;
 import id.co.evolution.financefy.fragment.FragmentAnalysis;
-import id.co.evolution.financefy.fragment.FragmentSpending;
+import id.co.evolution.financefy.fragment.FragmentAccount;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
@@ -59,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //            ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 //            adapter.addFragment(new FragmentAll(), "Semuanya");
 //            adapter.addFragment(new FragmentAnalysis(), "Pemasukan");
-//            adapter.addFragment(new FragmentSpending(), "Pengeluaran");
+//            adapter.addFragment(new FragmentAccount(), "Pengeluaran");
 //            adapter.addFragment(new FragmentAll(), "Pengeluaran");
 //            binding.layout.viewPager.setAdapter(adapter);
 
@@ -82,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         changeFragment(fragment);
                         break;
                     case "accounts":
-                        fragment = new FragmentSpending();
+                        fragment = new FragmentAccount();
                         changeFragment(fragment);
                         break;
                     case "settings":

@@ -120,14 +120,28 @@ public class ModelFinance implements Serializable {
     public static Comparator<ModelFinance> shortedPeriodLatestToLongest = new Comparator<ModelFinance>() {
         @Override
         public int compare(ModelFinance jc1, ModelFinance jc2) {
-            return  Tools.getDateFromDateFormat(jc2.getDefaultDate()) - Tools.getDateFromDateFormat(jc1.getDefaultDate());
+            int result =Tools.getDateFromDateFormat(jc2.getDefaultDate(),"year") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"year");
+            if(result == 0)
+                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"month") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"month");
+
+            if(result ==0)
+                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"date") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"date");
+
+            return  result;
         }
     };
 
     public static Comparator<ModelFinance> shortedPeriodLongestToLatest = new Comparator<ModelFinance>() {
         @Override
         public int compare(ModelFinance jc1, ModelFinance jc2) {
-            return  Tools.getDateFromDateFormat(jc1.getDefaultDate()) - Tools.getDateFromDateFormat(jc2.getDefaultDate());
+            int result =Tools.getDateFromDateFormat(jc2.getDefaultDate(),"year") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"year");
+            if(result == 0)
+                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"month") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"month");
+
+            if(result ==0)
+                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"date") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"date");
+
+            return  result;
         }
     };
 }

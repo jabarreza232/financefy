@@ -43,7 +43,6 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
 
     @Override
     public int getItemViewType(int position) {
-        Log.e("TAG", "getItemViewType: "+position);
         return super.getItemViewType(position);
     }
 
