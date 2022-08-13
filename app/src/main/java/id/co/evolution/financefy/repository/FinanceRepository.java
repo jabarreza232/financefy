@@ -10,9 +10,11 @@ import javax.inject.Inject;
 
 import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelUser;
+import id.co.evolution.financefy.model.ModelUserWithFinance;
 
 public class FinanceRepository {
-   public FinanceDao financeDao;
+    public FinanceDao financeDao;
 
     @Inject
     public FinanceRepository(FinanceDao financeDao) {
@@ -23,12 +25,12 @@ public class FinanceRepository {
         return financeDao.getAll();
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByMonth(String month) {
-        return financeDao.loadAllbyMonth(month);
+    public LiveData<List<ModelFinance>> getFinanceByMonth(String month, int id_user) {
+        return financeDao.loadAllbyMonth(month, id_user);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date) {
-        return financeDao.loadAllbyWeek(date);
+    public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date, int id_user) {
+        return financeDao.loadAllbyWeek(date, id_user);
     }
 
     public LiveData<List<ModelFinance>> getFinanceByType(String type) {
@@ -39,12 +41,16 @@ public class FinanceRepository {
         return financeDao.findById(id);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(String type, String month) {
-        return financeDao.findByTypeAndMonth(type, month);
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(String type, String month, int id_user) {
+        return financeDao.findByTypeAndMonth(type, month, id_user);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(String type, List<String> date) {
-        return financeDao.findByTypeAndWeek(type, date);
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(String type, List<String> date, int id_user) {
+        return financeDao.findByTypeAndWeek(type, date, id_user);
+    }
+
+    public LiveData<List<ModelUserWithFinance>> getFinanceByUserId(int id_user) {
+        return financeDao.findFinanceByUserId(id_user);
     }
 
     public static class InputUpdateFinance extends AsyncTask<Void, Void, Void> {

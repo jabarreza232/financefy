@@ -305,6 +305,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                                     model.setKategori(category);
                                     model.setKeterangan(binding.etDescription.getText().toString().trim());
                                     model.setMonth(month);
+                                    model.setId_finance_user(2);
 
                                     onSubmit(model);
                                     Intent intent = new Intent();

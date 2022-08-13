@@ -20,8 +20,24 @@ public class FinanceFilter {
     public List<ModelFilter> filterType = new ArrayList<>();
     public List<ModelFilter> filterNominal = new ArrayList<>();
     public List<ModelFilter> filterPeriod = new ArrayList<>();
-    public HashMap<String, String>mapIncome=new HashMap<>();
-    public HashMap<String, String>mapExpense=new HashMap<>();
+    public HashMap<String, String> mapIncome = new HashMap<>();
+    public HashMap<String, String> mapExpense = new HashMap<>();
+
+    public enum CATEGORY_INCOME {
+        HASIL_USAHA,
+        BONUS,
+        GAJI
+    }
+
+    public enum CATEGORY_EXPENSE {
+        BELANJA_UMUM,
+        MAkANAN,
+        PULSA_HP,
+        TRANSPORTASI,
+        TAGIHAN,
+        PAKET_INTERNET
+    }
+
     public FinanceFilter() {
         setUpFilter();
     }
@@ -45,6 +61,7 @@ public class FinanceFilter {
 
         return list;
     }
+
     public List<ModelFinance> filterPeriodFinance(@NonNull String filterPeriod, List<ModelFinance> list) {
         if (filterPeriod.equalsIgnoreCase("terlama")) {
             Collections.sort(list, ModelFinance.shortedPeriodLongestToLatest);
@@ -66,16 +83,16 @@ public class FinanceFilter {
         filterPeriod.add(new ModelFilter("Mingguan"));
         filterPeriod.add(new ModelFilter("Bulanan"));
 
-        mapIncome.put("hasil_usaha","Hasil Usaha");
-        mapIncome.put("bonus","Bonus");
-        mapIncome.put("gaji","Gaji");
+        mapIncome.put("hasil_usaha", "Hasil Usaha");
+        mapIncome.put("bonus", "Bonus");
+        mapIncome.put("gaji", "Gaji");
 
-        mapExpense.put("belanja_umum","Belanja Umum");
-        mapExpense.put("makanan","Makanan");
-        mapExpense.put("pulsa_hp","Pulsa HP");
-        mapExpense.put("transportasi","Transportasi");
-        mapExpense.put("tagihan","Tagihan");
-        mapExpense.put("paket_internet","Paket Internet");
+        mapExpense.put("belanja_umum", "Belanja Umum");
+        mapExpense.put("makanan", "Makanan");
+        mapExpense.put("pulsa_hp", "Pulsa HP");
+        mapExpense.put("transportasi", "Transportasi");
+        mapExpense.put("tagihan", "Tagihan");
+        mapExpense.put("paket_internet", "Paket Internet");
 
     }
 
@@ -100,7 +117,7 @@ public class FinanceFilter {
             modelNestedFinance.setDate(date);
             List<ModelFinance> dataFinance = new ArrayList<>();
             for (ModelFinance modelFinance : data) {
-                if (date.contains(modelFinance.getDate()))
+                if (date.equals(modelFinance.getDate()))
                     dataFinance.add(modelFinance);
             }
 
@@ -148,7 +165,7 @@ public class FinanceFilter {
         return list;
     }
 
-    public List<ModelFinance> listAnalysis(List<ModelFinance> data,String type) {
+    public List<ModelFinance> listAnalysis(List<ModelFinance> data, String type) {
         List<ModelFinance> list = new ArrayList<>();
         HashSet<String> hashsetCategory = new HashSet<>();
 
@@ -160,15 +177,15 @@ public class FinanceFilter {
             ModelFinance modelFinance = new ModelFinance();
             modelFinance.setKategori(category);
             double totalValue = 0;
-            String date=null;
+            String date = null;
             for (ModelFinance finance : data) {
                 if (category.contains(finance.getKategori())) {
-                    totalValue = totalValue+finance.getJumlahValue();
-                    date=finance.getDate();
+                    totalValue = totalValue + finance.getJumlahValue();
+                    date = finance.getDate();
                 }
             }
             modelFinance.setJumlah(Tools.convertToCurrency(totalValue));
-            modelFinance.setTotalValue(totalValueByType(data,type));
+            modelFinance.setTotalValue(totalValueByType(data, type));
             modelFinance.setTipe(type);
             modelFinance.setDate(date);
             list.add(modelFinance);

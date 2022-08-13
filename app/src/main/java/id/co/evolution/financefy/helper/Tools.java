@@ -14,6 +14,12 @@ import java.util.regex.Pattern;
 
 public class Tools {
     public static int REQUEST_CODE_CALLBACK = 3;
+    public enum TYPE_FILTER{
+        SEMUANYA,
+        PEMASUKAN,
+        PENGELUARAN
+    }
+
 
     public static String getFormattedMonthSimple(Long dateTime) {
         SimpleDateFormat newFormat = new SimpleDateFormat("MM-yyyy");

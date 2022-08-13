@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
+import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelUserWithFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
 
 public class ViewModelFinance extends ViewModel {
@@ -24,12 +26,12 @@ public class ViewModelFinance extends ViewModel {
     }
 
 
-    public LiveData<List<ModelFinance>> getFinanceByMonth(String month) {
-        return financeRepository.getFinanceByMonth(month);
+    public LiveData<List<ModelFinance>> getFinanceByMonth(String month, int id_user) {
+        return financeRepository.getFinanceByMonth(month, id_user);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date) {
-        return financeRepository.getFinanceByWeek(date);
+    public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date, int id_user) {
+        return financeRepository.getFinanceByWeek(date, id_user);
     }
 
     public LiveData<List<ModelFinance>> getFinanceByType(String type) {
@@ -40,20 +42,30 @@ public class ViewModelFinance extends ViewModel {
         return financeRepository.getModelFinanceById(id);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(String type, String month) {
-        return financeRepository.getFinanceByTypeAndMonth(type, month);
+    public LiveData<List<ModelUserWithFinance>> getFinanceByUserId(int id) {
+        return financeRepository.getFinanceByUserId(id);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(String type, List<String> date) {
-        return financeRepository.getFinanceByTypeAndWeek(type, date);
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(String type, String month, int id_user) {
+        if (type.equalsIgnoreCase(Tools.TYPE_FILTER.SEMUANYA.toString()))
+            return financeRepository.getFinanceByMonth(month, id_user);
+        else
+            return financeRepository.getFinanceByTypeAndMonth(type, month, id_user);
+    }
+
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(String type, List<String> date, int id_user) {
+        if (type.equalsIgnoreCase(Tools.TYPE_FILTER.SEMUANYA.toString()))
+            return financeRepository.getFinanceByWeek(date, id_user);
+        else
+        return financeRepository.getFinanceByTypeAndWeek(type, date, id_user);
     }
 
     public void inputUpdateFinance(String type, ModelFinance modelFinance) {
-        new FinanceRepository.InputUpdateFinance(modelFinance, type,financeRepository.financeDao).execute();
+        new FinanceRepository.InputUpdateFinance(modelFinance, type, financeRepository.financeDao).execute();
     }
 
     public void removeFinance(ModelFinance modelFinance) {
-        new FinanceRepository.RemoveFinance(modelFinance,financeRepository.financeDao).execute();
+        new FinanceRepository.RemoveFinance(modelFinance, financeRepository.financeDao).execute();
     }
 
     @Override

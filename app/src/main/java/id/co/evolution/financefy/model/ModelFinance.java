@@ -27,10 +27,22 @@ public class ModelFinance implements Serializable {
     String tipe;
     @ColumnInfo(name = "month")
     String month;
+    @ColumnInfo(name="id_finance_user")
+    int id_finance_user;
     @Ignore
     long totalValue;
 
+
+
     public ModelFinance() {
+    }
+
+    public int getId_finance_user() {
+        return id_finance_user;
+    }
+
+    public void setId_finance_user(int id_finance_user) {
+        this.id_finance_user = id_finance_user;
     }
 
     public int getId() {

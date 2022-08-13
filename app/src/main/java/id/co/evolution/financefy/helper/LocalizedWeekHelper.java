@@ -89,8 +89,11 @@ public class LocalizedWeekHelper {
         int startMonth = Integer.parseInt(startWeek.split("-")[1]);
         int endMonth = Integer.parseInt(endWeek.split("-")[1]);
 
-        Log.e("TAG", "getLastDayMonth: " + Tools.getFirstLastDate(endWeek, true));
+        //TODO logic untuk membedakan range week di bulan berbeda ex: 27 sep - 03 okt
         if (startMonth != endMonth) {
+
+            //TODO mendapatkan data dengan range startDate sampai kurang dari sama dengan akhir tanggal bulan
+            //ex: 27-30 feb
             for (int i = startDate; i <= Tools.getFirstLastDate(startWeek, false); i++) {
                 String date = startYear + "-" + startMonth+"-"+i;
                 list.add(Tools.convertDateFormatWeek(date));

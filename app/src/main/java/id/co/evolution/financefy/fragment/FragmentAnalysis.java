@@ -60,6 +60,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.MPPointF;
+import com.google.gson.Gson;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.text.SimpleDateFormat;
@@ -88,6 +89,8 @@ import id.co.evolution.financefy.asynctask.FilterMinYearAsynctask;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAllBinding;
 import id.co.evolution.financefy.databinding.FragmentAnalysisBinding;
+import id.co.evolution.financefy.dialog.DialogFilterFinance;
+import id.co.evolution.financefy.dialog.DialogMonthPicker;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.LocalizedWeekHelper;
 import id.co.evolution.financefy.helper.MyMarkView;
@@ -96,8 +99,12 @@ import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
+import id.co.evolution.financefy.model.ModelUser;
+import id.co.evolution.financefy.model.ModelUserWithFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
+import id.co.evolution.financefy.repository.UserRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
+import id.co.evolution.financefy.viewmodel.ViewModelUser;
 
 @AndroidEntryPoint
 public class FragmentAnalysis extends Fragment {
@@ -107,23 +114,30 @@ public class FragmentAnalysis extends Fragment {
     List<ModelFinance> finances = new ArrayList<>();
     FragmentAnalysisBinding binding;
     ViewModelFinance viewModelFinance;
+    ViewModelUser viewModelUser;
     AdapterAnalysisFinance adapter;
     TYPE_CHART typeChart = TYPE_CHART.BAR_CHART;
     Dialog dialog;
     LayoutInflater inflater;
     View dialogView;
     FinanceFilter financeFilter;
-    String filterType, filterPeriod = "Bulanan";
+    String filterType, filterPeriod;
     String month;
     LocalizedWeekHelper localizedWeekHelper;
     int prevNextWeek = 0;
     boolean nextWeekEnabled;
     @Inject
     FinanceRepository financeRepository;
+    @Inject
+    UserRepository userRepository;
+    FinanceFilter.CATEGORY_EXPENSE category_expense;
+    FinanceFilter.CATEGORY_INCOME category_income;
+
     CallbackOnActivityResult mCallbackOnActivityResult;
     int mPositionItem;
     long date_ship_millis;
 
+    ModelUser user;
 
     public enum TYPE_CHART {
         PIE_CHART,
@@ -158,10 +172,22 @@ public class FragmentAnalysis extends Fragment {
         prevNextMonth = Calendar.getInstance();
         date_ship_millis = today.getTimeInMillis();
         filterType = "Pemasukan";
+        filterPeriod = getString(R.string.bulanan);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
+        viewModelUser = new ViewModelProvider(this).get(ViewModelUser.class);
+
+        viewModelUser.init(userRepository);
         viewModelFinance.init(financeRepository);
 
-        loadDataFinanceByMonth(date_ship_millis);
+        viewModelUser.getFinanceByUserId(2).observe(getViewLifecycleOwner(), new Observer<ModelUserWithFinance>() {
+            @Override
+            public void onChanged(ModelUserWithFinance modelUserWithFinances) {
+                Log.e("TAG", "onChanged: " + new Gson().toJson(modelUserWithFinances));
+                user = modelUserWithFinances.user;
+                loadDataFinanceByMonth(date_ship_millis);
+            }
+        });
+
 
         binding.placeMonth.setOnClickListener(v -> showDialogMonthPicker());
 
@@ -169,7 +195,7 @@ public class FragmentAnalysis extends Fragment {
         binding.btnNext.setEnabled(false);
 
         binding.btnPrev.setOnClickListener(v -> {
-            if (filterPeriod.equalsIgnoreCase("bulanan")) {
+            if (filterPeriod.equalsIgnoreCase(getString(R.string.bulanan))) {
                 prevNextMonth.get(Calendar.YEAR);
                 prevNextMonth.add(Calendar.MONTH, -1);
                 long date_ship_milisecond = prevNextMonth.getTimeInMillis();
@@ -187,7 +213,7 @@ public class FragmentAnalysis extends Fragment {
                 binding.btnNext.setEnabled(nextWeekEnabled);
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByTypeAndWeek(filterType, localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(),user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -197,7 +223,7 @@ public class FragmentAnalysis extends Fragment {
         });
 
         binding.btnNext.setOnClickListener(v -> {
-            if (filterPeriod.equalsIgnoreCase("bulanan")) {
+            if (filterPeriod.equalsIgnoreCase(getString(R.string.bulanan))) {
                 prevNextMonth.get(Calendar.YEAR);
                 prevNextMonth.add(Calendar.MONTH, 1);
                 long date_ship_milisecond = prevNextMonth.getTimeInMillis();
@@ -215,7 +241,7 @@ public class FragmentAnalysis extends Fragment {
 
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByTypeAndWeek(filterType, localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(),user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -223,6 +249,7 @@ public class FragmentAnalysis extends Fragment {
             }
         });
 
+        Log.e("TAG", "cek_enum_category: "+ new Gson().toJson(FinanceFilter.CATEGORY_INCOME.values()));
         initiateSayHaloWithTime();
     }
 
@@ -242,33 +269,21 @@ public class FragmentAnalysis extends Fragment {
     }
 
     private void showDialogMonthPicker() {
-        MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
-                new MonthPickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(int selectedMonth, int selectedYear) { // on date set }
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.set(Calendar.YEAR, selectedYear);
-                        calendar.set(Calendar.MONTH, selectedMonth);
-                        prevNextMonth.set(Calendar.YEAR, selectedYear);
-                        prevNextMonth.set(Calendar.MONTH, selectedMonth);
-                        long date_ship_milis = calendar.getTimeInMillis();
-                        date_ship_millis = date_ship_milis;
-                        financeFilter.resetFilter();
-                        loadDataFinanceByMonth(date_ship_milis);
-                    }
-                }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
-
-        try {
-            builder.setMinYear(today.get(Calendar.YEAR))
-                    .setActivatedYear(today.get(Calendar.YEAR))
-                    .setMinYear(Integer.parseInt(new FilterMinYearAsynctask(today, dataFinance, getContext()).execute().get()))
-                    .setMaxYear((today.get(Calendar.YEAR)))
-                    .setMaxMonth(Integer.parseInt(new FilterMaxMonthAsynctask(today, dataFinance, getContext()).execute().get()));
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        builder.build().show();
+        DialogMonthPicker dialogMonthPicker = new DialogMonthPicker(getActivity(), today, dataFinance, new DialogMonthPicker.DialogMonthPickerCallback() {
+            @Override
+            public void onDateSet(int selectedMonth, int selectedYear) {
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.YEAR, selectedYear);
+                calendar.set(Calendar.MONTH, selectedMonth);
+                prevNextMonth.set(Calendar.YEAR, selectedYear);
+                prevNextMonth.set(Calendar.MONTH, selectedMonth);
+                long date_ship_milis = calendar.getTimeInMillis();
+                date_ship_millis = date_ship_milis;
+                financeFilter.resetFilter();
+                loadDataFinanceByMonth(date_ship_milis);
+            }
+        });
+        dialogMonthPicker.showDialogMonthPicker();
     }
 
 
@@ -317,14 +332,15 @@ public class FragmentAnalysis extends Fragment {
                 if (typeChart == TYPE_CHART.PIE_CHART) {
                     item.setIcon(R.drawable.ic_baseline_bar_chart_24);
                     typeChart = TYPE_CHART.BAR_CHART;
-                    if(finances.size()>0) new BarChartAsyncTask(finances).execute();
+                    if (finances.size() > 0) new BarChartAsyncTask(finances).execute();
                 } else if (typeChart == TYPE_CHART.BAR_CHART) {
                     item.setIcon(R.drawable.ic_baseline_pie_chart_24);
                     typeChart = TYPE_CHART.PIE_CHART;
-                    if(finances.size()>0) new PieChartAsyncTask(financeFilter.listAnalysis(finances, filterType)).execute();
+                    if (finances.size() > 0)
+                        new PieChartAsyncTask(financeFilter.listAnalysis(finances, filterType)).execute();
                 }
-                binding.barChartAnalysis.setVisibility(finances.size()>0&&typeChart == TYPE_CHART.BAR_CHART ? View.VISIBLE : View.GONE);
-                binding.pieChartAnalysis.setVisibility(finances.size()>0&&typeChart == TYPE_CHART.PIE_CHART ? View.VISIBLE : View.GONE);
+                binding.barChartAnalysis.setVisibility(finances.size() > 0 && typeChart == TYPE_CHART.BAR_CHART ? View.VISIBLE : View.GONE);
+                binding.pieChartAnalysis.setVisibility(finances.size() > 0 && typeChart == TYPE_CHART.PIE_CHART ? View.VISIBLE : View.GONE);
                 return true;
 
             default:
@@ -335,50 +351,33 @@ public class FragmentAnalysis extends Fragment {
 
 
     private void showDialogFilter() {
-        dialog = new Dialog(getContext());
-        inflater = getLayoutInflater();
-        dialogView = inflater.inflate(R.layout.dialog_choose_filter, null);
-        dialog.setContentView(dialogView);
-        TextView txtSubmit = dialogView.findViewById(R.id.txt_submit);
-        TextView txtNominal = dialogView.findViewById(R.id.txt_nominal);
-        RecyclerView rvListType = dialogView.findViewById(R.id.rv_type);
-        RecyclerView rvListNominal = dialogView.findViewById(R.id.rv_nominal);
-        RecyclerView rvListPeriod = dialogView.findViewById(R.id.rv_periode);
-        if (financeFilter.filterType.size() == 3)
-            financeFilter.filterType.remove(2);
-        txtNominal.setVisibility(View.GONE);
-
-        AdapterFilter adapterFilterType = new AdapterFilter(getContext(), financeFilter.filterType, (data, position) -> {
-            filterType = data.get(position).getValue();
-        });
-
-        rvListType.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvListType.setAdapter(adapterFilterType);
-
-
-        AdapterFilter adapterFilterPeriod = new AdapterFilter(getContext(), financeFilter.filterPeriod, (data, position) ->
-                filterPeriod = data.get(position).getValue());
-        rvListPeriod.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvListPeriod.setAdapter(adapterFilterPeriod);
-
-        txtSubmit.setOnClickListener(v -> {
-            if (filterType == null) {
-                Toast.makeText(getContext(), "Mohon untuk pilih tipe terlebih dahulu!", Toast.LENGTH_SHORT).show();
-                return;
+        DialogFilterFinance dialog = new DialogFilterFinance(getContext(), getLayoutInflater(), new DialogFilterFinance.DialogFilterFinanceCallback() {
+            @Override
+            public void resultFilterType(@NonNull String result) {
+                filterType = result;
             }
-            dialog.dismiss();
-            loadDataByType(filterType);
+
+            @Override
+            public void resultFilterNominal(@NonNull String result) {
+
+            }
+
+            @Override
+            public void resultFilterPeriod(@NonNull String result) {
+                filterPeriod = result;
+            }
+
+            @Override
+            public void onSubmit() {
+                if (filterType == null) {
+                    Toast.makeText(getContext(), "Mohon untuk pilih tipe terlebih dahulu!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                loadDataByType(filterType);
+            }
         });
 
-        Window window = dialog.getWindow();
-        WindowManager.LayoutParams wlp = window.getAttributes();
-
-        wlp.gravity = Gravity.CENTER;
-        wlp.flags &= ~WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
-        window.setAttributes(wlp);
-        dialog.getWindow().setLayout(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
-
-        dialog.show();
+        dialog.showDialogFilterFinance(financeFilter.filterType,financeFilter.filterNominal,financeFilter.filterPeriod,true);
     }
 
     @SuppressLint("NewApi")
@@ -387,8 +386,8 @@ public class FragmentAnalysis extends Fragment {
 
         nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
 
-        if (filterPeriod.equalsIgnoreCase("bulanan")) {
-            viewModelFinance.getFinanceByTypeAndMonth(type, month).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+        if (filterPeriod.equalsIgnoreCase(getString(R.string.bulanan))) {
+            viewModelFinance.getFinanceByTypeAndMonth(type, month,user.getId()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
                 @Override
                 public void onChanged(List<ModelFinance> modelFinances) {
                     if (modelFinances != null) loadData(modelFinances);
@@ -403,12 +402,12 @@ public class FragmentAnalysis extends Fragment {
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             }
             binding.btnNext.setEnabled(nextWeekEnabled);
-            viewModelFinance.getFinanceByTypeAndWeek(type, localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek))).observe(getViewLifecycleOwner(), modelFinances -> {
+            viewModelFinance.getFinanceByTypeAndWeek(type, getListDateWeek(),user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
                 if (modelFinances != null) loadData(modelFinances);
             });
         }
 
-        if (filterPeriod.equalsIgnoreCase("bulanan")) {
+        if (filterPeriod.equalsIgnoreCase(getString(R.string.bulanan))) {
             binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_millis));
             binding.placeMonth.setEnabled(true);
             if (date_ship_millis < today.getTimeInMillis())
@@ -440,7 +439,7 @@ public class FragmentAnalysis extends Fragment {
             binding.btnNext.setEnabled(false);
         }
 
-        viewModelFinance.getFinanceByTypeAndMonth(filterType, month).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+        viewModelFinance.getFinanceByTypeAndMonth(filterType, month,user.getId()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
             @Override
             public void onChanged(List<ModelFinance> modelFinances) {
                 if (modelFinances != null) loadData(modelFinances);
@@ -481,9 +480,9 @@ public class FragmentAnalysis extends Fragment {
     }
 
 
-    class PieChartAsyncTask extends AsyncTask<Void, PieDataSet,PieDataSet>{
+   private class PieChartAsyncTask extends AsyncTask<Void, PieDataSet, PieDataSet> {
 
-        List<ModelFinance>data;
+        List<ModelFinance> data;
         List<LegendEntry> legendEntries = new ArrayList<>();
         ArrayList<Integer> colors = new ArrayList<Integer>();
 
@@ -576,17 +575,17 @@ public class FragmentAnalysis extends Fragment {
         }
     }
 
-    class BarChartAsyncTask extends AsyncTask<Void, List<IBarDataSet>,List<IBarDataSet>>{
+   private class BarChartAsyncTask extends AsyncTask<Void, List<IBarDataSet>, List<IBarDataSet>> {
         // (0.2 + 0.03) * 4 + 0.08 = 1.00 -> interval per "group"
         float groupSpace = 0.08f;
         float barSpace = 0.02f; // x3 DataSet
         float barWidth = 0.28f; // x3 DataSet
 
 
-        List<ModelFinance>data;
-        List<String>listDate;
+        List<ModelFinance> data;
+        List<String> listDate;
 
-        public BarChartAsyncTask( List<ModelFinance> data) {
+        public BarChartAsyncTask(List<ModelFinance> data) {
             this.data = data;
         }
 
@@ -595,11 +594,13 @@ public class FragmentAnalysis extends Fragment {
             List<ModelNestedFinance> listNestedFinance = financeFilter.filterNestedFinance(data);
 //        float barWidth = (1 - groupSpace) / listNestedFinance.size() - barSpace; // x3 DataSet
             listNestedFinance = financeFilter.filterPeriod("terlama", listNestedFinance);
-
+            for (ModelNestedFinance modelNestedFinance : listNestedFinance) {
+                Log.e("cek_date_nested", modelNestedFinance.getDate());
+            }
 
             listDate = new ArrayList<>();
 
-            List<IBarDataSet> barDataSets= new ArrayList<>();
+            List<IBarDataSet> barDataSets = new ArrayList<>();
 
 
             if (filterType.equalsIgnoreCase("Pemasukan")) {
@@ -812,6 +813,9 @@ public class FragmentAnalysis extends Fragment {
             binding.barChartAnalysis.invalidate();
         }
     }
+    private List<String> getListDateWeek() {
+        return localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek));
     }
+}
 
 

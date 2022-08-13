@@ -20,12 +20,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.adapter.AdapterFinance;
 
 import id.co.evolution.financefy.databinding.FragmentAccountBinding;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelUserWithFinance;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 
@@ -35,6 +38,7 @@ public class FragmentAccount extends Fragment {
     FragmentAccountBinding binding;
     ViewModelFinance viewModelFinance;
     AdapterFinance.TYPE_LAYOUT_MANAGER type_layout_manager = AdapterFinance.TYPE_LAYOUT_MANAGER.GRID;
+
 
     public FragmentAccount() {
         // Required empty public constructor
@@ -47,6 +51,8 @@ public class FragmentAccount extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_account, container, false);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
         today = Calendar.getInstance();
+
+
 
         setHasOptionsMenu(true);
         return binding.getRoot();

@@ -13,7 +13,10 @@ import dagger.hilt.android.components.ApplicationComponent;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import id.co.evolution.financefy.db.FinanceDB;
 import id.co.evolution.financefy.db.FinanceDao;
+import id.co.evolution.financefy.db.UserDao;
+import id.co.evolution.financefy.model.ModelUserWithFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
+import id.co.evolution.financefy.repository.UserRepository;
 
 @Module
 @InstallIn(ApplicationComponent.class)
@@ -51,6 +54,12 @@ public class AppModule {
     }
 
     @Provides
+    UserRepository userRepository(@NonNull FinanceDB financeDB) {
+        return new UserRepository(financeDB.userDao());
+    }
+
+
+    @Provides
     SavedStateHandle savedStateHandle() {
         return new SavedStateHandle();
     }
@@ -58,6 +67,11 @@ public class AppModule {
     @Provides
     FinanceDao financeDao(@NonNull FinanceDB financeDB) {
         return financeDB.financeDao();
+    }
+
+    @Provides
+    UserDao userDao(@NonNull FinanceDB financeDB) {
+        return financeDB.userDao();
     }
 
 }
