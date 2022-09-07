@@ -260,14 +260,14 @@ class DialogCreateUser(
                             } else {
                                 tilTarget.error = null
                             }
-
+                            savings.title = etTitle.text.toString()
+                            savings.date_target = date_target
+                            savings.processValue = 0
+                            savings.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
 
 //                        user.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
                         }
-                        savings.title = etTitle.text.toString()
-                        savings.date_target = date_target
-                        savings.processValue = 0
-                        savings.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
+
                     }else{
                         user.id = this.user.id
                     }

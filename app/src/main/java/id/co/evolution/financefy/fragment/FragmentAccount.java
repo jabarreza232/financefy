@@ -196,7 +196,7 @@ public class FragmentAccount extends Fragment {
             if (dataSavings.size() > 0) {
 
                 setDataSavings(modelSavings.get(0));
-                binding.placeChooseSavings.setOnClickListener(v -> {
+                binding.layoutAccountSavings.placeChooseSavings.setOnClickListener(v -> {
                     dialogFinance = new DialogFinance(getContext(), (index, result) -> {
                         setDataSavings(modelSavings.get(index));
                     });
@@ -208,18 +208,22 @@ public class FragmentAccount extends Fragment {
     }
 
     private void setDataSavings(ModelSavings modelSavings) {
-        binding.txtChooseSavings.setText(modelSavings.getTitle());
-        binding.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue()));
-        binding.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue()));
-        binding.txtPercentageSavings.setText(Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()) + "% ");
-        binding.progressBarTargetSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
-        binding.progressBarTargetSavings.setMax(100);
+        binding.layoutAccountSavings.txtChooseSavings.setText(modelSavings.getTitle());
+        binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue()));
+        binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue()));
+        binding.layoutAccountSavings.txtPercentageSavings.setText(Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()) + "% ");
+        binding.layoutAccountSavings.progressBarTargetSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
+        binding.layoutAccountSavings.progressBarTargetSavings.setMax(100);
     }
+
 
     private void setDataUser(ModelUser user) {
         binding.txtName.setText(user.getName());
         binding.txtDescription.setText(user.getType() + " - " + user.getCategory());
         tinyDb.putObject("user", user);
         this.user = user;
+        boolean visibleAccountSavings = user.getCategory().equalsIgnoreCase(getString(R.string.menabung));
+        binding.layoutAccountSavings.placeAccountSavings.setVisibility(visibleAccountSavings ? View.VISIBLE : View.GONE);
+        binding.layoutAccountFinanceJournal.placeAccountFinanceJournal.setVisibility(!visibleAccountSavings ? View.VISIBLE : View.GONE);
     }
 }
