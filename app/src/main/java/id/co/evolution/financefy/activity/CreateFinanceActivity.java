@@ -5,6 +5,7 @@ import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
@@ -17,6 +18,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
@@ -36,18 +38,19 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.dialog.DialogFinance;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 @AndroidEntryPoint
-public class CreateFinance extends AppCompatActivity implements View.OnClickListener {
+public class CreateFinanceActivity extends AppCompatActivity implements View.OnClickListener {
 
     String date = "";
     String category = "";
     String type = "";
-    String[] kategori = null;
+    String[] arrayCategory = null;
     private String jumlah = "";
     String month = "";
     ActivityCreateFinanceBinding binding;
@@ -59,6 +62,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
     List<ModelFinance> listFinance;
     @Inject
     FinanceRepository financeRepository;
+    int id_user;
 
     @SuppressLint("ObsoleteSdkInt")
     @Override
@@ -85,6 +89,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
+        id_user = getIntent().getIntExtra("id_user", 0);
 
 
         binding.etAmount.addTextChangedListener(new TextWatcher() {
@@ -130,128 +135,51 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
 
 
     private void showDatePickerDialog() {
-        DatePickerDialog datePickerDialog = DatePickerDialog.newInstance(new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, monthOfYear);
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                long date_ship_milis = calendar.getTimeInMillis();
-                binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
-                date = getFormattedDateSimple(date_ship_milis);
+        DatePickerDialog datePickerDialog = DatePickerDialog.newInstance((view, year, monthOfYear, dayOfMonth) -> {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, monthOfYear);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            long date_ship_milis = calendar.getTimeInMillis();
+            binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
+            date = getFormattedDateSimple(date_ship_milis);
 
-                Log.e("TAG", "onDateSet: " + date);
-                month = getFormattedMonthSimple(date_ship_milis);
-            }
+            Log.e("TAG", "onDateSet: " + date);
+            month = getFormattedMonthSimple(date_ship_milis);
         });
 
         datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR), cur_calendar.get(Calendar.YEAR));
         datePickerDialog.setMaxDate(cur_calendar);
         datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
-        datePickerDialog.show(getFragmentManager(), "PickerDialog");
+        datePickerDialog.show(getSupportFragmentManager(), "PickerDialog");
     }
 
     private void showDialogCategory() {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setTitle("Pilih Kategori");
-        if (type.equalsIgnoreCase("pengeluaran")) {
-            kategori = getResources().getStringArray(R.array.category_pengeluaran);
-            builder.setItems(kategori, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case 0:
-                            dialog.dismiss();
-                            category = kategori[0];
-                            break;
-                        case 1:
-                            dialog.dismiss();
-                            category = kategori[1];
-                            break;
-                        case 2:
-                            dialog.dismiss();
-                            category = kategori[2];
-                            break;
-                        case 3:
-                            dialog.dismiss();
-                            category = kategori[3];
-                            break;
-                        case 4:
-                            dialog.dismiss();
-                            category = kategori[4];
-                            break;
-                        case 5:
-                            dialog.dismiss();
-                            category = kategori[5];
-                            break;
-
-                    }
-                    if (!category.isEmpty()) {
-                        binding.txtKategori.setText(category);
-                    }
-                }
-            });
-        } else {
-            kategori = getResources().getStringArray(R.array.category_pemasukan);
-            builder.setItems(kategori, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case 0:
-                            dialog.dismiss();
-                            category = kategori[0];
-                            break;
-                        case 1:
-                            dialog.dismiss();
-                            category = kategori[1];
-                            break;
-                        case 2:
-                            dialog.dismiss();
-                            category = kategori[2];
-                            break;
-                    }
-                    if (!category.isEmpty()) {
-                        binding.txtKategori.setText(category);
-                    }
-                }
-            });
-        }
-
-        android.app.AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    private void showDialogTipe() {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
-        builder.setTitle("Pilih Tipe");
-        final String[] tipe = {"Pengeluaran", "Pemasukan"};
-        builder.setItems(tipe, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        type = tipe[0];
-                        dialog.dismiss();
-                        kategori = getResources().getStringArray(R.array.category_pengeluaran);
-                        binding.txtKategori.setText(kategori[0]);
-                        category = kategori[0];
-                        break;
-                    case 1:
-                        type = tipe[1];
-                        kategori = getResources().getStringArray(R.array.category_pemasukan);
-                        binding.txtKategori.setText(kategori[0]);
-                        category = kategori[0];
-                        dialog.dismiss();
-                        break;
-                }
-                binding.txtType.setText(type);
+        int arrayCategoryFromResource = type.equalsIgnoreCase(getString(R.string.pengeluaran)) ? R.array.category_pengeluaran : R.array.category_pemasukan;
+        DialogFinance dialogFinance = new DialogFinance(this, (index,result) -> {
+            category = result;
+            if (!category.isEmpty()) {
+                binding.txtKategori.setText(category);
             }
         });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        dialogFinance.showDialogCategory(arrayCategoryFromResource);
     }
 
+    private void showDialogType() {
+        DialogFinance dialogFinance = new DialogFinance(this, (index,result) -> {
+            type = result;
+            int arrayCategoryFromResource = result.equalsIgnoreCase(getString(R.string.pengeluaran)) ? R.array.category_pengeluaran : R.array.category_pemasukan;
+            arrayCategory = getResources().getStringArray(arrayCategoryFromResource);
+            //TODO Default value di index pertama
+            binding.txtKategori.setText(arrayCategory[0]);
+            category = arrayCategory[0];
+            binding.txtType.setText(type);
+        });
+        dialogFinance.showDialogType(R.array.type_finance);
+    }
+
+
+    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -263,7 +191,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                 }
                 break;
             case R.id.place_type:
-                showDialogTipe();
+                showDialogType();
                 break;
 
             case R.id.place_date:
@@ -283,9 +211,11 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
             case R.id.place_submit:
                 if (type.isEmpty()) {
                     Toast.makeText(this, "Silahkan Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
-                } else if (binding.etAmount.getText().toString().isEmpty()) {
+                }
+
+                if (binding.etAmount.getText().toString().isEmpty()) {
                     binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
-                } else if (!binding.etAmount.getText().toString().isEmpty()) {
+                } else {
                     binding.tilAmount.setError(null);
                 }
 
@@ -305,7 +235,7 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
                                     model.setKategori(category);
                                     model.setKeterangan(binding.etDescription.getText().toString().trim());
                                     model.setMonth(month);
-                                    model.setId_finance_user(2);
+                                    model.setId_finance_user(id_user);
 
                                     onSubmit(model);
                                     Intent intent = new Intent();
@@ -323,6 +253,9 @@ public class CreateFinance extends AppCompatActivity implements View.OnClickList
 
     private void onSubmit(ModelFinance model) {
         boolean isUpdate = false;
+        //TODO ketika submit terdapat data yang identik sama maka tidak dapat duplikasi.
+        // melainkan hanya bisa melakukan penjumlahan value nya saja
+
         for (ModelFinance modelFinance : listFinance) {
             if (modelFinance.getKategori().contains(model.getKategori()) && modelFinance.getDate().contains(model.getDate())) {
                 double jumlahValue = modelFinance.getJumlahValue() + model.getJumlahValue();

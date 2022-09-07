@@ -22,28 +22,30 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import id.co.evolution.financefy.activity.CreateFinance;
+import id.co.evolution.financefy.activity.CreateFinanceActivity;
 import id.co.evolution.financefy.databinding.ActivityMainBinding;
 import id.co.evolution.financefy.fragment.FragmentAll;
 import id.co.evolution.financefy.fragment.FragmentAnalysis;
 import id.co.evolution.financefy.fragment.FragmentAccount;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
-    TinyDb tinyDb;
     ActivityMainBinding binding;
     public ViewModelFinance viewModelFinance;
     public List<ModelFinance> dataFinance = new ArrayList<>();
     public ModelFinance modelFinance;
+    int id_user = 0;
 
     @Inject
     FinanceRepository financeRepository;
-
+    ModelUser user;
+    @Inject
+    TinyDb tinyDb;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
+        user = tinyDb.getObject("user", ModelUser.class);
 
         viewModelFinance.getAllFinance().observe(this, modelFinances -> {
             dataFinance = modelFinances;
@@ -102,6 +105,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void changeFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_frame, fragment, fragment.getClass().getSimpleName()).addToBackStack(null).commit();
+
+
     }
 
     private ColorStateList getBottomNavigationColor() {
@@ -132,7 +137,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.fab_add) {
-            startActivityForResult(new Intent(this, CreateFinance.class), 3);
+            Log.e("TAG", "onClick: " + user.getId());
+            Intent intent = new Intent(this, CreateFinanceActivity.class);
+            intent.putExtra("id_user",user.getId());
+            startActivityForResult(intent, 3);
         }
     }
 }

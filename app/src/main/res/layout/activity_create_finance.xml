@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         android:background="@color/colorPrimary"
         android:orientation="vertical"
-        tools:context=".activity.CreateFinance">
+        tools:context=".activity.CreateFinanceActivity">
 
         <ImageView
             android:layout_width="match_parent"
@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/lato_bold"
                     android:padding="10dp"
-                    android:text="Input data"
+                    android:text="Input Finance"
                     android:textColor="@color/blackTextColor"
                     android:textSize="19sp" />
 

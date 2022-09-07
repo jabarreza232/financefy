@@ -66,7 +66,7 @@ public class FinanceRepository {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (type.toLowerCase().equals("create"))
+            if (type.equalsIgnoreCase("create"))
                 financeDao.insertAll(modelFinance);
             else
                 financeDao.update(modelFinance);

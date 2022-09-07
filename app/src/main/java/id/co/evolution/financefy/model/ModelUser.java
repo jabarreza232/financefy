@@ -8,6 +8,8 @@ import androidx.room.PrimaryKey;
 
 import java.util.Objects;
 
+import id.co.evolution.financefy.helper.Tools;
+
 @Entity(tableName = "user")
 public class ModelUser {
     @ColumnInfo(name = "id_user")
@@ -19,8 +21,7 @@ public class ModelUser {
     String type;
     @ColumnInfo(name = "category")
     String category;
-    @ColumnInfo(name = "target_value")
-    long targetValue;
+
 
     public ModelUser() {
     }
@@ -29,7 +30,7 @@ public class ModelUser {
         this.name = name;
         this.type = type;
         this.category = category;
-        this.targetValue = targetValue;
+
     }
 
     @Override
@@ -37,12 +38,12 @@ public class ModelUser {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ModelUser modelUser = (ModelUser) o;
-        return id == modelUser.id && targetValue == modelUser.targetValue && Objects.equals(name, modelUser.name) && Objects.equals(type, modelUser.type) && Objects.equals(category, modelUser.category) && Objects.equals(getTarget(), modelUser.getTarget());
+        return Objects.equals(name, modelUser.name) && Objects.equals(type, modelUser.type) && Objects.equals(category, modelUser.category);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, type, category, targetValue,getTarget());
+        return Objects.hash(id, name, type, category);
     }
 
     public int getId() {
@@ -75,18 +76,6 @@ public class ModelUser {
 
     public void setCategory(String category) {
         this.category = category;
-    }
-
-    public long getTargetValue() {
-        return targetValue;
-    }
-
-    public void setTargetValue(long targetValue) {
-        this.targetValue = targetValue;
-    }
-
-    public String getTarget() {
-        return String.valueOf(targetValue);
     }
 
 

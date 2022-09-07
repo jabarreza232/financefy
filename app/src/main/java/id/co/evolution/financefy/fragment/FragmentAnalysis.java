@@ -1,7 +1,6 @@
 package id.co.evolution.financefy.fragment;
 
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
-import static id.co.evolution.financefy.helper.Tools.numberFormat;
 
 
 import androidx.annotation.NonNull;
@@ -11,10 +10,6 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
 import android.annotation.SuppressLint;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -25,22 +20,15 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.components.Legend;
@@ -61,42 +49,27 @@ import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.MPPointF;
 import com.google.gson.Gson;
-import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.ConcurrentModificationException;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.activity.UpdateFinance;
 import id.co.evolution.financefy.adapter.AdapterAnalysisFinance;
-import id.co.evolution.financefy.adapter.AdapterFilter;
-import id.co.evolution.financefy.adapter.AdapterFinance;
-import id.co.evolution.financefy.asynctask.FilterMaxMonthAsynctask;
-import id.co.evolution.financefy.asynctask.FilterMinYearAsynctask;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
-import id.co.evolution.financefy.databinding.FragmentAllBinding;
 import id.co.evolution.financefy.databinding.FragmentAnalysisBinding;
 import id.co.evolution.financefy.dialog.DialogFilterFinance;
 import id.co.evolution.financefy.dialog.DialogMonthPicker;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.LocalizedWeekHelper;
 import id.co.evolution.financefy.helper.MyMarkView;
-import id.co.evolution.financefy.helper.MyValueFormatter;
 import id.co.evolution.financefy.helper.Tools;
-import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
 import id.co.evolution.financefy.model.ModelUser;
@@ -108,7 +81,7 @@ import id.co.evolution.financefy.viewmodel.ViewModelUser;
 
 @AndroidEntryPoint
 public class FragmentAnalysis extends Fragment {
-    Calendar today;
+    public Calendar today;
     Calendar prevNextMonth;
     List<ModelFinance> dataFinance = new ArrayList<>();
     List<ModelFinance> finances = new ArrayList<>();
@@ -117,12 +90,11 @@ public class FragmentAnalysis extends Fragment {
     ViewModelUser viewModelUser;
     AdapterAnalysisFinance adapter;
     TYPE_CHART typeChart = TYPE_CHART.BAR_CHART;
-    Dialog dialog;
-    LayoutInflater inflater;
-    View dialogView;
+    @Inject
     FinanceFilter financeFilter;
     String filterType, filterPeriod;
     String month;
+    @Inject
     LocalizedWeekHelper localizedWeekHelper;
     int prevNextWeek = 0;
     boolean nextWeekEnabled;
@@ -130,8 +102,21 @@ public class FragmentAnalysis extends Fragment {
     FinanceRepository financeRepository;
     @Inject
     UserRepository userRepository;
-    FinanceFilter.CATEGORY_EXPENSE category_expense;
-    FinanceFilter.CATEGORY_INCOME category_income;
+
+    public enum CATEGORY_INCOME {
+        HASIL_USAHA,
+        BONUS,
+        GAJI
+    }
+
+    public enum CATEGORY_EXPENSE {
+        BELANJA_UMUM,
+        MAkANAN,
+        PULSA_HP,
+        TRANSPORTASI,
+        TAGIHAN,
+        PAKET_INTERNET
+    }
 
     CallbackOnActivityResult mCallbackOnActivityResult;
     int mPositionItem;
@@ -148,6 +133,11 @@ public class FragmentAnalysis extends Fragment {
         // Required empty public constructor
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -155,8 +145,7 @@ public class FragmentAnalysis extends Fragment {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_analysis, container, false);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
-        financeFilter = new FinanceFilter();
-        localizedWeekHelper = new LocalizedWeekHelper();
+
         Log.e("cek_list_week: ", localizedWeekHelper.getFirstDay(-7).substring(0, (localizedWeekHelper.getFirstDay(-7).length() - 3)));
         setHasOptionsMenu(true);
         return binding.getRoot();
@@ -171,7 +160,7 @@ public class FragmentAnalysis extends Fragment {
         today.get(Calendar.MONTH);
         prevNextMonth = Calendar.getInstance();
         date_ship_millis = today.getTimeInMillis();
-        filterType = "Pemasukan";
+        filterType = getString(R.string.pemasukan);
         filterPeriod = getString(R.string.bulanan);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelUser = new ViewModelProvider(this).get(ViewModelUser.class);
@@ -213,7 +202,7 @@ public class FragmentAnalysis extends Fragment {
                 binding.btnNext.setEnabled(nextWeekEnabled);
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(),user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(), user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -241,7 +230,7 @@ public class FragmentAnalysis extends Fragment {
 
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(),user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(), user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -249,7 +238,7 @@ public class FragmentAnalysis extends Fragment {
             }
         });
 
-        Log.e("TAG", "cek_enum_category: "+ new Gson().toJson(FinanceFilter.CATEGORY_INCOME.values()));
+        Log.e("TAG", "cek_enum_category: " + new Gson().toJson(CATEGORY_INCOME.BONUS.name()));
         initiateSayHaloWithTime();
     }
 
@@ -377,7 +366,7 @@ public class FragmentAnalysis extends Fragment {
             }
         });
 
-        dialog.showDialogFilterFinance(financeFilter.filterType,financeFilter.filterNominal,financeFilter.filterPeriod,true);
+        dialog.showDialogFilterFinance(financeFilter.filterType, financeFilter.filterNominal, financeFilter.filterPeriod, true);
     }
 
     @SuppressLint("NewApi")
@@ -387,14 +376,13 @@ public class FragmentAnalysis extends Fragment {
         nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
 
         if (filterPeriod.equalsIgnoreCase(getString(R.string.bulanan))) {
-            viewModelFinance.getFinanceByTypeAndMonth(type, month,user.getId()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+            viewModelFinance.getFinanceByTypeAndMonth(type, month, user.getId()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
                 @Override
                 public void onChanged(List<ModelFinance> modelFinances) {
                     if (modelFinances != null) loadData(modelFinances);
                 }
             });
         } else {
-
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 if (nextWeekEnabled)
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
@@ -402,7 +390,7 @@ public class FragmentAnalysis extends Fragment {
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             }
             binding.btnNext.setEnabled(nextWeekEnabled);
-            viewModelFinance.getFinanceByTypeAndWeek(type, getListDateWeek(),user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
+            viewModelFinance.getFinanceByTypeAndWeek(type, getListDateWeek(), user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
                 if (modelFinances != null) loadData(modelFinances);
             });
         }
@@ -410,6 +398,8 @@ public class FragmentAnalysis extends Fragment {
         if (filterPeriod.equalsIgnoreCase(getString(R.string.bulanan))) {
             binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_millis));
             binding.placeMonth.setEnabled(true);
+
+            //TODO jika range tanggal per minggu nya kurang dari tanggal hari maka bisa melakukan tombol next tanggal per minggunya
             if (date_ship_millis < today.getTimeInMillis())
                 binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
             else
@@ -439,7 +429,7 @@ public class FragmentAnalysis extends Fragment {
             binding.btnNext.setEnabled(false);
         }
 
-        viewModelFinance.getFinanceByTypeAndMonth(filterType, month,user.getId()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+        viewModelFinance.getFinanceByTypeAndMonth(filterType, month, user.getId()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
             @Override
             public void onChanged(List<ModelFinance> modelFinances) {
                 if (modelFinances != null) loadData(modelFinances);
@@ -448,7 +438,7 @@ public class FragmentAnalysis extends Fragment {
     }
 
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint({"NotifyDataSetChanged", "SetTextI18n"})
     private void loadData(List<ModelFinance> data) {
         loadDataHeader(data);
         finances = data;
@@ -480,7 +470,7 @@ public class FragmentAnalysis extends Fragment {
     }
 
 
-   private class PieChartAsyncTask extends AsyncTask<Void, PieDataSet, PieDataSet> {
+    private class PieChartAsyncTask extends AsyncTask<Void, PieDataSet, PieDataSet> {
 
         List<ModelFinance> data;
         List<LegendEntry> legendEntries = new ArrayList<>();
@@ -575,7 +565,7 @@ public class FragmentAnalysis extends Fragment {
         }
     }
 
-   private class BarChartAsyncTask extends AsyncTask<Void, List<IBarDataSet>, List<IBarDataSet>> {
+    private class BarChartAsyncTask extends AsyncTask<Void, List<IBarDataSet>, List<IBarDataSet>> {
         // (0.2 + 0.03) * 4 + 0.08 = 1.00 -> interval per "group"
         float groupSpace = 0.08f;
         float barSpace = 0.02f; // x3 DataSet
@@ -603,7 +593,7 @@ public class FragmentAnalysis extends Fragment {
             List<IBarDataSet> barDataSets = new ArrayList<>();
 
 
-            if (filterType.equalsIgnoreCase("Pemasukan")) {
+            if (filterType.equalsIgnoreCase(getString(R.string.pemasukan))) {
                 ArrayList<BarEntry> entriesCompanyResults = new ArrayList<>();
                 ArrayList<BarEntry> entriesBonus = new ArrayList<>();
                 ArrayList<BarEntry> entriesSalary = new ArrayList<>();
@@ -619,26 +609,26 @@ public class FragmentAnalysis extends Fragment {
 
                     for (ModelFinance modelIncome : listData) {
                         Log.e("cek_date", modelNestedFinance.getDefaultDate() + " : " + modelIncome.getDefaultDate() + " : " + modelIncome.getKategori() + " : " + modelIncome.getJumlahValue());
-                        if (modelIncome.getKategori().contains(financeFilter.mapIncome.get("hasil_usaha"))) {
+                        if (modelIncome.getKategoriWithSeparator().contains(CATEGORY_INCOME.HASIL_USAHA.name().toLowerCase())) {
                             fHasilUsaha = (float) modelIncome.getJumlahValue();
                         }
-                        if (modelIncome.getKategori().contains(financeFilter.mapIncome.get("gaji"))) {
+                        if (modelIncome.getKategoriWithSeparator().contains(CATEGORY_INCOME.GAJI.name().toLowerCase())) {
                             fGaji = (float) modelIncome.getJumlahValue();
                         }
 
-                        if (modelIncome.getKategori().contains(financeFilter.mapIncome.get("bonus"))) {
+                        if (modelIncome.getKategoriWithSeparator().contains(CATEGORY_INCOME.BONUS.name().toLowerCase())) {
                             fBonus = (float) modelIncome.getJumlahValue();
                         }
                     }
 
-                    entriesCompanyResults.add(new BarEntry(i, fHasilUsaha, financeFilter.mapIncome.get("hasil_usaha")));
-                    entriesBonus.add(new BarEntry(i, fBonus, financeFilter.mapIncome.get("bonus")));
-                    entriesSalary.add(new BarEntry(i, fGaji, financeFilter.mapIncome.get("gaji")));
+                    entriesCompanyResults.add(new BarEntry(i, fHasilUsaha, CATEGORY_INCOME.HASIL_USAHA.name().toLowerCase()));
+                    entriesBonus.add(new BarEntry(i, fBonus, CATEGORY_INCOME.BONUS.name().toLowerCase()));
+                    entriesSalary.add(new BarEntry(i, fGaji, CATEGORY_INCOME.GAJI.name().toLowerCase()));
                 }
 
-                BarDataSet barDataSetCompanyResult = new BarDataSet(entriesCompanyResults, financeFilter.mapIncome.get("hasil_usaha"));
-                BarDataSet barDataSetBonus = new BarDataSet(entriesBonus, financeFilter.mapIncome.get("bonus"));
-                BarDataSet barDataSetSalary = new BarDataSet(entriesSalary, financeFilter.mapIncome.get("gaji"));
+                BarDataSet barDataSetCompanyResult = new BarDataSet(entriesCompanyResults, CATEGORY_INCOME.HASIL_USAHA.name().toLowerCase());
+                BarDataSet barDataSetBonus = new BarDataSet(entriesBonus, CATEGORY_INCOME.BONUS.name().toLowerCase());
+                BarDataSet barDataSetSalary = new BarDataSet(entriesSalary, CATEGORY_INCOME.GAJI.name().toLowerCase());
 
 
                 barDataSetBonus.setColor(ContextCompat.getColor(getContext(), R.color.blueColor));
@@ -667,41 +657,41 @@ public class FragmentAnalysis extends Fragment {
 
                     for (ModelFinance modelExpense : listData) {
                         Log.e("cek_date", modelNestedFinance.getDefaultDate() + " : " + modelExpense.getDefaultDate() + " : " + modelExpense.getKategori() + " : " + modelExpense.getJumlahValue());
-                        if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("belanja_umum"))) {
+                        if (modelExpense.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.BELANJA_UMUM.name().toLowerCase())) {
                             fGeneralShopping = (float) modelExpense.getJumlahValue();
                         }
-                        if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("makanan"))) {
+                        if (modelExpense.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.MAkANAN.name().toLowerCase())) {
                             fFood = (float) modelExpense.getJumlahValue();
                         }
 
-                        if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("pulsa_hp"))) {
+                        if (modelExpense.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.PULSA_HP.name().toLowerCase())) {
                             fPulse = (float) modelExpense.getJumlahValue();
                         }
-                        if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("transportasi"))) {
+                        if (modelExpense.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.TRANSPORTASI.name().toLowerCase())) {
                             fTransportation = (float) modelExpense.getJumlahValue();
                         }
-                        if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("paket_internet"))) {
+                        if (modelExpense.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.PAKET_INTERNET.name().toLowerCase())) {
                             fInternetPackages = (float) modelExpense.getJumlahValue();
                         }
-                        if (modelExpense.getKategori().contains(financeFilter.mapExpense.get("tagihan"))) {
+                        if (modelExpense.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.TAGIHAN.name().toLowerCase())) {
                             fBill = (float) modelExpense.getJumlahValue();
                         }
                     }
 
-                    entriesGeneralShopping.add(new BarEntry(i, fGeneralShopping, financeFilter.mapExpense.get("belanja_umum")));
-                    entriesFood.add(new BarEntry(i, fFood, financeFilter.mapExpense.get("makanan")));
-                    entriesPulse.add(new BarEntry(i, fPulse, financeFilter.mapExpense.get("pulsa_hp")));
-                    entriesTransportation.add(new BarEntry(i, fTransportation, financeFilter.mapExpense.get("transportasi")));
-                    entriesBill.add(new BarEntry(i, fBill, financeFilter.mapExpense.get("tagihan")));
-                    entriesInternetPackages.add(new BarEntry(i, fInternetPackages, financeFilter.mapExpense.get("paket_internet")));
+                    entriesGeneralShopping.add(new BarEntry(i, fGeneralShopping, CATEGORY_EXPENSE.BELANJA_UMUM.name().toLowerCase()));
+                    entriesFood.add(new BarEntry(i, fFood, CATEGORY_EXPENSE.MAkANAN.name().toLowerCase()));
+                    entriesPulse.add(new BarEntry(i, fPulse, CATEGORY_EXPENSE.PULSA_HP.name().toLowerCase()));
+                    entriesTransportation.add(new BarEntry(i, fTransportation, CATEGORY_EXPENSE.TRANSPORTASI.name().toLowerCase()));
+                    entriesBill.add(new BarEntry(i, fBill, CATEGORY_EXPENSE.TAGIHAN.name().toLowerCase()));
+                    entriesInternetPackages.add(new BarEntry(i, fInternetPackages, CATEGORY_EXPENSE.PAKET_INTERNET.name().toLowerCase()));
                 }
 
-                BarDataSet barDataSetGeneralShopping = new BarDataSet(entriesGeneralShopping, financeFilter.mapExpense.get("belanja_umum"));
-                BarDataSet barDataSetFood = new BarDataSet(entriesFood, financeFilter.mapExpense.get("makanan"));
-                BarDataSet barDataSetPulse = new BarDataSet(entriesPulse, financeFilter.mapExpense.get("pulsa_hp"));
-                BarDataSet barDataSetTransportation = new BarDataSet(entriesTransportation, financeFilter.mapExpense.get("transportasi"));
-                BarDataSet barDataSetBill = new BarDataSet(entriesBill, financeFilter.mapExpense.get("tagihan"));
-                BarDataSet barDataSetInternetPackages = new BarDataSet(entriesInternetPackages, financeFilter.mapExpense.get("paket_internet"));
+                BarDataSet barDataSetGeneralShopping = new BarDataSet(entriesGeneralShopping, CATEGORY_EXPENSE.BELANJA_UMUM.name().toLowerCase());
+                BarDataSet barDataSetFood = new BarDataSet(entriesFood, CATEGORY_EXPENSE.MAkANAN.name().toLowerCase());
+                BarDataSet barDataSetPulse = new BarDataSet(entriesPulse, CATEGORY_EXPENSE.PULSA_HP.name().toLowerCase());
+                BarDataSet barDataSetTransportation = new BarDataSet(entriesTransportation, CATEGORY_EXPENSE.TRANSPORTASI.name().toLowerCase());
+                BarDataSet barDataSetBill = new BarDataSet(entriesBill, CATEGORY_EXPENSE.TAGIHAN.name().toLowerCase());
+                BarDataSet barDataSetInternetPackages = new BarDataSet(entriesInternetPackages, CATEGORY_EXPENSE.PAKET_INTERNET.name().toLowerCase());
 
 
                 barDataSetGeneralShopping.setColor(ContextCompat.getColor(getContext(), R.color.blueColor));
@@ -813,6 +803,8 @@ public class FragmentAnalysis extends Fragment {
             binding.barChartAnalysis.invalidate();
         }
     }
+
+
     private List<String> getListDateWeek() {
         return localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek));
     }

@@ -8,7 +8,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.db.UserDao;
+import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.model.ModelUserWithFinance;
 
@@ -32,7 +34,7 @@ public class UserRepository {
         return userDao.findFinanceByUserId(id_user);
     }
 
-    public static class InputUpdateUser extends AsyncTask<Void, Void, Void> {
+    public static class InputUpdateUser extends AsyncTask<Void, Void, LiveData<List<ModelUser>>> {
         ModelUser modelUser;
         String type;
         UserDao userDao;
@@ -44,12 +46,33 @@ public class UserRepository {
         }
 
         @Override
-        protected Void doInBackground(Void... voids) {
-            if (type.toLowerCase().equals("create"))
+        protected LiveData<List<ModelUser>> doInBackground(Void... voids) {
+            if (type.equalsIgnoreCase("create"))
                 userDao.insertAll(modelUser);
             else
                 userDao.update(modelUser);
 
+            return userDao.getAll();
+        }
+
+        @Override
+        protected void onPostExecute(LiveData<List<ModelUser>> unused) {
+            super.onPostExecute(unused);
+        }
+    }
+
+    public static class RemoveUser extends AsyncTask<Void, Void, Void> {
+        ModelUser modelUser;
+        UserDao userDao;
+
+        public RemoveUser(ModelUser modelUser, UserDao userDao) {
+            this.modelUser = modelUser;
+            this.userDao = userDao;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            userDao.delete(modelUser);
             return null;
         }
 

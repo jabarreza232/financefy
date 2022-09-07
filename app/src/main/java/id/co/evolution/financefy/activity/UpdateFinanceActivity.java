@@ -43,6 +43,7 @@ import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
 import id.co.evolution.financefy.db.FinanceDB;
 import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.dialog.DialogFinance;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
@@ -50,12 +51,12 @@ import id.co.evolution.financefy.viewmodel.ViewModelFactory;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 @AndroidEntryPoint
-public class UpdateFinance extends AppCompatActivity implements View.OnClickListener {
+public class UpdateFinanceActivity extends AppCompatActivity implements View.OnClickListener {
 
     String date = "";
     String category = "";
     String type = "";
-    String[] kategori = null;
+    String[] arrayCategory = null;
     private String jumlah = "";
     String month = "";
     ModelFinance modelFinance;
@@ -65,10 +66,11 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
     DialogCalculator dialogCalculator;
     //    @Inject
 //    ViewModelFactory viewModelFactory;
-    int position;
+    int position,id_user;
 
     @Inject
     FinanceRepository financeRepository;
+
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,7 +84,8 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
-        position = getIntent().getIntExtra("position",0);
+        position = getIntent().getIntExtra("position", 0);
+        id_user = getIntent().getIntExtra("id_user", 0);
         viewModelFinance.getFinanceById(getIntent().getIntExtra("id", 0)).observe(this, modelFinance -> {
             this.modelFinance = modelFinance;
             loadData();
@@ -168,104 +171,31 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
         datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR), cur_calendar.get(Calendar.YEAR));
         datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
         datePickerDialog.setMaxDate(cur_calendar);
-        datePickerDialog.show(getFragmentManager(), "PickerDialog");
+        datePickerDialog.show(getSupportFragmentManager(), "PickerDialog");
     }
 
     private void showDialogCategory() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Pilih Kategori");
-        if (type.equalsIgnoreCase("pengeluaran")) {
-            kategori = getResources().getStringArray(R.array.category_pengeluaran);
-            builder.setItems(kategori, (dialog, which) -> {
-                switch (which) {
-                    case 0:
-                        dialog.dismiss();
-                        category = kategori[0];
-                        break;
-                    case 1:
-                        dialog.dismiss();
-                        category = kategori[1];
-                        break;
-                    case 2:
-                        dialog.dismiss();
-                        category = kategori[2];
-                        break;
-                    case 3:
-                        dialog.dismiss();
-                        category = kategori[3];
-                        break;
-                    case 4:
-                        dialog.dismiss();
-                        category = kategori[4];
-                        break;
-                    case 5:
-                        dialog.dismiss();
-                        category = kategori[5];
-                        break;
-
-                }
-                if (!category.isEmpty())
-                    binding.txtKategori.setText(category);
-
-            });
-        } else {
-            kategori = getResources().getStringArray(R.array.category_pemasukan);
-            builder.setItems(kategori, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case 0:
-                            dialog.dismiss();
-                            category = kategori[0];
-                            break;
-                        case 1:
-                            dialog.dismiss();
-                            category = kategori[1];
-                            break;
-                        case 2:
-                            dialog.dismiss();
-                            category = kategori[2];
-                            break;
-                    }
-                    if (!category.isEmpty()) {
-                        binding.txtKategori.setText(category);
-                    }
-                }
-            });
-        }
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    private void showDialogTipe() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Pilih Tipe");
-        final String[] tipe = {"Pengeluaran", "Pemasukan"};
-        builder.setItems(tipe, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch (which) {
-                    case 0:
-                        type = tipe[0];
-                        dialog.dismiss();
-                        kategori = getResources().getStringArray(R.array.category_pengeluaran);
-                        binding.txtKategori.setText(kategori[0]);
-                        category = kategori[0];
-                        break;
-                    case 1:
-                        type = tipe[1];
-                        kategori = getResources().getStringArray(R.array.category_pemasukan);
-                        binding.txtKategori.setText(kategori[0]);
-                        category = kategori[0];
-                        dialog.dismiss();
-                        break;
-                }
-                binding.txtType.setText(type);
+        int arrayCategoryFromResource = type.equalsIgnoreCase(getString(R.string.pengeluaran)) ? R.array.category_pengeluaran : R.array.category_pemasukan;
+        DialogFinance dialogFinance = new DialogFinance(this, (index,result) -> {
+            category = result;
+            if (!category.isEmpty()) {
+                binding.txtKategori.setText(category);
             }
         });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        dialogFinance.showDialogCategory(arrayCategoryFromResource);
+    }
+
+    private void showDialogType() {
+        DialogFinance dialogFinance = new DialogFinance(this, (index,result) -> {
+            type = result;
+            int arrayCategoryFromResource = result.equalsIgnoreCase(getString(R.string.pengeluaran)) ? R.array.category_pengeluaran : R.array.category_pemasukan;
+            arrayCategory = getResources().getStringArray(arrayCategoryFromResource);
+            //TODO Default value di index pertama
+            binding.txtKategori.setText(arrayCategory[0]);
+            category = arrayCategory[0];
+            binding.txtType.setText(type);
+        });
+        dialogFinance.showDialogType(R.array.type_finance);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -276,10 +206,10 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
                 showDialogCategory();
                 break;
             case R.id.place_type:
-                showDialogTipe();
+                showDialogType();
                 break;
             case R.id.btn_calculator:
-                dialogCalculator = new DialogCalculator(this, getLayoutInflater(),Tools.convertCurrencyToValue(jumlah), result -> {
+                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), Tools.convertCurrencyToValue(jumlah), result -> {
                     jumlah = Tools.convertToCurrency(result);
                     binding.etAmount.setText(jumlah);
                 });
@@ -317,7 +247,7 @@ public class UpdateFinance extends AppCompatActivity implements View.OnClickList
                                 viewModelFinance.inputUpdateFinance("Update", model);
                                 Intent intent = new Intent();
                                 intent.putExtra("finance", model);
-                                intent.putExtra("position",position);
+                                intent.putExtra("position", position);
                                 setResult(RESULT_OK, intent);
                                 finish();
                             })

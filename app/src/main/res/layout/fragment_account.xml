@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -13,21 +14,28 @@
             android:orientation="vertical"
             tools:context=".fragment.FragmentAll">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/TextInputLayoutOutlineTheme"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
-                android:drawablePadding="5dp"
-                android:fontFamily="@font/ubuntu_r"
-                android:padding="16dp"
-                android:text="Pilih Akun"
-                android:textColor="@color/blackTextColor" />
+                android:layout_margin="10dp"
+                android:hint="@string/choose_account">
+
+                <AutoCompleteTextView
+                    android:id="@+id/spin_choose_account"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:ellipsize="end"
+                    android:inputType="none"
+                    tools:text="M Jabbar" />
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
-                android:background="@drawable/shape_line_black">
+                android:background="@drawable/shape_line_gray">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -45,16 +53,19 @@
                         android:textSize="15sp" />
 
                     <ImageView
-                        android:id="@+id/img_edit"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:id="@+id/img_more"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:src="@drawable/ic_edit" />
+                        android:src="@drawable/ic_baseline_more_vert_24" />
+
 
                     <TextView
+                        android:id="@+id/txt_description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/txt_name"
+                        android:layout_toStartOf="@id/img_more"
                         android:fontFamily="@font/ubuntu_r"
                         android:text="Pribadi - Menabung"
                         android:textColor="@color/blackTextColor"
@@ -65,6 +76,32 @@
 
             </FrameLayout>
 
+            <RelativeLayout
+                android:id="@+id/place_choose_savings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@drawable/shape_date">
+
+                <TextView
+                    android:id="@+id/txt_choose_savings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="Pilih Tabungan"
+                    android:textColor="@color/blackTextColor" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:padding="16dp"
+                    android:src="@drawable/ic_arrow_drop_down"
+                    app:tint="@color/blackTextColor" />
+
+
+            </RelativeLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -72,36 +109,48 @@
                 android:orientation="horizontal"
                 android:weightSum="2">
 
-                <FrameLayout
+                <LinearLayout
                     android:id="@+id/place_target"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginEnd="5dp"
                     android:layout_weight="1"
-                    android:background="@drawable/shape_line_black">
+                    android:background="@drawable/shape_line_gray"
+                    android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
+                        android:drawablePadding="5dp"
+                        android:fontFamily="@font/lato_bold"
+                        android:padding="10dp"
+                        android:text="Target"
+                        android:textColor="@color/blackTextColor"
+                        android:textSize="15sp" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/colorGrey30" />
+
+                    <TextView
+                        android:id="@+id/txt_target"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:drawableStart="@drawable/ic_baseline_gps_fixed_24"
                         android:drawablePadding="5dp"
                         android:fontFamily="@font/calibri"
-                        android:padding="10dp"
+                        android:padding="16dp"
                         android:text="Rp.50.000"
-                        android:textColor="@color/blackTextColor"
+                        android:textColor="@color/blackTextColor" />
 
-                        />
-
-                </FrameLayout>
+                </LinearLayout>
 
                 <FrameLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@drawable/shape_line_black"
-
-                    >
+                    android:background="@drawable/shape_line_gray">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -109,6 +158,20 @@
                         android:layout_gravity="center_vertical"
                         android:orientation="vertical">
 
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:drawablePadding="5dp"
+                            android:fontFamily="@font/lato_bold"
+                            android:padding="10dp"
+                            android:text="Progress"
+                            android:textColor="@color/blackTextColor"
+                            android:textSize="15sp" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/colorGrey30" />
 
                         <RelativeLayout
                             android:layout_width="match_parent"
@@ -117,31 +180,31 @@
 
 
                             <TextView
-                                android:id="@+id/txt_jumlah"
+                                android:id="@+id/txt_progress_value_savings"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="7dp"
                                 android:layout_marginBottom="5dp"
-                                android:layout_toStartOf="@id/txt_percentage"
+                                android:layout_toStartOf="@id/txt_percentage_savings"
                                 android:fontFamily="@font/ubuntu_r"
+                                android:text="Rp.15.000"
                                 android:textColor="@android:color/black"
-                                android:textSize="13sp"
-                                android:text="Rp.15.000"/>
+                                android:textSize="13sp" />
 
 
                             <ProgressBar
-                                android:id="@+id/progress_finance"
+                                android:id="@+id/progress_bar_target_savings"
                                 style="@android:style/Widget.ProgressBar.Horizontal"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_below="@id/txt_jumlah"
+                                android:layout_below="@id/txt_progress_value_savings"
                                 android:layout_marginBottom="10dp"
-                                android:layout_toStartOf="@id/txt_percentage"
+                                android:layout_toStartOf="@id/txt_percentage_savings"
                                 android:progressDrawable="@drawable/progress_income_drawable"
                                 tools:ignore="UnusedAttribute" />
 
                             <TextView
-                                android:id="@+id/txt_percentage"
+                                android:id="@+id/txt_percentage_savings"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
@@ -161,6 +224,20 @@
             </LinearLayout>
         </LinearLayout>
 
-
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/fab_add_account"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="16dp"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="Tambah Akun"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/blueColor"
+            app:icon="@drawable/ic_add"
+            app:iconGravity="end"
+            app:iconTint="@color/white" />
     </RelativeLayout>
 </layout>

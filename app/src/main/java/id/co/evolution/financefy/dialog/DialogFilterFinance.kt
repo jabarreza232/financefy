@@ -2,10 +2,7 @@ package id.co.evolution.financefy.dialog
 
 import android.app.Dialog
 import android.content.Context
-import android.view.Gravity
-import android.view.LayoutInflater
-import android.view.View
-import android.view.WindowManager
+import android.view.*
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -32,18 +29,18 @@ class DialogFilterFinance(
         listFilterNominal: List<ModelFilter>,
         listFilterPeriod: List<ModelFilter>, isAnalysis: Boolean = false
     ) {
-        val txtSubmit = dialogView.findViewById<TextView>(R.id.txt_submit)
-        val txtNominal = dialogView.findViewById<TextView>(R.id.txt_nominal)
-        val rvListType: RecyclerView = dialogView.findViewById(R.id.rv_type)
-        val rvListNominal: RecyclerView = dialogView.findViewById(R.id.rv_nominal)
-        val rvListPeriod: RecyclerView = dialogView.findViewById(R.id.rv_periode)
+        val txtSubmit = findViewById<TextView>(R.id.txt_submit)
+        val txtNominal = findViewById<TextView>(R.id.txt_nominal)
+        val rvListType: RecyclerView = findViewGroupById(R.id.rv_type)
+        val rvListNominal: RecyclerView = findViewGroupById(R.id.rv_nominal)
+        val rvListPeriod: RecyclerView = findViewGroupById(R.id.rv_periode)
 
         var listFilterTypeValue = listFilterType
 
         isAnalysis.let {
             when (it) {
                 true -> {
-                    listFilterTypeValue = listFilterType.subList(0,2)
+                    listFilterTypeValue = listFilterType.subList(0, 2)
                     txtNominal.visibility = View.GONE
                 }
                 false -> {
@@ -80,7 +77,7 @@ class DialogFilterFinance(
             LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         rvListPeriod.adapter = adapterFilterPeriod
 
-        txtSubmit.setOnClickListener { v: View? ->
+        txtSubmit onClick View.OnClickListener {
             dialog.dismiss()
             dialogFilterFinanceCallback.onSubmit()
         }
@@ -90,22 +87,32 @@ class DialogFilterFinance(
 
         wlp.gravity = Gravity.CENTER
         wlp.flags = wlp.flags and WindowManager.LayoutParams.FLAG_BLUR_BEHIND.inv()
-        window!!.attributes = wlp
+        window.attributes = wlp
         dialog.window!!.setLayout(
             RelativeLayout.LayoutParams.MATCH_PARENT,
             RelativeLayout.LayoutParams.WRAP_CONTENT
         )
 
         dialog.show()
-
     }
 
+    private infix fun View.onClick(onclick: View.OnClickListener) {
+        setOnClickListener(onclick)
+    }
+
+    private fun <T : View> findViewById(value: Int): T {
+        return dialogView.findViewById(value)
+    }
+
+    private fun <T : ViewGroup> findViewGroupById(value: Int): T {
+
+        return dialogView.findViewById(value)
+    }
 
     interface DialogFilterFinanceCallback {
         fun resultFilterType(result: String)
         fun resultFilterNominal(result: String)
         fun resultFilterPeriod(result: String)
         fun onSubmit()
-
     }
 }

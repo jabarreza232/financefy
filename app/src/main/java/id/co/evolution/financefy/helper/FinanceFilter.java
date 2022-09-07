@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
+import javax.inject.Inject;
+
 import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
@@ -20,24 +22,9 @@ public class FinanceFilter {
     public List<ModelFilter> filterType = new ArrayList<>();
     public List<ModelFilter> filterNominal = new ArrayList<>();
     public List<ModelFilter> filterPeriod = new ArrayList<>();
-    public HashMap<String, String> mapIncome = new HashMap<>();
-    public HashMap<String, String> mapExpense = new HashMap<>();
 
-    public enum CATEGORY_INCOME {
-        HASIL_USAHA,
-        BONUS,
-        GAJI
-    }
 
-    public enum CATEGORY_EXPENSE {
-        BELANJA_UMUM,
-        MAkANAN,
-        PULSA_HP,
-        TRANSPORTASI,
-        TAGIHAN,
-        PAKET_INTERNET
-    }
-
+    @Inject
     public FinanceFilter() {
         setUpFilter();
     }
@@ -82,18 +69,6 @@ public class FinanceFilter {
 
         filterPeriod.add(new ModelFilter("Mingguan"));
         filterPeriod.add(new ModelFilter("Bulanan"));
-
-        mapIncome.put("hasil_usaha", "Hasil Usaha");
-        mapIncome.put("bonus", "Bonus");
-        mapIncome.put("gaji", "Gaji");
-
-        mapExpense.put("belanja_umum", "Belanja Umum");
-        mapExpense.put("makanan", "Makanan");
-        mapExpense.put("pulsa_hp", "Pulsa HP");
-        mapExpense.put("transportasi", "Transportasi");
-        mapExpense.put("tagihan", "Tagihan");
-        mapExpense.put("paket_internet", "Paket Internet");
-
     }
 
     public void resetFilter() {

@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 /**
  * Created by sadaPc on 22/09/2017.
  */
@@ -27,6 +29,8 @@ public class TinyDb {
     private String DEFAULT_APP_IMAGEDATA_DIRECTORY;
     private String lastImagePath = "";
 
+
+    @Inject
     public TinyDb(Context appContext) {
         preferences = PreferenceManager.getDefaultSharedPreferences(appContext);
     }
@@ -308,8 +312,8 @@ public class TinyDb {
 
         String json = getString(key);
         T value = new Gson().fromJson(json, classOfT);
-        if (value == null)
-            throw new NullPointerException();
+//        if (value == null)
+//            throw new NullPointerException();
         return value;
     }
 

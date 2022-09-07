@@ -12,7 +12,7 @@ import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.repository.UserRepository;
 
 public class ViewModelUser extends ViewModel {
-    UserRepository userRepository;
+   public UserRepository userRepository;
 
     public void init(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -24,7 +24,9 @@ public class ViewModelUser extends ViewModel {
 
     public LiveData<ModelUserWithFinance> getFinanceByUserId(int id) {
         return userRepository.getFinanceByUserId(id);
-    }    public LiveData<List<ModelUser>> getAllUser() {
+    }
+
+    public LiveData<List<ModelUser>> getAllUser() {
         return userRepository.getAllUser();
     }
 

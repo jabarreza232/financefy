@@ -6,6 +6,10 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.room.Room;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -13,7 +17,11 @@ import dagger.hilt.android.components.ApplicationComponent;
 import dagger.hilt.android.qualifiers.ApplicationContext;
 import id.co.evolution.financefy.db.FinanceDB;
 import id.co.evolution.financefy.db.FinanceDao;
+import id.co.evolution.financefy.db.SavingsDao;
 import id.co.evolution.financefy.db.UserDao;
+import id.co.evolution.financefy.helper.FinanceFilter;
+import id.co.evolution.financefy.helper.LocalizedWeekHelper;
+import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.model.ModelUserWithFinance;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.repository.UserRepository;
@@ -48,20 +56,34 @@ public class AppModule {
             return new ViewModelFinance();
         }
     */
-    @Provides
-    FinanceRepository financeRepository(@NonNull FinanceDB financeDB) {
-        return new FinanceRepository(financeDB.financeDao());
-    }
+
+//    @Provides
+//    FinanceRepository financeRepository(@NonNull FinanceDB financeDB) {
+//        return new FinanceRepository(financeDB.financeDao());
+//    }
+//
+//    @Provides
+//    UserRepository userRepository(@NonNull FinanceDB financeDB) {
+//        return new UserRepository(financeDB.userDao());
+//    }
 
     @Provides
-    UserRepository userRepository(@NonNull FinanceDB financeDB) {
-        return new UserRepository(financeDB.userDao());
+    TinyDb tinyDb(@ApplicationContext Context context){
+        return new TinyDb(context);
     }
-
 
     @Provides
     SavedStateHandle savedStateHandle() {
         return new SavedStateHandle();
+    }
+
+    @Provides
+    FinanceFilter financeFilter(){
+        return new FinanceFilter();
+    }
+    @Provides
+    LocalizedWeekHelper localizedWeekHelper(){
+        return new LocalizedWeekHelper();
     }
 
     @Provides
@@ -72,6 +94,9 @@ public class AppModule {
     @Provides
     UserDao userDao(@NonNull FinanceDB financeDB) {
         return financeDB.userDao();
+    } @Provides
+    SavingsDao savingsDao(@NonNull FinanceDB financeDB) {
+        return financeDB.savingsDao();
     }
 
 }

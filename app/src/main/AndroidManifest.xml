@@ -14,14 +14,16 @@
         android:theme="@style/AppTheme"
         tools:replace="android:icon">
         <activity
-            android:name=".activity.CreateFinance"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
-            />
+            android:name=".activity.CreateUser"
+            android:exported="false" />
         <activity
-            android:windowSoftInputMode="stateAlwaysHidden|adjustPan"
-            android:name=".activity.UpdateFinance"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:name=".activity.CreateFinanceActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
+        <activity
+            android:name=".activity.UpdateFinanceActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -31,8 +33,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
     </application>
 
 </manifest>

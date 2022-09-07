@@ -27,11 +27,10 @@ public class ModelFinance implements Serializable {
     String tipe;
     @ColumnInfo(name = "month")
     String month;
-    @ColumnInfo(name="id_finance_user")
+    @ColumnInfo(name = "id_finance_user")
     int id_finance_user;
     @Ignore
     long totalValue;
-
 
 
     public ModelFinance() {
@@ -65,15 +64,24 @@ public class ModelFinance implements Serializable {
         return jumlah;
     }
 
-    public double getJumlahValue(){
+    public double getJumlahValue() {
         return Tools.replaceCurrencyStringToDouble(jumlah);
     }
+
     public void setJumlah(String jumlah) {
         this.jumlah = jumlah;
     }
 
     public String getKategori() {
         return kategori;
+    }
+
+    public String getKategoriLowerCase() {
+        return kategori.toLowerCase();
+    }
+
+    public String getKategoriWithSeparator() {
+        return kategori.replace(" ","_").toLowerCase();
     }
 
     public void setKategori(String kategori) {
@@ -92,9 +100,10 @@ public class ModelFinance implements Serializable {
         return date;
     }
 
-    public String getDefaultDate(){
+    public String getDefaultDate() {
         return Tools.convertDateFormat(date);
     }
+
     public void setDate(String date) {
         this.date = date;
     }
@@ -115,45 +124,37 @@ public class ModelFinance implements Serializable {
         this.totalValue = totalValue;
     }
 
+
     public static Comparator<ModelFinance> shortedNominalMinToMax = (jc1, jc2) -> {
-        String min=jc1.getJumlah().replaceAll("[Rp,.]","");
-        String max=jc2.getJumlah().replaceAll("[Rp,.]","");
-        return  ((int)(Long.parseLong(min)-Long.parseLong(max)));
+        String min = jc1.getJumlah().replaceAll("[Rp,.]", "");
+        String max = jc2.getJumlah().replaceAll("[Rp,.]", "");
+        return ((int) (Long.parseLong(min) - Long.parseLong(max)));
     };
 
-    public static Comparator<ModelFinance> shortedNominalMaxToMin = new Comparator<ModelFinance>() {
-        @Override
-        public int compare(ModelFinance jc1, ModelFinance jc2) {
-            String min=jc1.getJumlah().replaceAll("[Rp,.]","");
-            String max=jc2.getJumlah().replaceAll("[Rp,.]","");
-            return ((int) (Long.parseLong(max)-Long.parseLong(min)));
-        }
+    public static Comparator<ModelFinance> shortedNominalMaxToMin = (jc1, jc2) -> {
+        String min = jc1.getJumlah().replaceAll("[Rp,.]", "");
+        String max = jc2.getJumlah().replaceAll("[Rp,.]", "");
+        return ((int) (Long.parseLong(max) - Long.parseLong(min)));
     };
-    public static Comparator<ModelFinance> shortedPeriodLatestToLongest = new Comparator<ModelFinance>() {
-        @Override
-        public int compare(ModelFinance jc1, ModelFinance jc2) {
-            int result =Tools.getDateFromDateFormat(jc2.getDefaultDate(),"year") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"year");
-            if(result == 0)
-                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"month") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"month");
+    public static Comparator<ModelFinance> shortedPeriodLatestToLongest = (jc1, jc2) -> {
+        int result = Tools.getDateFromDateFormat(jc2.getDefaultDate(), "year") - Tools.getDateFromDateFormat(jc1.getDefaultDate(), "year");
+        if (result == 0)
+            result = Tools.getDateFromDateFormat(jc2.getDefaultDate(), "month") - Tools.getDateFromDateFormat(jc1.getDefaultDate(), "month");
 
-            if(result ==0)
-                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"date") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"date");
+        if (result == 0)
+            result = Tools.getDateFromDateFormat(jc2.getDefaultDate(), "date") - Tools.getDateFromDateFormat(jc1.getDefaultDate(), "date");
 
-            return  result;
-        }
+        return result;
     };
 
-    public static Comparator<ModelFinance> shortedPeriodLongestToLatest = new Comparator<ModelFinance>() {
-        @Override
-        public int compare(ModelFinance jc1, ModelFinance jc2) {
-            int result =Tools.getDateFromDateFormat(jc2.getDefaultDate(),"year") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"year");
-            if(result == 0)
-                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"month") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"month");
+    public static Comparator<ModelFinance> shortedPeriodLongestToLatest = (jc1, jc2) -> {
+        int result = Tools.getDateFromDateFormat(jc2.getDefaultDate(), "year") - Tools.getDateFromDateFormat(jc1.getDefaultDate(), "year");
+        if (result == 0)
+            result = Tools.getDateFromDateFormat(jc2.getDefaultDate(), "month") - Tools.getDateFromDateFormat(jc1.getDefaultDate(), "month");
 
-            if(result ==0)
-                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"date") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"date");
+        if (result == 0)
+            result = Tools.getDateFromDateFormat(jc2.getDefaultDate(), "date") - Tools.getDateFromDateFormat(jc1.getDefaultDate(), "date");
 
-            return  result;
-        }
+        return result;
     };
 }

@@ -3,7 +3,6 @@ package id.co.evolution.financefy.callback;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.ActivityResultRegistry;
@@ -12,11 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.google.gson.Gson;
-
 import java.util.List;
 
-import id.co.evolution.financefy.activity.UpdateFinance;
+import id.co.evolution.financefy.activity.UpdateFinanceActivity;
 import id.co.evolution.financefy.model.ModelFinance;
 
 public class CallbackOnActivityResult implements DefaultLifecycleObserver {
@@ -44,7 +41,7 @@ public class CallbackOnActivityResult implements DefaultLifecycleObserver {
     }
 
     public void updateDataFinance(List<ModelFinance> data, int position) {
-        Intent i = new Intent(mContext, UpdateFinance.class);
+        Intent i = new Intent(mContext, UpdateFinanceActivity.class);
         i.putExtra("id", data.get(position).getId());
         i.putExtra("position",position);
         mStartForResult.launch(i);

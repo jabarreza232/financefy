@@ -57,54 +57,9 @@ public class Tools {
         return Double.parseDouble(value.replaceAll("[Rp,.]", ""));
     }
 
-    public static String numberFormat(long number) {
-        DecimalFormat format;
-        String lengthNumber = String.valueOf(number);
-        String result = "";
-        if (lengthNumber.length() == 4) {
-            format = new DecimalFormat("#,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 5) {
-            format = new DecimalFormat("##,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 6) {
-            format = new DecimalFormat("###,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 7) {
-            format = new DecimalFormat("#,###,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 8) {
-            format = new DecimalFormat("##,###,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 9) {
-            format = new DecimalFormat("###,###,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 10) {
-            format = new DecimalFormat("#,###,###,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 11) {
-            format = new DecimalFormat("##,###,###,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 12) {
-            format = new DecimalFormat("###,###,###,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 13) {
-            format = new DecimalFormat("#,###,###,###,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 14) {
-            format = new DecimalFormat("##,###,###,###,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 15) {
-            format = new DecimalFormat("###,###,###,###,###");
-            result = format.format(number);
-        } else if (lengthNumber.length() == 16) {
-            format = new DecimalFormat("#,###,###,###,###,###");
-            result = format.format(number);
-        } else {
-            result = String.valueOf(number);
-        }
+    public static long replaceCurrencyStringToLong(String value) {
 
-        return result;
+        return Long.parseLong(value.replaceAll("[Rp,.]", ""));
     }
 
     public static String getSpecialCharacterInMyString(String value) {
