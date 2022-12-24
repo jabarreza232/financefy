@@ -42,4 +42,7 @@ public interface SavingsDao {
 
     @Delete
     void deleteSavings(List<ModelSavings> savings);
+
+    @Query("DELETE  FROM savings WHERE id_savings_user =:id")
+    void deleteSavingsByIdUser(int id);
 }

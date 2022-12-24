@@ -12,32 +12,23 @@ import androidx.cardview.widget.CardView
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import com.google.gson.Gson
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
-import dagger.hilt.android.AndroidEntryPoint
 import id.co.evolution.financefy.R
 import id.co.evolution.financefy.helper.Tools
 import id.co.evolution.financefy.model.ModelSavings
 import id.co.evolution.financefy.model.ModelUser
-import id.co.evolution.financefy.repository.SavingsRepository
-import id.co.evolution.financefy.repository.UserRepository
-import id.co.evolution.financefy.repository.UserRepository.InputUpdateUser
 import java.text.NumberFormat
 import java.util.*
-import javax.inject.Inject
 
 class DialogCreateUser(
     val context: Context,
-    val inflater: LayoutInflater,
-    val userRepository: UserRepository
-
+    val inflater: LayoutInflater
 ) : View.OnClickListener {
 
     val dialog: Dialog = Dialog(context)
     val dialogView: View = inflater.inflate(R.layout.dialog_create_user, null)
 
 
-    lateinit var savingsRepository: SavingsRepository
     lateinit var dialogCreateUserCallback: DialogCreateUserCallback
     var jumlah = ""
     var type = ""
@@ -48,6 +39,8 @@ class DialogCreateUser(
     private lateinit var arrayCategory: Array<String>
     private lateinit var dialogCalculator: DialogCalculator
     private var user: ModelUser = ModelUser()
+    private var countSavings: Int = 0
+    private var savings: ModelSavings = ModelSavings()
     private lateinit var fragmentManager: FragmentManager
     var cur_calendar = Calendar.getInstance()
 
@@ -62,6 +55,7 @@ class DialogCreateUser(
     private var txtType: TextView
     private var txtDate: TextView
     private var txtCategory: TextView
+    private var txtHeader: TextView
     private var btnSubmit: CardView
     private var btnCalculator: Button
     private var btnClose: ImageView
@@ -69,6 +63,7 @@ class DialogCreateUser(
     init {
         dialog.setContentView(dialogView)
         etName = findViewById(R.id.et_name)
+        txtHeader = findViewById(R.id.txt_header)
         tilName = findViewById(R.id.til_name)
         tilTarget = findViewById(R.id.til_target_value)
         etTarget = findViewById(R.id.et_target_value)
@@ -84,38 +79,49 @@ class DialogCreateUser(
         btnCalculator = findViewById(R.id.btn_calculator)
     }
 
-    constructor (
-        context: Context,
-        inflater: LayoutInflater,
-        userRepository: UserRepository,
-        userUpdate: ModelUser
-    ) : this(context, inflater, userRepository) {
-        this.user = userUpdate
-    }
 
     constructor (
         context: Context,
         inflater: LayoutInflater,
-        userRepository: UserRepository,
-        savingsRepository: SavingsRepository,
         fragmentManager: FragmentManager,
+        countSavings:Int,
         userUpdate: ModelUser,
+        savingsUpdate: ModelSavings,
         dialogCreateUserCallback: DialogCreateUserCallback
-    ) : this(context, inflater, userRepository) {
+    ) : this(context, inflater) {
         this.dialogCreateUserCallback = dialogCreateUserCallback
         this.fragmentManager = fragmentManager
-        this.savingsRepository = savingsRepository
         this.user = userUpdate
+        this.savings = savingsUpdate
+        this.countSavings = countSavings
+
     }
 
     fun showDialogCreateUser(isAddAccount: Boolean) {
         this.isAddAccount = isAddAccount
+        val textHeader = if (isAddAccount) "Input User" else "Update User"
+        txtHeader.text = textHeader
 
         if (!isAddAccount) {
             user.let {
                 etName.setText(it.name)
+                category = it.category
+                type = it.type
+                setUpCategory()
                 txtType.text = it.type
                 txtCategory.text = it.category
+            }
+
+
+            if (user.category.equals(context.getString(R.string.menabung))) {
+
+                savings.let {
+                    etTitle.setText(it.title)
+                    txtDate.text = it.date_target
+                    etTarget.setText(Tools.convertToCurrency(it.targetValue))
+                    date_target = it.date_target
+                    jumlah = Tools.convertToCurrency(it.targetValue).replace("[Rp,.]".toRegex(), "")
+                }
             }
         }
 
@@ -233,9 +239,7 @@ class DialogCreateUser(
 
 
 
-
-
-                    if (isAddAccount) {
+                    if(isAddAccount || savings.id>0||countSavings==0){
                         if (category == context.getString(R.string.menabung)) {
                             if (etTitle.text.toString().isEmpty()) {
                                 messageError = "Silahkan input judul menabung terlebih dahulu"
@@ -247,7 +251,6 @@ class DialogCreateUser(
                             if (date_target.isEmpty()) {
                                 messageError =
                                     "Silahkan input tanggal target menabung terlebih dahulu"
-                                Toast.makeText(context, messageError, Toast.LENGTH_SHORT).show()
                                 throw Exception(messageError)
                             } else {
                                 txtDate.error = null
@@ -260,17 +263,33 @@ class DialogCreateUser(
                             } else {
                                 tilTarget.error = null
                             }
+
+//                        user.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
+
                             savings.title = etTitle.text.toString()
                             savings.date_target = date_target
                             savings.processValue = 0
                             savings.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
-
-//                        user.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
                         }
-
-                    }else{
-                        user.id = this.user.id
                     }
+
+
+                    if (!isAddAccount) {
+                        user.id = this.user.id
+                        if(this.savings.id>0)
+                            savings.id = this.savings.id
+
+
+                        savings.id_savings_user = user.id
+                        if(savings.title != null){
+                            savings.title = etTitle.text.toString()
+                            savings.date_target = date_target
+                            savings.processValue = 0
+                            savings.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
+                        }
+                    }
+
+
 
                     user.name = etName.text.toString()
                     user.type = type
@@ -282,7 +301,7 @@ class DialogCreateUser(
                     dialog.dismiss()
 
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
                 }
             }
             R.id.btn_calculator -> {
@@ -309,13 +328,8 @@ class DialogCreateUser(
                 val date_ship_milis = calendar.timeInMillis
                 txtDate.setText(Tools.getFormattedDateSimple(date_ship_milis))
                 date_target = Tools.getFormattedDateSimple(date_ship_milis)
-
             }
-        datePickerDialog.setYearRange(
-            cur_calendar.get(Calendar.YEAR),
-            cur_calendar.get(Calendar.YEAR)
-        )
-        datePickerDialog.maxDate = cur_calendar
+        datePickerDialog.minDate = cur_calendar
         datePickerDialog.accentColor = context.resources.getColor(R.color.colorPrimary)
 
         datePickerDialog.show(fragmentManager, "PickerDialog")
@@ -334,7 +348,7 @@ class DialogCreateUser(
         val dialogFinance = DialogFinance(context, object : DialogFinance.DialogFinanceCallback {
             override fun onSubmit(index: Int, result: String) {
                 category = result
-                if (isAddAccount) setVisibilityPlaceSavings()
+                setUpCategory()
                 if (category.isNotEmpty()) txtCategory.text = category
             }
         })
@@ -346,30 +360,43 @@ class DialogCreateUser(
         val dialogFinance = DialogFinance(context, object : DialogFinance.DialogFinanceCallback {
             override fun onSubmit(index: Int, result: String) {
                 type = result
-                arrayCategoryFromResource = R.array.category_user
-                arrayCategory = context.resources.getStringArray(arrayCategoryFromResource)
 
                 //TODO ketika memilih tipe usaha maka category tidak bisa di pilih
                 //TODO Dan di set default false
+                setUpCategory()
+
                 category = if (type.equals(
                         context.getString(R.string.usaha),
                         ignoreCase = true
                     )
                 ) arrayCategory[1] else arrayCategory[0]
 
-                if (isAddAccount) setVisibilityPlaceSavings()
+                if(isAddAccount) setVisibilityPlaceSavings()
+                else {
+                    if(savings.id>0||countSavings==0) setVisibilityPlaceSavings()
+                }
 
                 txtCategory.text = category
-                txtCategory.isClickable = type.equals(
-                    context.getString(R.string.pribadi),
-                    ignoreCase = true
-                )
-
 
                 txtType.text = type
             }
         })
         dialogFinance.showDialogType(R.array.type_user)
+    }
+
+    private fun setUpCategory() {
+
+        txtCategory.isEnabled = type.equals(
+            context.getString(R.string.pribadi),
+            ignoreCase = true
+        )
+        arrayCategoryFromResource = R.array.category_user
+        arrayCategory = context.resources.getStringArray(arrayCategoryFromResource)
+
+        if(isAddAccount) setVisibilityPlaceSavings()
+        else {
+            if(savings.id>0||countSavings==0) setVisibilityPlaceSavings()
+        }
     }
 
     fun setVisibilityPlaceSavings() {
@@ -378,7 +405,7 @@ class DialogCreateUser(
         placeDate.visibility = getVisibilityPlaceSavings()
     }
 
-    fun getVisibilityPlaceSavings(): Int {
+    private fun getVisibilityPlaceSavings(): Int {
         return if (category.equals(
                 context.getString(R.string.menabung),
                 ignoreCase = true

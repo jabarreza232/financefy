@@ -28,6 +28,8 @@ public class ViewModelFinance extends ViewModel {
 
     public LiveData<List<ModelFinance>> getFinanceByMonth(String month, int id_user) {
         return financeRepository.getFinanceByMonth(month, id_user);
+    } public LiveData<List<ModelFinance>> getFinanceByYear(String year, int id_user) {
+        return financeRepository.getFinanceByYear(year, id_user);
     }
 
     public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date, int id_user) {
@@ -42,7 +44,7 @@ public class ViewModelFinance extends ViewModel {
         return financeRepository.getModelFinanceById(id);
     }
 
-    public LiveData<List<ModelUserWithFinance>> getFinanceByUserId(int id) {
+    public LiveData<List<ModelFinance>> getFinanceByUserId(int id) {
         return financeRepository.getFinanceByUserId(id);
     }
 
@@ -63,6 +65,7 @@ public class ViewModelFinance extends ViewModel {
     public void inputUpdateFinance(String type, ModelFinance modelFinance) {
         new FinanceRepository.InputUpdateFinance(modelFinance, type, financeRepository.financeDao).execute();
     }
+
 
     public void removeFinance(ModelFinance modelFinance) {
         new FinanceRepository.RemoveFinance(modelFinance, financeRepository.financeDao).execute();

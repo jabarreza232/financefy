@@ -1,6 +1,9 @@
 package id.co.evolution.financefy.fragment;
 
+import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
+
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,42 +27,58 @@ import java.util.List;
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.adapter.AdapterFinance;
 import id.co.evolution.financefy.databinding.FragmentAccountBinding;
 import id.co.evolution.financefy.dialog.DialogCreateUser;
 import id.co.evolution.financefy.dialog.DialogFinance;
+import id.co.evolution.financefy.dialog.DialogSavings;
+import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
+import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelUser;
+import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.repository.SavingsRepository;
 import id.co.evolution.financefy.repository.UserRepository;
+import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 import id.co.evolution.financefy.viewmodel.ViewModelSavings;
 import id.co.evolution.financefy.viewmodel.ViewModelUser;
 
 @AndroidEntryPoint
 public class FragmentAccount extends Fragment {
     Calendar today;
+    Calendar prevNextYear;
     List<ModelUser> dataUser = new ArrayList<>();
     List<ModelSavings> dataSavings = new ArrayList<>();
+    List<ModelFinance> dataFinance = new ArrayList<>();
     FragmentAccountBinding binding;
-    AdapterFinance.TYPE_LAYOUT_MANAGER type_layout_manager = AdapterFinance.TYPE_LAYOUT_MANAGER.GRID;
     DialogCreateUser dialogCreateUser;
     @Inject
     UserRepository userRepository;
     @Inject
     SavingsRepository savingsRepository;
+    @Inject
+    FinanceRepository financeRepository;
+    @Inject
+    FinanceFilter financeFilter;
+
     ViewModelUser viewModelUser;
     ViewModelSavings viewModelSavings;
+    ViewModelFinance viewModelFinance;
+
     @Inject
     TinyDb tinyDb;
-    ModelUser user;
 
     boolean isAddSavings;
+    int count_savings;
 
-    DialogFinance dialogFinance;
+    DialogSavings dialogSavings;
     int id_savings_user = 0;
+    long date_ship_millis;
+    MainActivity mainActivity;
+    //TODO NOTE SAVINGS : Menabung, FINANCE : JURNAL KEUANGAN
 
     public FragmentAccount() {
         // Required empty public constructor
@@ -72,8 +91,17 @@ public class FragmentAccount extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_account, container, false);
 
         today = Calendar.getInstance();
+        today.get(Calendar.YEAR);
+        prevNextYear = Calendar.getInstance();
+        date_ship_millis = today.getTimeInMillis();
         isAddSavings = false;
         return binding.getRoot();
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mainActivity = ((MainActivity) context);
     }
 
     @SuppressLint({"NewApi", "SetTextI18n"})
@@ -82,20 +110,27 @@ public class FragmentAccount extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModelUser = new ViewModelProvider(this).get(ViewModelUser.class);
         viewModelSavings = new ViewModelProvider(this).get(ViewModelSavings.class);
+        viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
 
         viewModelUser.init(userRepository);
+        viewModelFinance.init(financeRepository);
         viewModelSavings.init(savingsRepository);
+
+        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(),savings->{
+            //TODO Hanya Sebagai pengecekan user apakah target menabung ada atau tidak
+            // untuk kebutuhan visibility form category menabung.
+            count_savings= savings.size();
+        });
         //get the spinner from the xml.
-        user = tinyDb.getObject("user", ModelUser.class);
         refreshDataUser(null, null);
-        refreshDataSavings();
+
+        refreshDataUserByCategory();
 
 
         binding.spinChooseAccount.setOnItemClickListener((adapterView, view1, i, l) -> {
 
-            setDataUser(dataUser.get(i));
-
-            refreshDataSavings();
+             setDataUser(dataUser.get(i));
+             refreshDataUserByCategory();
         });
 
 
@@ -108,6 +143,14 @@ public class FragmentAccount extends Fragment {
         });
     }
 
+    private void refreshDataUserByCategory() {
+        if (mainActivity.user.getCategory().equalsIgnoreCase(getString(R.string.menabung))) {
+            refreshDataSavings();
+        } else {
+            refreshDataFinance();
+        }
+    }
+
     private void showDialogChoose() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Pilih Opsi");
@@ -115,24 +158,29 @@ public class FragmentAccount extends Fragment {
 
 
         builder.setItems(tipe, (dialog, which) -> {
-            switch (which) {
-                case 0:
+            switch (tipe[which]) {
+                case "Ubah Akun":
 //                    mPositionItem = position;
                     showDialogAddAccount(false);
                     dialog.dismiss();
                     break;
-                case 1:
+                case "Hapus Akun":
 //                    viewModelFinance.removeFinance(data.get(position));
 //                    dataFinance.remove(position);
 //                    binding.rvList.getAdapter().notifyDataSetChanged();
 
-                    new UserRepository.RemoveUser(user, userRepository.userDao).execute();
-                    new SavingsRepository.RemoveSavings(dataSavings, savingsRepository.savingsDao).execute();
+                    new UserRepository.RemoveUser(mainActivity.user, userRepository.userDao).execute();
 
-                    user = dataUser.get((dataUser.indexOf(user) - 1));
+                    new SavingsRepository.RemoveSavings(savingsRepository.savingsDao,mainActivity.user.getId()).execute();
 
-                    refreshDataUser(user, null);
-                    refreshDataSavings();
+                    new FinanceRepository.RemoveFinance(financeRepository.financeDao,mainActivity.user.getId()).execute();
+
+                    int selectedPositionUser= dataUser.indexOf(mainActivity.user);
+                    mainActivity.user = dataUser.get((selectedPositionUser==0? 1 :selectedPositionUser - 1));
+
+                    refreshDataUser(mainActivity.user, null);
+
+                    refreshDataUserByCategory();
                     dialog.dismiss();
                     break;
             }
@@ -142,18 +190,23 @@ public class FragmentAccount extends Fragment {
     }
 
     private void showDialogAddAccount(boolean isAddAccount) {
+        String type = isAddAccount ? "create" : "update";
 
 
-        dialogCreateUser = new DialogCreateUser(getContext(), getLayoutInflater(), userRepository, savingsRepository, getFragmentManager(), user, (modelUser, modelSavings) -> {
-            String type = isAddAccount ? "create" : "update";
+
+        dialogCreateUser = new DialogCreateUser(getContext(), getLayoutInflater(),  getFragmentManager(),count_savings, mainActivity.user,mainActivity.modelSavings, (modelUser, modelSavings) -> {
 
             new UserRepository.InputUpdateUser(modelUser, type, userRepository.userDao)
                     .execute();
 
             isAddSavings = isAddAccount;
-            if (!isAddAccount) user = modelUser;
+            if (!isAddAccount) mainActivity.user = modelUser;
+            modelSavings = modelUser.getCategory().equalsIgnoreCase(getString(R.string.menabung))?modelSavings:new ModelSavings();
+            mainActivity.modelSavings = modelSavings;
+            tinyDb.putObject("savings", modelSavings);
+            refreshDataUser(modelUser,  modelSavings);
 
-            refreshDataUser(modelUser, modelSavings);
+            refreshDataUserByCategory();
         });
 
         dialogCreateUser.showDialogCreateUser(isAddAccount);
@@ -161,16 +214,13 @@ public class FragmentAccount extends Fragment {
 
     private void refreshDataUser(ModelUser modelUser, ModelSavings modelSavings) {
         viewModelUser.getAllUser().observe(getViewLifecycleOwner(), modelUsers -> {
-            if (isAddSavings) {
-                for (ModelUser modelUser1 : modelUsers) {
-                    if (modelUser1.equals(modelUser)) {
+            for (ModelUser modelUser1 : modelUsers) {
+                if (modelUser1.equals(modelUser)) {
 
-                        id_savings_user = modelUser1.getId();
-                        modelSavings.setId_savings_user(id_savings_user);
-                        Log.e("TAG", "showDialogAddAccount: " + new Gson().toJson(modelUser1) + " : " + new Gson().toJson(modelSavings));
-                        new SavingsRepository.InputUpdateSavings(modelSavings, "create", savingsRepository.savingsDao).execute();
-                        isAddSavings = false;
-                    }
+                    id_savings_user = modelUser1.getId();
+                    if(modelSavings!=null)  modelSavings.setId_savings_user(id_savings_user);
+                    Log.e("TAG", "showDialogAddAccount: " + new Gson().toJson(modelUser1) + " : " + new Gson().toJson(modelSavings));
+
                 }
             }
 
@@ -182,13 +232,49 @@ public class FragmentAccount extends Fragment {
             ArrayAdapter<String> adapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item, dataName.toArray());
             binding.spinChooseAccount.setAdapter(adapter);
 
-            if (user != null)
-                setDataUser(user);
+            if (mainActivity.user != null) setDataUser(mainActivity.user);
         });
+
+        if(modelSavings!=null && modelSavings.getTitle()!=null) {
+
+            isAddSavings = count_savings==0;
+
+            String type = isAddSavings ? "create" : "update";
+
+            new SavingsRepository.InputUpdateSavings(modelSavings, type, savingsRepository.savingsDao).execute();
+            isAddSavings = false;
+            mainActivity.modelSavings= new ModelSavings();
+        }
+    }
+
+
+    private void refreshDataFinance() {
+
+        viewModelFinance.getFinanceByUserId(mainActivity.user.getId()).observe(getViewLifecycleOwner(), modelFinance -> {
+            dataFinance = modelFinance;
+
+            binding.layoutAccountFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(dataFinance)));
+            binding.layoutAccountFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(dataFinance)));
+        });
+
+//
+//        binding.layoutAccountFinanceJournal.txtYear.setText(Tools.getFormattedYearSimple(date_ship_milis));
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//
+//            if (date_ship_milis != today.getTimeInMillis()) {
+//                binding.layoutAccountFinanceJournal.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+//
+//                binding.layoutAccountFinanceJournal.btnNext.setEnabled(true);
+//            }
+//            if (date_ship_milis >= today.getTimeInMillis()) {
+//                binding.layoutAccountFinanceJournal.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
+//                binding.layoutAccountFinanceJournal.btnNext.setEnabled(false);
+//            }
+//        }
     }
 
     private void refreshDataSavings() {
-        viewModelSavings.findAllSavingsByIdUser(user.getId()).observe(getViewLifecycleOwner(), modelSavings -> {
+        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(), modelSavings -> {
             dataSavings = modelSavings;
             List<String> dataSavings = new ArrayList<>();
             for (ModelSavings savings : modelSavings)
@@ -197,17 +283,20 @@ public class FragmentAccount extends Fragment {
 
                 setDataSavings(modelSavings.get(0));
                 binding.layoutAccountSavings.placeChooseSavings.setOnClickListener(v -> {
-                    dialogFinance = new DialogFinance(getContext(), (index, result) -> {
+                    dialogSavings = new DialogSavings(getContext(), (index, result) -> {
                         setDataSavings(modelSavings.get(index));
                     });
 
-                    dialogFinance.showDialogSavings(dataSavings);
+                    dialogSavings.showDialogSavings(dataSavings);
                 });
             }
         });
+
     }
 
     private void setDataSavings(ModelSavings modelSavings) {
+        mainActivity.modelSavings = modelSavings;
+        tinyDb.putObject("savings", modelSavings);
         binding.layoutAccountSavings.txtChooseSavings.setText(modelSavings.getTitle());
         binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue()));
         binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue()));
@@ -218,10 +307,11 @@ public class FragmentAccount extends Fragment {
 
 
     private void setDataUser(ModelUser user) {
+        binding.spinChooseAccount.setText("");
         binding.txtName.setText(user.getName());
         binding.txtDescription.setText(user.getType() + " - " + user.getCategory());
         tinyDb.putObject("user", user);
-        this.user = user;
+        mainActivity.user = user;
         boolean visibleAccountSavings = user.getCategory().equalsIgnoreCase(getString(R.string.menabung));
         binding.layoutAccountSavings.placeAccountSavings.setVisibility(visibleAccountSavings ? View.VISIBLE : View.GONE);
         binding.layoutAccountFinanceJournal.placeAccountFinanceJournal.setVisibility(!visibleAccountSavings ? View.VISIBLE : View.GONE);

@@ -69,15 +69,16 @@ public class DialogCalculator {
         binding.etAmount.setText(result);
 
         AdapterCalculator adapterCalculator = new AdapterCalculator(context, DummyCalculator.getDataCalculator(), (data, position) -> {
-            if (result.equals("0") && !data.get(position).equals("0"))
+            List<String> dataList = (List<String>) data;
+
+            if (result.equals("0") && !dataList.get(position).equals("0"))
                 result = "";
             boolean checkSymbol = result.length() > 0 && Tools.isSpecialCharacterInMyString(Tools.getLastChar(result));
 
-
-            switch (data.get(position)) {
+            switch (dataList.get(position)) {
                 case "0":
-                    if (data.get(position).equalsIgnoreCase("0")) {
-                        if (result.equalsIgnoreCase(data.get(position))) {
+                    if (dataList.get(position).equalsIgnoreCase("0")) {
+                        if (result.equalsIgnoreCase(dataList.get(position))) {
                             result = "0";
                         } else {
                             result += "0";

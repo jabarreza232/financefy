@@ -4,23 +4,31 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.ActivityResultRegistry;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 
 import java.util.List;
 
+import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.activity.UpdateFinanceActivity;
+import id.co.evolution.financefy.activity.UpdateSavingsActivity;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelSavings;
+import id.co.evolution.financefy.model.ModelSavingsProgress;
 
 public class CallbackOnActivityResult implements DefaultLifecycleObserver {
     private final ActivityResultRegistry mRegistry;
     private ActivityResultLauncher<Intent> mStartForResult;
     private final Context mContext;
     private final OnCallbackResult mOnCallbackResult;
+   public static int REQUEST_CODE_FINANCE = 3, REQUEST_CODE_SAVINGS = 4;
 
     public CallbackOnActivityResult(Context context, @NonNull ActivityResultRegistry registry, OnCallbackResult onCallbackResult) {
         mRegistry = registry;
@@ -32,22 +40,29 @@ public class CallbackOnActivityResult implements DefaultLifecycleObserver {
     public void onCreate(@NonNull LifecycleOwner owner) {
         mStartForResult = mRegistry.register("UpdateData", new ActivityResultContracts.StartActivityForResult(),
                 result -> {
-                    if (result.getResultCode() == Activity.RESULT_OK) {
-                        Intent intent = result.getData();
-                        // Handle the Intent
-                         mOnCallbackResult.result(intent);
-                    }
+                    Intent intent = result.getData();
+                    // Handle the Intent
+                    mOnCallbackResult.result(result,intent);
                 });
     }
 
-    public void updateDataFinance(List<ModelFinance> data, int position) {
+    public void updateDataFinance(List<ModelFinance> data, int position,int id_user) {
         Intent i = new Intent(mContext, UpdateFinanceActivity.class);
         i.putExtra("id", data.get(position).getId());
         i.putExtra("position",position);
+        i.putExtra("id_user",id_user);
+        mStartForResult.launch(i);
+    }
+
+    public void updateDataSavings(List<ModelSavingsProgress> data, int position, ModelSavings savings) {
+        Intent i = new Intent(mContext, UpdateSavingsActivity.class);
+        i.putExtra("id", data.get(position).getId());
+        i.putExtra("position",position);
+        i.putExtra("savings",savings);
         mStartForResult.launch(i);
     }
 
     public interface OnCallbackResult {
-        void result(Intent intent);
+        void result(ActivityResult result, Intent intent);
     }
 }

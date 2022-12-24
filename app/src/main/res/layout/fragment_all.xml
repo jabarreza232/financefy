@@ -46,7 +46,7 @@
                             android:textSize="15sp" />
 
                         <TextView
-                            android:id="@+id/txt_tipe_account"
+                            android:id="@+id/txt_type_account"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_below="@id/txt_name"
@@ -58,102 +58,14 @@
                             android:textColor="@color/blackTextColor"
                             android:textSize="13sp" />
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_below="@id/txt_tipe_account"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:orientation="horizontal"
-                            android:weightSum="3">
+                       <include
+                           android:id="@+id/layout_finance_journal"
+                           layout="@layout/layout_finance_journal" />
 
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="5dp"
-                                    android:fontFamily="@font/ubuntu_b"
-                                    android:text="PEMASUKAN"
-                                    android:textAlignment="center"
-                                    android:textColor="@color/blackTextColor"
-                                    android:textSize="13sp" />
-
-                                <TextView
-                                    android:id="@+id/txt_total_income"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="@font/ubuntu_r"
-                                    android:text="Rp.0"
-                                    android:textAlignment="center"
-                                    android:textColor="@color/green"
-                                    android:textSize="13sp" />
-
-                            </LinearLayout>
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="5dp"
-                                    android:fontFamily="@font/ubuntu_b"
-                                    android:text="PENGELUARAN"
-                                    android:textAlignment="center"
-                                    android:textColor="@color/blackTextColor"
-                                    android:textSize="13sp" />
-
-                                <TextView
-                                    android:id="@+id/txt_total_expense"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="@font/ubuntu_r"
-                                    android:text="Rp.0"
-                                    android:textAlignment="center"
-                                    android:textColor="@color/red"
-                                    android:textSize="13sp" />
-
-                            </LinearLayout>
-
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginBottom="5dp"
-                                    android:fontFamily="@font/ubuntu_b"
-                                    android:text="TOTAL"
-                                    android:textAlignment="center"
-                                    android:textColor="@color/blackTextColor"
-                                    android:textSize="13sp" />
-
-                                <TextView
-                                    android:id="@+id/txt_total_all"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="@font/ubuntu_r"
-                                    android:text="Rp.0"
-                                    android:textAlignment="center"
-                                    android:textColor="@color/green"
-                                    android:textSize="13sp" />
-
-                            </LinearLayout>
-
-                        </LinearLayout>
+                        <include
+                            android:id="@+id/layout_savings_progress"
+                            layout="@layout/layout_savings_progress"
+                            />
 
                     </RelativeLayout>
                 </androidx.cardview.widget.CardView>

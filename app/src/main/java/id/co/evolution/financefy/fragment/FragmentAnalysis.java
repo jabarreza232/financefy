@@ -10,6 +10,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -69,6 +70,7 @@ import id.co.evolution.financefy.dialog.DialogMonthPicker;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.LocalizedWeekHelper;
 import id.co.evolution.financefy.helper.MyMarkView;
+import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
@@ -102,6 +104,7 @@ public class FragmentAnalysis extends Fragment {
     FinanceRepository financeRepository;
     @Inject
     UserRepository userRepository;
+    ModelUser user;
 
     public enum CATEGORY_INCOME {
         HASIL_USAHA,
@@ -122,8 +125,9 @@ public class FragmentAnalysis extends Fragment {
     int mPositionItem;
     long date_ship_millis;
 
-    ModelUser user;
-
+    MainActivity mainActivity;
+    @Inject
+    TinyDb tinyDb;
     public enum TYPE_CHART {
         PIE_CHART,
         BAR_CHART
@@ -140,11 +144,18 @@ public class FragmentAnalysis extends Fragment {
     }
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        mainActivity = ((MainActivity) context);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_analysis, container, false);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
+        user = mainActivity.user;
 
         Log.e("cek_list_week: ", localizedWeekHelper.getFirstDay(-7).substring(0, (localizedWeekHelper.getFirstDay(-7).length() - 3)));
         setHasOptionsMenu(true);
@@ -168,11 +179,10 @@ public class FragmentAnalysis extends Fragment {
         viewModelUser.init(userRepository);
         viewModelFinance.init(financeRepository);
 
-        viewModelUser.getFinanceByUserId(2).observe(getViewLifecycleOwner(), new Observer<ModelUserWithFinance>() {
+        viewModelUser.getFinanceByUserId(user.getId()).observe(getViewLifecycleOwner(), new Observer<ModelUserWithFinance>() {
             @Override
             public void onChanged(ModelUserWithFinance modelUserWithFinances) {
                 Log.e("TAG", "onChanged: " + new Gson().toJson(modelUserWithFinances));
-                user = modelUserWithFinances.user;
                 loadDataFinanceByMonth(date_ship_millis);
             }
         });
@@ -247,14 +257,15 @@ public class FragmentAnalysis extends Fragment {
         String now = simpleDateFormat.format(new Date());
         Log.e("waktu", now + " - " + now.substring(0, 1) + " - " + now.substring(0, 2));
         if (Integer.parseInt(now.substring(0, 2)) >= 4 && Integer.parseInt(now.substring(0, 2)) < 10) {
-            binding.txtName.setText("Selamat Pagi, Jackson!");
+            binding.txtName.setText("Selamat Pagi, " + user.getName() + "!");
         } else if (Integer.parseInt(now.substring(0, 2)) >= 10 && Integer.parseInt(now.substring(0, 2)) < 15) {
-            binding.txtName.setText("Selamat Siang, Jackson!");
+            binding.txtName.setText("Selamat Siang, " + user.getName() + "!");
         } else if (Integer.parseInt(now.substring(0, 2)) >= 15 && Integer.parseInt(now.substring(0, 2)) < 18) {
-            binding.txtName.setText("Selamat Sore, Jackson!");
+            binding.txtName.setText("Selamat Sore, " + user.getName() + "!");
         } else {
-            binding.txtName.setText("Selamat Malam, Jackson!");
+            binding.txtName.setText("Selamat Malam, " + user.getName() + "!");
         }
+        binding.txtTypeAccount.setText(user.getType()+" - "+user.getCategory());
     }
 
     private void showDialogMonthPicker() {
@@ -284,7 +295,7 @@ public class FragmentAnalysis extends Fragment {
             switch (which) {
                 case 0:
                     mPositionItem = position;
-                    mCallbackOnActivityResult.updateDataFinance(data, position);
+                    mCallbackOnActivityResult.updateDataFinance(data, position,user.getId());
                     dialog.dismiss();
                     break;
                 case 1:

@@ -66,14 +66,16 @@ public class SavingsRepository {
     }
 
     public static class RemoveSavings extends AsyncTask<Void, Void, Void> {
-        List<ModelSavings> dataSavings;
         SavingsDao savingsDao;
         ModelSavings modelSavings;
-
+        int id_user;
 
         public RemoveSavings(List<ModelSavings> dataSavings, SavingsDao savingsDao) {
-            this.dataSavings = dataSavings;
             this.savingsDao = savingsDao;
+        }
+        public RemoveSavings(SavingsDao savingsDao,int id_user) {
+            this.savingsDao = savingsDao;
+            this.id_user= id_user;
         }
 
         public RemoveSavings(ModelSavings modelSavings, SavingsDao savingsDao) {
@@ -83,8 +85,8 @@ public class SavingsRepository {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (dataSavings != null) {
-                savingsDao.deleteSavings(dataSavings);
+            if (id_user>0) {
+                savingsDao.deleteSavingsByIdUser(id_user);
             } else {
                 savingsDao.delete(modelSavings);
             }

@@ -28,6 +28,9 @@ public interface FinanceDao {
     @Query("SELECT * FROM finance WHERE month IN(:month) AND id_finance_user IN(:id_user)")
     LiveData<List<ModelFinance>> loadAllbyMonth(String month, int id_user);
 
+    @Query("SELECT * FROM finance WHERE month IN(:year) AND id_finance_user IN(:id_user)")
+    LiveData<List<ModelFinance>> loadAllByYear(String year, int id_user);
+
     @Query("SELECT * FROM finance WHERE type LIKE:type")
     LiveData<List<ModelFinance>> findByType(String type);
 
@@ -43,8 +46,8 @@ public interface FinanceDao {
 
 
     @Transaction
-    @Query("SELECT * FROM user WHERE id_user =:id")
-    LiveData<List<ModelUserWithFinance>> findFinanceByUserId(int id);
+    @Query("SELECT * FROM finance WHERE id_finance_user =:id ")
+    LiveData<List<ModelFinance>> findFinanceByUserId(int id);
 
     @Insert
     void insertAll(ModelFinance... finances);
@@ -52,7 +55,13 @@ public interface FinanceDao {
     @Update
     void update(ModelFinance finance);
 
+    @Query("UPDATE finance SET count=:amount WHERE id_finance =:id_finance AND id_finance_user=:id_user")
+    void updateByIdUser(String amount, int id_finance, int id_user);
+
     @Delete
     void delete(ModelFinance finance);
+
+    @Query("DELETE FROM finance WHERE id_finance_user=:id_user")
+    void deleteByIdUser(int id_user);
 
 }

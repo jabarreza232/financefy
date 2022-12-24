@@ -1,5 +1,8 @@
 package id.co.evolution.financefy.activity;
 
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_FINANCE;
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
+
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -51,21 +54,10 @@ import id.co.evolution.financefy.viewmodel.ViewModelFactory;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 @AndroidEntryPoint
-public class UpdateFinanceActivity extends AppCompatActivity implements View.OnClickListener {
+public class UpdateFinanceActivity extends BaseFinanceActivity implements View.OnClickListener {
 
-    String date = "";
-    String category = "";
-    String type = "";
-    String[] arrayCategory = null;
-    private String jumlah = "";
-    String month = "";
+
     ModelFinance modelFinance;
-    ActivityCreateFinanceBinding binding;
-    ViewModelFinance viewModelFinance;
-    Calendar cur_calendar = Calendar.getInstance();
-    DialogCalculator dialogCalculator;
-    //    @Inject
-//    ViewModelFactory viewModelFactory;
     int position,id_user;
 
     @Inject
@@ -153,50 +145,6 @@ public class UpdateFinanceActivity extends AppCompatActivity implements View.OnC
     }
 
 
-    private void showDatePickerDialog() {
-        DatePickerDialog datePickerDialog = DatePickerDialog.newInstance(new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.YEAR, year);
-                calendar.set(Calendar.MONTH, monthOfYear);
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                long date_ship_milis = calendar.getTimeInMillis();
-                binding.txtDate.setText(Tools.getFormattedDateSimple(date_ship_milis));
-                date = Tools.getFormattedDateSimple((date_ship_milis));
-                month = Tools.getFormattedMonthSimple((date_ship_milis));
-            }
-        });
-
-        datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR), cur_calendar.get(Calendar.YEAR));
-        datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
-        datePickerDialog.setMaxDate(cur_calendar);
-        datePickerDialog.show(getSupportFragmentManager(), "PickerDialog");
-    }
-
-    private void showDialogCategory() {
-        int arrayCategoryFromResource = type.equalsIgnoreCase(getString(R.string.pengeluaran)) ? R.array.category_pengeluaran : R.array.category_pemasukan;
-        DialogFinance dialogFinance = new DialogFinance(this, (index,result) -> {
-            category = result;
-            if (!category.isEmpty()) {
-                binding.txtKategori.setText(category);
-            }
-        });
-        dialogFinance.showDialogCategory(arrayCategoryFromResource);
-    }
-
-    private void showDialogType() {
-        DialogFinance dialogFinance = new DialogFinance(this, (index,result) -> {
-            type = result;
-            int arrayCategoryFromResource = result.equalsIgnoreCase(getString(R.string.pengeluaran)) ? R.array.category_pengeluaran : R.array.category_pemasukan;
-            arrayCategory = getResources().getStringArray(arrayCategoryFromResource);
-            //TODO Default value di index pertama
-            binding.txtKategori.setText(arrayCategory[0]);
-            category = arrayCategory[0];
-            binding.txtType.setText(type);
-        });
-        dialogFinance.showDialogType(R.array.type_finance);
-    }
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -244,11 +192,12 @@ public class UpdateFinanceActivity extends AppCompatActivity implements View.OnC
                                 model.setKategori(category);
                                 model.setKeterangan(binding.etDescription.getText().toString().trim());
                                 model.setMonth(month);
+                                model.setId_finance_user(id_user);
                                 viewModelFinance.inputUpdateFinance("Update", model);
                                 Intent intent = new Intent();
                                 intent.putExtra("finance", model);
                                 intent.putExtra("position", position);
-                                setResult(RESULT_OK, intent);
+                                setResult(REQUEST_CODE_FINANCE, intent);
                                 finish();
                             })
                             .setCancelText("Tidak")

@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.callback.MethodCallback;
 import id.co.evolution.financefy.databinding.ListAnalysisBinding;
 import id.co.evolution.financefy.databinding.ListFinanceBinding;
 import id.co.evolution.financefy.databinding.ListNestedFinanceBinding;
@@ -82,7 +83,4 @@ public class AdapterAnalysisFinance extends RecyclerView.Adapter<AdapterAnalysis
         }
     }
 
-    public interface MethodCallback {
-        void onClick(List<ModelFinance> data, int position);
-    }
 }

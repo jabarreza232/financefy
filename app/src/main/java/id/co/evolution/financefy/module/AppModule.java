@@ -6,10 +6,6 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.SavedStateHandle;
 import androidx.room.Room;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -18,13 +14,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext;
 import id.co.evolution.financefy.db.FinanceDB;
 import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.db.SavingsDao;
+import id.co.evolution.financefy.db.SavingsProgressDao;
 import id.co.evolution.financefy.db.UserDao;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.LocalizedWeekHelper;
+import id.co.evolution.financefy.helper.SavingsFilter;
 import id.co.evolution.financefy.helper.TinyDb;
-import id.co.evolution.financefy.model.ModelUserWithFinance;
-import id.co.evolution.financefy.repository.FinanceRepository;
-import id.co.evolution.financefy.repository.UserRepository;
 
 @Module
 @InstallIn(ApplicationComponent.class)
@@ -81,6 +76,12 @@ public class AppModule {
     FinanceFilter financeFilter(){
         return new FinanceFilter();
     }
+
+    @Provides
+    SavingsFilter savingsFilter(){
+        return new SavingsFilter();
+    }
+
     @Provides
     LocalizedWeekHelper localizedWeekHelper(){
         return new LocalizedWeekHelper();
@@ -94,9 +95,14 @@ public class AppModule {
     @Provides
     UserDao userDao(@NonNull FinanceDB financeDB) {
         return financeDB.userDao();
-    } @Provides
+    }
+    @Provides
     SavingsDao savingsDao(@NonNull FinanceDB financeDB) {
         return financeDB.savingsDao();
+    }
+    @Provides
+    SavingsProgressDao savingsProgressDao(@NonNull FinanceDB financeDB) {
+        return financeDB.savingsPrgoressDao();
     }
 
 }

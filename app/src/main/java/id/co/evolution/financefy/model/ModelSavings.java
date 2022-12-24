@@ -4,10 +4,11 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @Entity(tableName = "savings")
-public class ModelSavings {
+public class ModelSavings implements Serializable {
     @ColumnInfo(name = "id_savings")
     @PrimaryKey(autoGenerate = true)
     int id;
@@ -27,6 +28,14 @@ public class ModelSavings {
     }
 
     public ModelSavings() {
+    }
+
+    public ModelSavings(String title, long targetValue, long processValue, int id_savings_user, String date_target) {
+        this.title = title;
+        this.targetValue = targetValue;
+        this.processValue = processValue;
+        this.id_savings_user = id_savings_user;
+        this.date_target = date_target;
     }
 
     public int getId() {

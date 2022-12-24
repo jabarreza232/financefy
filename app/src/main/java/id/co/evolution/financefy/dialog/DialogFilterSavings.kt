@@ -1,8 +1,10 @@
 package id.co.evolution.financefy.dialog
 
-import android.app.Dialog
 import android.content.Context
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.WindowManager
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -11,36 +13,27 @@ import id.co.evolution.financefy.R
 import id.co.evolution.financefy.adapter.AdapterFilter
 import id.co.evolution.financefy.model.ModelFilter
 
-open class DialogFilterFinance(
-    val context: Context,
-    val inflater: LayoutInflater,
-    val dialogFilterFinanceCallback: DialogFilterFinanceCallback
-) {
-    val dialog: Dialog = Dialog(context)
-    val dialogView: View = inflater.inflate(R.layout.dialog_choose_filter, null)
+class DialogFilterSavings(
+     context: Context,
+     inflater: LayoutInflater,
+     dialogFilterSavingsCallback: DialogFilterFinanceCallback
+):DialogFilterFinance(context,inflater,dialogFilterSavingsCallback) {
 
-    init {
-        dialog.setContentView(dialogView)
-    }
-
-
-    fun showDialogFilterFinance(
-        listFilterType: List<ModelFilter>,
+    fun showDialogFilterSavings(
         listFilterNominal: List<ModelFilter>,
         listFilterPeriod: List<ModelFilter>, isAnalysis: Boolean = false
     ) {
         val txtSubmit = findViewById<TextView>(R.id.txt_submit)
         val txtNominal = findViewById<TextView>(R.id.txt_nominal)
-        val rvListType: RecyclerView = findViewGroupById(R.id.rv_type)
+        val txtType = findViewById<TextView>(R.id.txt_type)
         val rvListNominal: RecyclerView = findViewGroupById(R.id.rv_nominal)
         val rvListPeriod: RecyclerView = findViewGroupById(R.id.rv_periode)
+        txtType.visibility = View.GONE
 
-        var listFilterTypeValue = listFilterType
 
         isAnalysis.let {
             when (it) {
                 true -> {
-                    listFilterTypeValue = listFilterType.subList(0, 2)
                     txtNominal.visibility = View.GONE
                 }
                 false -> {
@@ -57,17 +50,6 @@ open class DialogFilterFinance(
                 }
             }
         }
-
-        val adapterFilterType = AdapterFilter(
-            context, listFilterTypeValue
-        ) { data: List<Any>, position: Int ->
-            data as List<ModelFilter>
-            dialogFilterFinanceCallback.resultFilterType(data[position].value)
-        }
-
-        rvListType.layoutManager =
-            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        rvListType.adapter = adapterFilterType
 
 
         val adapterFilterPeriod = AdapterFilter(
@@ -97,25 +79,5 @@ open class DialogFilterFinance(
         )
 
         dialog.show()
-    }
-
-     infix fun View.onClick(onclick: View.OnClickListener) {
-        setOnClickListener(onclick)
-    }
-
-     fun <T : View> findViewById(value: Int): T {
-        return dialogView.findViewById(value)
-    }
-
-     fun <T : ViewGroup> findViewGroupById(value: Int): T {
-
-        return dialogView.findViewById(value)
-    }
-
-    interface DialogFilterFinanceCallback {
-        fun resultFilterType(result: String)
-        fun resultFilterNominal(result: String)
-        fun resultFilterPeriod(result: String)
-        fun onSubmit()
     }
 }

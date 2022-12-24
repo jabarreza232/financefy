@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -31,30 +30,37 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
+import id.co.evolution.financefy.databinding.ActivityCreateSavingsBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
-import id.co.evolution.financefy.dialog.DialogFinance;
 import id.co.evolution.financefy.helper.Tools;
-import id.co.evolution.financefy.model.ModelFinance;
-import id.co.evolution.financefy.repository.FinanceRepository;
-import id.co.evolution.financefy.viewmodel.ViewModelFinance;
+import id.co.evolution.financefy.model.ModelSavings;
+import id.co.evolution.financefy.model.ModelSavingsProgress;
+import id.co.evolution.financefy.repository.SavingsProgressRepository;
+import id.co.evolution.financefy.repository.SavingsRepository;
+import id.co.evolution.financefy.viewmodel.ViewModelSavings;
+import id.co.evolution.financefy.viewmodel.ViewModelSavingsProgress;
 
 @AndroidEntryPoint
-public class CreateFinanceActivity extends BaseFinanceActivity implements View.OnClickListener {
+public class CreateSavingsActivity extends AppCompatActivity implements View.OnClickListener {
+    String date = "";
+    private String jumlah = "";
+    String month = "";
+    ActivityCreateSavingsBinding binding;
+    Calendar cur_calendar = Calendar.getInstance();
+    ViewModelSavingsProgress viewModelSavingsProgress;
+    ViewModelSavings viewModelSaving;
+    DialogCalculator dialogCalculator;
+    List<ModelSavingsProgress> listSavings;
 
-
-    //    @Inject
-//    ViewModelFactory viewModelFactory;
-    public  List<ModelFinance> listFinance;
     @Inject
-      FinanceRepository financeRepository;
-    public  int id_user;
-
-    @SuppressLint("ObsoleteSdkInt")
+    SavingsProgressRepository savingsProgressRepository;
+    @Inject
+    SavingsRepository savingsRepository;
+    ModelSavings modelSavings;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
+        binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings);
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow();
@@ -65,17 +71,20 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         cur_calendar.get(Calendar.MONTH);
         cur_calendar.get(Calendar.DAY_OF_MONTH);
         long date_ship_milis = cur_calendar.getTimeInMillis();
-        viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
-        viewModelFinance.init(financeRepository);
+        viewModelSavingsProgress = new ViewModelProvider(this).get(ViewModelSavingsProgress.class);
+        viewModelSaving = new ViewModelProvider(this).get(ViewModelSavings.class);
+        viewModelSavingsProgress.init(savingsProgressRepository);
+        viewModelSaving.init(savingsRepository);
 
         binding.txtHeader.setText("Input data");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
-        id_user = getIntent().getIntExtra("id_user", 0);
+        modelSavings =(ModelSavings) getIntent().getSerializableExtra("savings");
 
-        viewModelFinance.getFinanceByUserId(id_user).observe(this, modelFinances -> {
-            listFinance = modelFinances;
+
+        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(this, modelSavings -> {
+            listSavings = modelSavings;
         });
 
         binding.etAmount.addTextChangedListener(new TextWatcher() {
@@ -112,13 +121,32 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         });
 
         binding.placeDate.setOnClickListener(this);
-        binding.placeCategory.setOnClickListener(this);
-        binding.placeType.setOnClickListener(this);
+
         binding.imgBack.setOnClickListener(this);
         binding.placeSubmit.setOnClickListener(this);
         binding.btnCalculator.setOnClickListener(this);
     }
 
+
+    private void showDatePickerDialog() {
+        DatePickerDialog datePickerDialog = DatePickerDialog.newInstance((view, year, monthOfYear, dayOfMonth) -> {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, monthOfYear);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            long date_ship_milis = calendar.getTimeInMillis();
+            binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
+            date = getFormattedDateSimple(date_ship_milis);
+
+            Log.e("TAG", "onDateSet: " + date);
+            month = getFormattedMonthSimple(date_ship_milis);
+        });
+
+        datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR), cur_calendar.get(Calendar.YEAR));
+        datePickerDialog.setMaxDate(cur_calendar);
+        datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
+        datePickerDialog.show(getSupportFragmentManager(), "PickerDialog");
+    }
 
 
 
@@ -127,17 +155,6 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.place_category:
-                if (!type.isEmpty()) {
-                    showDialogCategory();
-                } else {
-                    Toast.makeText(this, "Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            case R.id.place_type:
-                showDialogType();
-                break;
-
             case R.id.place_date:
                 showDatePickerDialog();
                 break;
@@ -147,14 +164,16 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
 
             case R.id.btn_calculator:
                 dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
-                    jumlah = Tools.convertToCurrency(result);
-                    binding.etAmount.setText(jumlah);
+                    jumlah = result;
+                    binding.etAmount.setText(Tools.convertToCurrency(result));
                 });
                 dialogCalculator.show();
                 break;
             case R.id.place_submit:
-                if (type.isEmpty()) {
-                    Toast.makeText(this, "Silahkan Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
+                if (binding.etTitle.getText().toString().isEmpty()) {
+                    binding.tilTitle.setError("Silahkan input judul terlebih dahulu");
+                } else {
+                    binding.tilTitle.setError(null);
                 }
 
                 if (binding.etAmount.getText().toString().isEmpty()) {
@@ -163,30 +182,25 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
                     binding.tilAmount.setError(null);
                 }
 
-                if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty()) {
+                if (!binding.etAmount.getText().toString().isEmpty()) {
 
                     new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                             .setTitleText("Submit")
                             .setContentText("Apakah anda yakin ingin submit data ?")
                             .setConfirmText("Ya")
-                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                @Override
-                                public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                    ModelFinance model = new ModelFinance();
-                                    model.setDate(date);
-                                    model.setJumlah(jumlah);
-                                    model.setTipe(type);
-                                    model.setKategori(category);
-                                    model.setKeterangan(binding.etDescription.getText().toString().trim());
-                                    model.setMonth(month);
-                                    model.setId_finance_user(id_user);
-
-                                    onSubmit(model);
-                                    Intent intent = new Intent();
-                                    intent.putExtra("finance", model);
-                                    setResult(RESULT_OK, intent);
-                                    finish();
-                                }
+                            .setConfirmClickListener(sweetAlertDialog -> {
+                                ModelSavingsProgress model = new ModelSavingsProgress();
+                                model.setDate_progress_savings(date);
+                                model.setMonth(month);
+                                model.setProcessValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
+                                model.setDescription(binding.etDescription.getText().toString().trim());
+                                model.setTitle(binding.etTitle.getText().toString().trim());
+                                model.setId_savings(modelSavings.getId());
+                                onSubmit(model);
+                                Intent intent = new Intent();
+                                intent.putExtra("savings", modelSavings);
+                                setResult(RESULT_OK, intent);
+                                finish();
                             })
                             .setCancelText("Tidak")
                             .show();
@@ -195,25 +209,22 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         }
     }
 
-    private void onSubmit(ModelFinance model) {
+    private void onSubmit(ModelSavingsProgress model) {
         boolean isUpdate = false;
-        //TODO ketika submit terdapat data yang identik sama maka tidak dapat duplikasi.
-        // melainkan hanya bisa melakukan penjumlahan value nya saja
-
-
-        for (ModelFinance modelFinance : listFinance) {
-            if (modelFinance.getKategori().contains(model.getKategori()) && modelFinance.getDate().contains(model.getDate())) {
-                double jumlahValue = modelFinance.getJumlahValue() + model.getJumlahValue();
-                model.setId(modelFinance.getId());
-                model.setJumlah(Tools.convertToCurrency(jumlahValue));
+        for (ModelSavingsProgress modelSavings : listSavings) {
+            if (modelSavings.getTitle().contains(model.getTitle()) && modelSavings.getDate_progress_savings().contains(model.getDate_progress_savings())) {
+                model.setId(modelSavings.getId());
+                model.setProcessValue(modelSavings.getProcessValue());
                 isUpdate = true;
             }
         }
 
-        if (isUpdate)
-            viewModelFinance.inputUpdateFinance("Update", model);
-        else
-            viewModelFinance.inputUpdateFinance("Create", model);
+        if(isUpdate)
+        viewModelSavingsProgress.inputUpdateSavings("Update", model);
+        else viewModelSavingsProgress.inputUpdateSavings("Create", model);
 
+        long processValue =model.getProcessValue()+modelSavings.getProcessValue();
+        modelSavings.setProcessValue(processValue);
+        viewModelSaving.inputUpdateSavings("Update",modelSavings);
     }
 }

@@ -14,33 +14,34 @@ import javax.inject.Inject;
 import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
+import id.co.evolution.financefy.model.ModelNestedSavings;
+import id.co.evolution.financefy.model.ModelSavingsProgress;
 
-public class FinanceFilter {
-    public List<ModelFilter> filterType = new ArrayList<>();
+public class SavingsFilter {
     public List<ModelFilter> filterNominal = new ArrayList<>();
     public List<ModelFilter> filterPeriod = new ArrayList<>();
 
 
     @Inject
-    public FinanceFilter() {
+    public SavingsFilter() {
         setUpFilter();
     }
 
-    public List<ModelFinance> filterNominal(String filterNominal, List<ModelFinance> list) {
+    public List<ModelSavingsProgress> filterNominal(String filterNominal, List<ModelSavingsProgress> list) {
         if (filterNominal.split("-")[0].equalsIgnoreCase("terendah")) {
-            Collections.sort(list, ModelFinance.shortedNominalMinToMax);
+            Collections.sort(list, ModelSavingsProgress.shortedNominalMinToMax);
         } else {
-            Collections.sort(list, ModelFinance.shortedNominalMaxToMin);
+            Collections.sort(list, ModelSavingsProgress.shortedNominalMaxToMin);
         }
 
         return list;
     }
 
-    public List<ModelNestedFinance> filterPeriod(@NonNull String filterPeriod, List<ModelNestedFinance> list) {
+    public List<ModelNestedSavings> filterPeriod(@NonNull String filterPeriod, List<ModelNestedSavings> list) {
         if (filterPeriod.equalsIgnoreCase("terlama")) {
-            Collections.sort(list, ModelNestedFinance.shortedPeriodLongestToLatest);
+            Collections.sort(list, ModelNestedSavings.shortedPeriodLongestToLatest);
         } else {
-            Collections.sort(list, ModelNestedFinance.shortedPeriodLatestToLongest);
+            Collections.sort(list, ModelNestedSavings.shortedPeriodLatestToLongest);
         }
 
         return list;
@@ -57,10 +58,6 @@ public class FinanceFilter {
     }
 
     public void setUpFilter() {
-        filterType.add(new ModelFilter("Pengeluaran"));
-        filterType.add(new ModelFilter("Pemasukan"));
-        filterType.add(new ModelFilter("Semuanya"));
-
         filterNominal.add(new ModelFilter("Tertinggi-Terendah"));
         filterNominal.add(new ModelFilter("Terendah-Tertinggi"));
 
@@ -70,53 +67,35 @@ public class FinanceFilter {
 
     public void resetFilter() {
         filterNominal.clear();
-        filterType.clear();
         filterPeriod.clear();
         setUpFilter();
     }
 
-    public List<ModelNestedFinance> filterNestedFinance(List<ModelFinance> data) {
-        List<ModelNestedFinance> listData = new ArrayList<>();
+    public List<ModelNestedSavings> filterNestedSavings(List<ModelSavingsProgress> data) {
+        List<ModelNestedSavings> listData = new ArrayList<>();
         HashSet<String> hashset = new HashSet<>();
 
-        for (ModelFinance modelFinance : data) {
-            hashset.add(modelFinance.getDate());
+        for (ModelSavingsProgress modelSavings : data) {
+            hashset.add(modelSavings.getDate_progress_savings());
         }
 
         for (String date : hashset) {
             Log.e("TAG", "filterNestedFinance: " + date);
-            ModelNestedFinance modelNestedFinance = new ModelNestedFinance();
+            ModelNestedSavings modelNestedFinance = new ModelNestedSavings();
             modelNestedFinance.setDate(date);
-            List<ModelFinance> dataFinance = new ArrayList<>();
-            for (ModelFinance modelFinance : data) {
-                if (date.equals(modelFinance.getDate()))
-                    dataFinance.add(modelFinance);
+            List<ModelSavingsProgress> dataSavings = new ArrayList<>();
+            for (ModelSavingsProgress modelFinance : data) {
+                if (date.equals(modelFinance.getDate_progress_savings()))
+                    dataSavings.add(modelFinance);
             }
 
-            modelNestedFinance.setFinances(dataFinance);
+            modelNestedFinance.setSavingsProgresses(dataSavings);
             listData.add(modelNestedFinance);
         }
 
         return listData;
     }
 
-    public long totalExpense(List<ModelFinance> data) {
-        long expense = 0;
-        for (ModelFinance modelFinance : data)
-            if (modelFinance.getTipe().equalsIgnoreCase("pengeluaran"))
-                expense += (long) modelFinance.getJumlahValue();
-
-        return expense;
-    }
-
-    public long totalIncome(List<ModelFinance> data) {
-        long income = 0;
-        for (ModelFinance modelFinance : data)
-            if (modelFinance.getTipe().equalsIgnoreCase("pemasukan"))
-                income += (long) modelFinance.getJumlahValue();
-
-        return income;
-    }
 
     public long totalValueByType(List<ModelFinance> data, String type) {
         long value = 0;

@@ -1,22 +1,19 @@
 package id.co.evolution.financefy.adapter;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.callback.MethodCallback;
 import id.co.evolution.financefy.databinding.ListCalculatorBinding;
-import id.co.evolution.financefy.databinding.ListFilterBinding;
-import id.co.evolution.financefy.model.ModelFilter;
 
 public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.ViewHolder> {
     Context context;
@@ -62,9 +59,5 @@ public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.Vi
                 methodCallback.onClick(data, position);
             });
         }
-    }
-
-    public interface MethodCallback {
-        void onClick(List<String> data, int position);
     }
 }

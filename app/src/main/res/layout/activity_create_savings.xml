@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/lato_bold"
                     android:padding="10dp"
-                    android:text="Input Finance"
+                    android:text="Input Savings"
                     android:textColor="@color/blackTextColor"
                     android:textSize="19sp" />
 
@@ -85,57 +85,23 @@
 
                 </RelativeLayout>
 
-                <RelativeLayout
-                    android:id="@+id/place_type"
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/til_title"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/shape_date">
+                    android:hint="Title"
+                    app:errorEnabled="true">
 
-                    <TextView
-                        android:id="@+id/txt_type"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="Type"
-                        android:textColor="@color/blackTextColor" />
+                        android:gravity="top|start"
+                        android:inputType="text" />
 
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:padding="16dp"
-                        android:src="@drawable/ic_arrow_drop_down"
-                        app:tint="@color/blackTextColor" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-
-                </RelativeLayout>
-
-                <RelativeLayout
-                    android:id="@+id/place_category"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/shape_date">
-
-                    <TextView
-                        android:id="@+id/txt_kategori"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="16dp"
-                        android:text="Category"
-                        android:textColor="@color/blackTextColor" />
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:padding="16dp"
-                        android:src="@drawable/ic_arrow_drop_down"
-                        app:tint="@color/blackTextColor" />
-
-
-                </RelativeLayout>
 
                 <RelativeLayout
                     android:layout_width="match_parent"

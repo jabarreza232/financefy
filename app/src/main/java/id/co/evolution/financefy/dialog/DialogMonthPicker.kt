@@ -15,6 +15,7 @@ class DialogMonthPicker(
     private var dialogMonthPickerCallback: DialogMonthPickerCallback
 ) {
 
+
     fun showDialogMonthPicker() {
         val builder = MonthPickerDialog.Builder(
             context,
@@ -25,15 +26,17 @@ class DialogMonthPicker(
         )
 
         try {
+
             builder.setMinYear(today.get(Calendar.YEAR))
                 .setActivatedYear(today.get(Calendar.YEAR))
-                .setMinYear(
-                    FilterMinYearAsynctask(today, dataFinance, context).execute().get().toInt())
-                .setMaxYear((today.get(Calendar.YEAR)))
-                .setMaxMonth(
-                    FilterMaxMonthAsynctask(today, dataFinance, context).execute().get()
+
+            if(dataFinance.isNotEmpty()){
+                builder.setMinYear(FilterMinYearAsynctask(today, dataFinance, context).execute().get().toInt())
+                    .setMaxYear((today.get(Calendar.YEAR)))
+                    .setMaxMonth(FilterMaxMonthAsynctask(today, dataFinance, context).execute().get()
                         .toInt()
-                )
+                    )
+            }
         } catch (e: ExecutionException) {
             e.printStackTrace()
         } catch (e: InterruptedException) {

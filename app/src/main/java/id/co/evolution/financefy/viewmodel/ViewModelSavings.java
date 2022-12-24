@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
+import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.repository.SavingsRepository;
 
@@ -15,7 +16,7 @@ public class ViewModelSavings extends ViewModel {
         this.savingsRepository = savingsRepository;
     }
 
-    public void inputUpdateUser(String type, ModelSavings modelSavings) {
+    public void inputUpdateSavings(String type, ModelSavings modelSavings) {
         new SavingsRepository.InputUpdateSavings(modelSavings, type, savingsRepository.savingsDao).execute();
     }
 

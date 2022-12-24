@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.callback.MethodCallback;
 import id.co.evolution.financefy.databinding.ListFilterBinding;
 import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
@@ -88,7 +89,4 @@ public class AdapterFilter extends RecyclerView.Adapter<AdapterFilter.ViewHolder
         }
     }
 
-    public interface MethodCallback {
-        void onClick(List<ModelFilter> data, int position);
-    }
 }

@@ -1,6 +1,5 @@
 package id.co.evolution.financefy.adapter;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,27 +15,28 @@ import com.github.vipulasri.timelineview.TimelineView;
 import java.util.List;
 
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.callback.MethodCallback;
 import id.co.evolution.financefy.databinding.ListFinanceBinding;
 import id.co.evolution.financefy.fragment.FragmentAll;
 import id.co.evolution.financefy.fragment.FragmentAll.TYPE_LAYOUT_MANAGER;
-import id.co.evolution.financefy.model.ModelFinance;
-import id.co.evolution.financefy.model.ModelNestedFinance;
+import id.co.evolution.financefy.model.ModelNestedSavings;
 
-public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHolder> {
-    Context context;
-    List<ModelNestedFinance> data;
+public class AdapterSavings extends RecyclerView.Adapter<AdapterSavings.ViewHolder> {
+    List<ModelNestedSavings> data;
     MethodCallback methodCallback;
-   TYPE_LAYOUT_MANAGER type;
-    TYPE_NESTED_FINANCE type_nested_finance=TYPE_NESTED_FINANCE.DEFAULT;
-
+    TYPE_LAYOUT_MANAGER type;
+    int total_value;
 
     public enum TYPE_NESTED_FINANCE {
         ANALYSIS,
         DEFAULT
     }
 
-    public AdapterFinance(Context context, List<ModelNestedFinance> data, MethodCallback methodCallback) {
-        this.context = context;
+    public void setTotal_value(int total_value) {
+        this.total_value = total_value;
+    }
+
+    public AdapterSavings( List<ModelNestedSavings> data, MethodCallback methodCallback) {
         this.data = data;
         this.methodCallback = methodCallback;
     }
@@ -45,14 +45,10 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
         this.type = type;
     }
 
-    public void setType(TYPE_NESTED_FINANCE type) {
-        this.type_nested_finance = type;
-    }
-
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(context).inflate(R.layout.list_finance, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_finance, viewGroup, false);
         return new ViewHolder(view, i);
     }
 
@@ -71,6 +67,7 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
     public int getItemViewType(int position) {
         return TimelineView.getTimeLineViewType(position, getItemCount());
     }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
         ListFinanceBinding binding;
         TimelineView mTimelineView;
@@ -82,35 +79,20 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
             mTimelineView.initLine(viewType);
         }
 
-        public void bindData(ModelNestedFinance modelNestedFinance){
-            if(type_nested_finance==TYPE_NESTED_FINANCE.ANALYSIS)
-                showAnalysis(modelNestedFinance);
-                else
-                showNestedFinance(modelNestedFinance);
-
+        public void bindData(ModelNestedSavings modelNestedFinance){
+            showNestedFinance(modelNestedFinance);
         }
 
-        private void showNestedFinance(ModelNestedFinance modelNestedFinance){
-            AdapterNestedFinance adapterFinance = new AdapterNestedFinance(context, modelNestedFinance.getFinances(), (data, position) -> methodCallback.onClick(data,position));
+        private void showNestedFinance(ModelNestedSavings modelNestedFinance){
+            AdapterNestedSavings adapterFinance = new AdapterNestedSavings(total_value, modelNestedFinance.getSavingsProgresses(), (data, position) -> methodCallback.onClick(data,position));
 
-            if (type ==TYPE_LAYOUT_MANAGER.GRID) {
-                binding.rvFinance.setLayoutManager(new GridLayoutManager(context, 2));
-            } else if (type ==TYPE_LAYOUT_MANAGER.VERTICAL) {
-                binding.rvFinance.setLayoutManager(new LinearLayoutManager(context));
+            if (type == TYPE_LAYOUT_MANAGER.GRID) {
+                binding.rvFinance.setLayoutManager(new GridLayoutManager(itemView.getContext(), 2));
+            } else if (type == TYPE_LAYOUT_MANAGER.VERTICAL) {
+                binding.rvFinance.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
             }
             binding.rvFinance.setNestedScrollingEnabled(false);
             binding.rvFinance.setAdapter(adapterFinance);
         }
-
-        private void showAnalysis(ModelNestedFinance modelNestedFinance){
-            AdapterAnalysisFinance adapterFinance = new AdapterAnalysisFinance(context, modelNestedFinance.getFinances(), (data, position) -> methodCallback.onClick(data,position));
-            binding.rvFinance.setLayoutManager(new LinearLayoutManager(context));
-            binding.rvFinance.setNestedScrollingEnabled(true);
-            binding.rvFinance.setAdapter(adapterFinance);
-        }
-    }
-
-    public interface MethodCallback {
-        void onClick(List<ModelFinance> data, int position);
     }
 }

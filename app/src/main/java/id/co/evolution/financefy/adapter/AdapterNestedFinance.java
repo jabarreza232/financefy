@@ -17,6 +17,7 @@ import com.github.vipulasri.timelineview.TimelineView;
 import java.util.List;
 
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.callback.MethodCallback;
 import id.co.evolution.financefy.databinding.ListFinanceBinding;
 import id.co.evolution.financefy.databinding.ListNestedFinanceBinding;
 import id.co.evolution.financefy.model.ModelFinance;
@@ -85,9 +86,5 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
             binding = DataBindingUtil.bind(itemView);
 
         }
-    }
-
-    public interface MethodCallback {
-        void onClick(List<ModelFinance> data, int position);
     }
 }

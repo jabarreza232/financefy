@@ -26,7 +26,7 @@ public class ModelUser {
     public ModelUser() {
     }
 
-    public ModelUser(String name, String type, String category, long targetValue) {
+    public ModelUser(String name, String type, String category) {
         this.name = name;
         this.type = type;
         this.category = category;

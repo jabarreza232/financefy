@@ -29,6 +29,10 @@ public class FinanceRepository {
         return financeDao.loadAllbyMonth(month, id_user);
     }
 
+    public LiveData<List<ModelFinance>> getFinanceByYear(String year, int id_user) {
+        return financeDao.loadAllByYear(year, id_user);
+    }
+
     public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date, int id_user) {
         return financeDao.loadAllbyWeek(date, id_user);
     }
@@ -49,13 +53,15 @@ public class FinanceRepository {
         return financeDao.findByTypeAndWeek(type, date, id_user);
     }
 
-    public LiveData<List<ModelUserWithFinance>> getFinanceByUserId(int id_user) {
+    public LiveData<List<ModelFinance>> getFinanceByUserId(int id_user) {
         return financeDao.findFinanceByUserId(id_user);
     }
 
     public static class InputUpdateFinance extends AsyncTask<Void, Void, Void> {
         ModelFinance modelFinance;
         String type;
+        String amount;
+        int id_user,id_finance;
         FinanceDao financeDao;
 
         public InputUpdateFinance(ModelFinance modelFinance, String type, FinanceDao financeDao) {
@@ -64,12 +70,25 @@ public class FinanceRepository {
             this.financeDao = financeDao;
         }
 
+        public InputUpdateFinance(String amount,int id_finance,int id_user, String type, FinanceDao financeDao) {
+            this.amount = amount;
+            this.id_user = id_user;
+            this.id_finance = id_finance;
+            this.type = type;
+            this.financeDao = financeDao;
+        }
+
         @Override
         protected Void doInBackground(Void... voids) {
             if (type.equalsIgnoreCase("create"))
                 financeDao.insertAll(modelFinance);
-            else
-                financeDao.update(modelFinance);
+            else{
+                if(id_user>0)
+                financeDao.updateByIdUser(amount,id_finance,id_user);
+                else
+                    financeDao.update(modelFinance);
+
+            }
 
             return null;
         }
@@ -83,15 +102,24 @@ public class FinanceRepository {
     public static class RemoveFinance extends AsyncTask<Void, Void, Void> {
         ModelFinance modelFinance;
         FinanceDao financeDao;
+        int id_user;
 
         public RemoveFinance(ModelFinance modelFinance, FinanceDao financeDao) {
             this.modelFinance = modelFinance;
             this.financeDao = financeDao;
         }
+        public RemoveFinance( FinanceDao financeDao,int id_user) {
+            this.financeDao = financeDao;
+            this.id_user = id_user;
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
-            financeDao.delete(modelFinance);
+            if(id_user>0){
+                financeDao.deleteByIdUser(id_user);
+            }else{
+                financeDao.delete(modelFinance);
+            }
             return null;
         }
 
