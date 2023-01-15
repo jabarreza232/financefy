@@ -1,29 +1,52 @@
 package id.co.evolution.financefy.helper;
 
+import android.animation.ObjectAnimator;
 import android.os.Build;
+import android.util.Property;
+import android.view.View;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Tools {
     public static int REQUEST_CODE_CALLBACK = 3;
-    public enum TYPE_FILTER{
+
+    public enum TYPE_FILTER {
         SEMUANYA,
         PEMASUKAN,
         PENGELUARAN
     }
 
+    public enum TYPE {
+        CLICKED,
+        EDIT,
+        REMOVED
+    }
 
     public static String getFormattedMonthSimple(Long dateTime) {
         SimpleDateFormat newFormat = new SimpleDateFormat("MM-yyyy");
         return newFormat.format(new Date(dateTime));
+    }
+
+    public static long getRestOfTheDay(String startDate, String endDate) {
+        SimpleDateFormat df = new SimpleDateFormat("MMMM dd, yyyy");
+
+        try {
+            Date start = df.parse(startDate);
+            Date end = df.parse(endDate);
+            long diff = end.getTime() - start.getTime();
+            return TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+        } catch (ParseException e) {
+            return 0;
+        }
+
     }
 
     public static long getFormattedMonthToTime(String dateTime) {
@@ -32,13 +55,17 @@ public class Tools {
         try {
             return df.parse(dateTime).getTime();
         } catch (ParseException e) {
-           return 0;
+            return 0;
         }
     }
 
     public static String getFormattedYearSimple(Long dateTime) {
         SimpleDateFormat newFormat = new SimpleDateFormat("yyyy");
         return newFormat.format(new Date(dateTime));
+    }
+
+    public static ObjectAnimator getObjectAnimator(View view, Property property, float values,long duration) {
+        return ObjectAnimator.ofFloat(view, property, values).setDuration(duration);
     }
 
     public static String getFormattedMonthTextSimple(Long dateTime) {

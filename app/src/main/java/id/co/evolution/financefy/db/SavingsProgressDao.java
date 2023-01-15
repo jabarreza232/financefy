@@ -27,9 +27,14 @@ public interface SavingsProgressDao {
     @Query("SELECT * FROM savings_progress WHERE id_savings =:id_savings")
     LiveData<List<ModelSavingsProgress>> findByIdSavings(int id_savings);
 
-
     @Query("SELECT * FROM savings_progress WHERE id_progress_savings =:id LIMIT 1")
     LiveData<ModelSavingsProgress> findById(int id);
+
+    @Query("SELECT COUNT(process_value) FROM savings_progress WHERE id_savings=:id_savings")
+    LiveData<Integer>findTotalProcessValueByIdSavings(int id_savings);
+
+    @Query("SELECT COUNT(process_value) FROM savings_progress")
+    LiveData<Integer>findTotalProcessValue();
 
     @Query("SELECT * FROM savings_progress WHERE date_progress_savings IN(:date) AND id_savings IN(:id_savings)")
     LiveData<List<ModelSavingsProgress>> loadAllByWeek(List<String> date, int id_savings);

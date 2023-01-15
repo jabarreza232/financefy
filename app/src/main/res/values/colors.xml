@@ -10,6 +10,8 @@
     <color name="colorTextGreen">#0E9713</color>
     <color name="colorTextOrange">#EC4009</color>
 
+    <color name="blackTransparent">#39000000</color>
+
     <!-- dots inactive colors -->
     <color name="colorGrey50">#B4B1B1</color>
     <color name="colorGrey30">#D6D4D4</color>

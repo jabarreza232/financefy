@@ -32,6 +32,10 @@ public class ViewModelSavingsProgress extends ViewModel {
         return savingsRepository.getSavingsById(id);
     }
 
+    public LiveData<Integer> findTotalProcessValueByIdSavings(int id) {
+        return savingsRepository.getTotalProcessValueByIdSavings(id);
+    }
+
     public LiveData<List<ModelSavingsProgress>> getSavingsByMonth(String month, int id_savings) {
         return savingsRepository.getSavingsByMonth(month, id_savings);
     }

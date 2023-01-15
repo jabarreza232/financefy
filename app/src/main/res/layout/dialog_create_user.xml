@@ -117,7 +117,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Judul"
+                android:hint="Title"
                 android:visibility="gone"
                 app:errorEnabled="true">
 
@@ -142,7 +142,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
-                    android:text="Tanggal Target"
+                    android:text="Date"
                     android:textColor="@color/blackTextColor" />
 
                 <ImageView
@@ -168,7 +168,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_toStartOf="@id/btn_calculator"
-                    android:hint="Nilai Target"
+                    android:hint="Amount of money"
                     app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText

@@ -24,11 +24,11 @@
 
 
             <TextView
+                android:drawableRight="@drawable/ic_arrow_drop_down"
                 android:id="@+id/txt_title"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:layout_toStartOf="@id/txt_percentage"
                 android:fontFamily="@font/lato_bold"
                 android:textColor="@android:color/black"
                 android:textSize="15sp"

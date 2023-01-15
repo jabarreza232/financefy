@@ -31,7 +31,6 @@ import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.FragmentAccountBinding;
 import id.co.evolution.financefy.dialog.DialogCreateUser;
-import id.co.evolution.financefy.dialog.DialogFinance;
 import id.co.evolution.financefy.dialog.DialogSavings;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.TinyDb;
@@ -78,6 +77,7 @@ public class FragmentAccount extends Fragment {
     int id_savings_user = 0;
     long date_ship_millis;
     MainActivity mainActivity;
+
     //TODO NOTE SAVINGS : Menabung, FINANCE : JURNAL KEUANGAN
 
     public FragmentAccount() {
@@ -279,11 +279,12 @@ public class FragmentAccount extends Fragment {
             List<String> dataSavings = new ArrayList<>();
             for (ModelSavings savings : modelSavings)
                 dataSavings.add(savings.getTitle());
-            if (dataSavings.size() > 0) {
 
-                setDataSavings(modelSavings.get(0));
+            if (dataSavings.size() > 0) {
+                setDataSavings(mainActivity.modelSavings!=null? mainActivity.modelSavings:modelSavings.get(0));
+
                 binding.layoutAccountSavings.placeChooseSavings.setOnClickListener(v -> {
-                    dialogSavings = new DialogSavings(getContext(), (index, result) -> {
+                    dialogSavings = new DialogSavings(getContext(),getLayoutInflater(), (index, result) -> {
                         setDataSavings(modelSavings.get(index));
                     });
 

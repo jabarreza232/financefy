@@ -1,6 +1,7 @@
 package id.co.evolution.financefy.fragment;
 
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_FINANCE;
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 
 import android.annotation.SuppressLint;
@@ -49,6 +50,7 @@ import id.co.evolution.financefy.databinding.FragmentAllBinding;
 import id.co.evolution.financefy.dialog.DialogFilterFinance;
 import id.co.evolution.financefy.dialog.DialogFilterSavings;
 import id.co.evolution.financefy.dialog.DialogMonthPicker;
+import id.co.evolution.financefy.dialog.DialogSavings;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.LocalizedWeekHelper;
 import id.co.evolution.financefy.helper.SavingsFilter;
@@ -75,6 +77,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     Calendar prevNextMonth;
     List<ModelFinance> dataFinance = new ArrayList<>();
     List<ModelFinance> financeData;
+    List<ModelSavings> savingsTargetData = new ArrayList<>();
     List<ModelSavingsProgress> savingsData;
     FragmentAllBinding binding;
     ViewModelFinance viewModelFinance;
@@ -109,6 +112,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
         VERTICAL
     }
 
+    DialogSavings dialogSavings;
     @Inject
     UserRepository userRepository;
     CallbackOnActivityResult mCallbackOnActivityResult;
@@ -186,11 +190,9 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                     tinyDb.putObject("user", user);
                     mainActivity.user = user;
                     viewModelUser.inputUpdateUser("create", user);
-
                 } else {
                     for (ModelUser modelUser : modelUserWithFinances)
                         user = modelUser;
-
 //                        mainActivity.user = user;
                 }
 
@@ -198,7 +200,6 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 loadDataByMonth(date_ship_millis);
                 initiateSayHaloWithTime();
             });
-
         }
 
 
@@ -317,6 +318,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
         AlertDialog dialog = builder.create();
         dialog.show();
     }
+
     private void showDialogSavings(final List<ModelSavingsProgress> data, final int position) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Pilih Opsi");
@@ -330,7 +332,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                     break;
                 case 1:
                     viewModelSavingsProgress.removeSavings(data.get(position));
-                    dataFinance.remove(position);
+                    savingsData.remove(position);
                     binding.rvList.getAdapter().notifyDataSetChanged();
                     dialog.dismiss();
                     break;
@@ -376,7 +378,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.filter:
-                if(user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))){
+                if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
                     showDialogFilterFinance();
                 } else {
                     showDialogFilterSavings();
@@ -392,10 +394,10 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                     type_layout_manager = TYPE_LAYOUT_MANAGER.GRID;
                 }
 
-                if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))&&adapter != null) {
+                if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan)) && adapter != null) {
                     adapter.setType(type_layout_manager);
                     adapter.notifyDataSetChanged();
-                }else{
+                } else {
                     adapterSavings.setType(type_layout_manager);
                     adapterSavings.notifyDataSetChanged();
                 }
@@ -539,9 +541,15 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
             }
         } else {
             //BY SAVINGS
+            viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(), dataSavings -> {
+                if (dataSavings != null) {
+                    savingsTargetData = new ArrayList<>(dataSavings);
+                }
+            });
+
             binding.layoutFinanceJournal.linearlayoutFinanceJournal.setVisibility(View.GONE);
             binding.layoutSavingsProgress.linearlayoutSavingsProgress.setVisibility(View.VISIBLE);
-            if(modelSavings!=null){
+            if (modelSavings != null) {
                 viewModelSavingsProgress.getSavingsByMonth(Tools.getFormattedMonthSimple(date_ship_milis), modelSavings.getId()).observe(getViewLifecycleOwner(), modelSavings -> {
                     if (modelSavings != null) loadDataSavings(modelSavings);
                 });
@@ -559,7 +567,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
             });
         } else {
             viewModelSavingsProgress.getSavingsByWeek(getListDateWeek(), modelSavings.getId()).observe(getViewLifecycleOwner(), modelSavingsProgresses -> {
-                    if(modelSavingsProgresses!=null)loadDataSavings(modelSavingsProgresses);
+                if (modelSavingsProgresses != null) loadDataSavings(modelSavingsProgresses);
             });
         }
     }
@@ -585,14 +593,15 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
     private void loadDataSavings(List<ModelSavingsProgress> data) {
         savingsData = new ArrayList<>(data);
-        loadDataHeaderSavings(data);
+        loadTotalSavingsTarget();
+        loadDataHeaderSavings();
         if (filterNominal != null)
             data = savingsFilter.filterNominal(filterNominal, data);
 
         List<ModelNestedSavings> listNestedSavings = savingsFilter.filterNestedSavings(data);
         listNestedSavings = savingsFilter.filterPeriod("terbaru", listNestedSavings);
-        adapterSavings = new AdapterSavings( listNestedSavings, this::showDialogSavings);
-        adapterSavings.setTotal_value((int)modelSavings.getTargetValue());
+        adapterSavings = new AdapterSavings(listNestedSavings, this::showDialogSavings);
+        adapterSavings.setTotal_value((int) modelSavings.getTargetValue());
         adapterSavings.setType(type_layout_manager);
         binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.rvList.setAdapter(adapterSavings);
@@ -610,15 +619,30 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     }
 
     @SuppressLint("SetTextI18n")
-    private void loadDataHeaderSavings(List<ModelSavingsProgress> data) {
-
+    private void loadDataHeaderSavings() {
         binding.layoutSavingsProgress.txtTitle.setText(modelSavings.getTitle());
-        binding.layoutSavingsProgress.txtProgress.setText(Tools.convertToCurrency(modelSavings.getProcessValue())+" s/d "+Tools.convertToCurrency(modelSavings.getTargetValue()));
-        binding.layoutSavingsProgress.progressSavings.setProgress((int)Tools.calculatePercentage(modelSavings.getProcessValue(),modelSavings.getTargetValue()));
+        binding.layoutSavingsProgress.txtProgress.setText(Tools.convertToCurrency(modelSavings.getProcessValue()) + " s/d " + Tools.convertToCurrency(modelSavings.getTargetValue()));
+        binding.layoutSavingsProgress.progressSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutSavingsProgress.progressSavings.setMax(100);
-        binding.layoutSavingsProgress.txtPercentage.setText(Tools.calculatePercentage((double)modelSavings.getProcessValue(),(double)modelSavings.getTargetValue())+"%");
+        binding.layoutSavingsProgress.txtPercentage.setText(Tools.calculatePercentage((double) modelSavings.getProcessValue(), (double) modelSavings.getTargetValue()) + "%");
 
-        binding.layoutSavingsProgress.txtDay.setText("Sisa 28 hari");
+        binding.layoutSavingsProgress.txtDay.setText("Sisa " + Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target()) + " hari");
+        binding.layoutSavingsProgress.txtTitle.setOnClickListener(v -> {
+            List<String> dataSavings = new ArrayList<>();
+            for (ModelSavings savings : savingsTargetData)
+                dataSavings.add(savings.getTitle());
+
+            dialogSavings = new DialogSavings(getContext(),getLayoutInflater(), (index, result) -> {
+                modelSavings = savingsTargetData.get(index);
+                setSavingsTarget();
+                viewModelSavingsProgress.findAllSavingsByIdSavings(savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                    if (dataSavingsProgress != null) {
+                        loadDataSavings(dataSavingsProgress);
+                    }
+                });
+            });
+            dialogSavings.showDialogSavings(dataSavings);
+        });
     }
 
     private List<String> getListDateWeek() {
@@ -631,7 +655,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
     @Override
     public void result(ActivityResult result, Intent intent) {
-        if(result.getResultCode()==REQUEST_CODE_FINANCE){
+        if (result.getResultCode() == REQUEST_CODE_FINANCE) {
             ModelFinance modelFinance = (ModelFinance) intent.getSerializableExtra("finance");
             for (int i = 0; i < financeData.size(); i++) {
                 if (financeData.get(i).getId() == modelFinance.getId())
@@ -641,17 +665,38 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
             Log.e("TAG", "result: " + new Gson().toJson(financeData));
             loadDataFinance(financeData);
 
-        }else{
-            if(intent!=null){
-                ModelSavings modelSavings = (ModelSavings) intent.getSerializableExtra("savings");
-//            for (int i = 0; i < savingsData.size(); i++) {
-//                if (savingsData.get(i).getId() == modelSavings.getId())
-//                    savingsData.set(i, modelSavings);
-//            }
+        } else if (result.getResultCode() == REQUEST_CODE_SAVINGS) {
 
+
+            if (intent != null) {
+                ModelSavingsProgress modelSavingsProgress = (ModelSavingsProgress) intent.getSerializableExtra("savings_progress");
+
+                for (int i = 0; i < savingsData.size(); i++) {
+                    if (savingsData.get(i).getId() == modelSavingsProgress.getId())
+                        savingsData.set(i, modelSavingsProgress);
+                }
+
+
+                loadTotalSavingsTarget();
                 Log.e("TAG", "result: " + new Gson().toJson(modelSavings));
+                Log.e("TAG", "result: " + new Gson().toJson(modelSavingsProgress));
                 loadDataSavings(savingsData);
             }
         }
+
+    }
+
+    private void loadTotalSavingsTarget() {
+        long processValue = 0;
+        for (ModelSavingsProgress model : savingsData)
+            processValue += model.getProcessValue();
+
+        modelSavings.setProcessValue(processValue);
+        setSavingsTarget();
+    }
+
+    private void setSavingsTarget() {
+        tinyDb.putObject("savings", modelSavings);
+        mainActivity.modelSavings = modelSavings;
     }
 }

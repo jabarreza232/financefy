@@ -27,6 +27,9 @@ public class SavingsProgressRepository {
     public LiveData<ModelSavingsProgress> getSavingsById(int id) {
         return savingsDao.findById(id);
     }
+    public LiveData<Integer> getTotalProcessValueByIdSavings(int id) {
+        return savingsDao.findTotalProcessValueByIdSavings(id);
+    }
 
     public LiveData<List<ModelSavingsProgress>> getSavingsByDate(String date) {
         return savingsDao.findByDate(date);

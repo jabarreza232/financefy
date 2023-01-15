@@ -64,8 +64,7 @@
 
                         <include
                             android:id="@+id/layout_savings_progress"
-                            layout="@layout/layout_savings_progress"
-                            />
+                            layout="@layout/layout_savings_progress" />
 
                     </RelativeLayout>
                 </androidx.cardview.widget.CardView>

@@ -23,44 +23,39 @@ import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.text.NumberFormat;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.databinding.ActivityCreateSavingsBinding;
+import id.co.evolution.financefy.databinding.ActivityCreateSavingsTargetBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelSavings;
-import id.co.evolution.financefy.model.ModelSavingsProgress;
-import id.co.evolution.financefy.repository.SavingsProgressRepository;
 import id.co.evolution.financefy.repository.SavingsRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelSavings;
-import id.co.evolution.financefy.viewmodel.ViewModelSavingsProgress;
 
 @AndroidEntryPoint
-public class CreateSavingsActivity extends AppCompatActivity implements View.OnClickListener {
+public class CreateSavingsTargetActivity extends AppCompatActivity implements View.OnClickListener{
     String date = "";
     private String jumlah = "";
     String month = "";
-    ActivityCreateSavingsBinding binding;
+    ActivityCreateSavingsTargetBinding binding;
     Calendar cur_calendar = Calendar.getInstance();
-    ViewModelSavingsProgress viewModelSavingsProgress;
     ViewModelSavings viewModelSaving;
     DialogCalculator dialogCalculator;
-    List<ModelSavingsProgress> listSavings;
 
-    @Inject
-    SavingsProgressRepository savingsProgressRepository;
+
     @Inject
     SavingsRepository savingsRepository;
     ModelSavings modelSavings;
+    private int id_user;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings);
+        binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_target);
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow();
@@ -71,9 +66,7 @@ public class CreateSavingsActivity extends AppCompatActivity implements View.OnC
         cur_calendar.get(Calendar.MONTH);
         cur_calendar.get(Calendar.DAY_OF_MONTH);
         long date_ship_milis = cur_calendar.getTimeInMillis();
-        viewModelSavingsProgress = new ViewModelProvider(this).get(ViewModelSavingsProgress.class);
         viewModelSaving = new ViewModelProvider(this).get(ViewModelSavings.class);
-        viewModelSavingsProgress.init(savingsProgressRepository);
         viewModelSaving.init(savingsRepository);
 
         binding.txtHeader.setText("Input data");
@@ -81,12 +74,7 @@ public class CreateSavingsActivity extends AppCompatActivity implements View.OnC
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
         modelSavings =(ModelSavings) getIntent().getSerializableExtra("savings");
-
-
-        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(this, modelSavings -> {
-            listSavings = modelSavings;
-        });
-
+        id_user = getIntent().getIntExtra("id_user", 0);
         binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -127,7 +115,6 @@ public class CreateSavingsActivity extends AppCompatActivity implements View.OnC
         binding.btnCalculator.setOnClickListener(this);
     }
 
-
     private void showDatePickerDialog() {
         DatePickerDialog datePickerDialog = DatePickerDialog.newInstance((view, year, monthOfYear, dayOfMonth) -> {
             Calendar calendar = Calendar.getInstance();
@@ -142,8 +129,7 @@ public class CreateSavingsActivity extends AppCompatActivity implements View.OnC
             month = getFormattedMonthSimple(date_ship_milis);
         });
 
-        datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR), cur_calendar.get(Calendar.YEAR));
-        datePickerDialog.setMaxDate(cur_calendar);
+        datePickerDialog.setMinDate(cur_calendar);
         datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
         datePickerDialog.show(getSupportFragmentManager(), "PickerDialog");
     }
@@ -189,14 +175,13 @@ public class CreateSavingsActivity extends AppCompatActivity implements View.OnC
                             .setContentText("Apakah anda yakin ingin submit data ?")
                             .setConfirmText("Ya")
                             .setConfirmClickListener(sweetAlertDialog -> {
-                                ModelSavingsProgress model = new ModelSavingsProgress();
-                                model.setDate_progress_savings(date);
-                                model.setMonth(month);
-                                model.setProcessValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
-                                model.setDescription(binding.etDescription.getText().toString().trim());
+                                ModelSavings model = new ModelSavings();
+                                model.setDate_target(date);
+                                model.setId_savings_user(id_user);
+                                model.setTargetValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
                                 model.setTitle(binding.etTitle.getText().toString().trim());
-                                model.setId_savings(modelSavings.getId());
-                                onSubmit(model);
+                                viewModelSaving.inputUpdateSavings("Create", model);
+
                                 Intent intent = new Intent();
                                 intent.putExtra("savings", modelSavings);
                                 setResult(RESULT_OK, intent);
@@ -207,24 +192,5 @@ public class CreateSavingsActivity extends AppCompatActivity implements View.OnC
                 }
                 break;
         }
-    }
-
-    private void onSubmit(ModelSavingsProgress model) {
-        boolean isUpdate = false;
-        for (ModelSavingsProgress modelSavings : listSavings) {
-            if (modelSavings.getTitle().contains(model.getTitle()) && modelSavings.getDate_progress_savings().contains(model.getDate_progress_savings())) {
-                model.setId(modelSavings.getId());
-                model.setProcessValue(modelSavings.getProcessValue());
-                isUpdate = true;
-            }
-        }
-
-        if(isUpdate)
-        viewModelSavingsProgress.inputUpdateSavings("Update", model);
-        else viewModelSavingsProgress.inputUpdateSavings("Create", model);
-
-        long processValue =model.getProcessValue()+modelSavings.getProcessValue();
-        modelSavings.setProcessValue(processValue);
-        viewModelSaving.inputUpdateSavings("Update",modelSavings);
     }
 }

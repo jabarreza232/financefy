@@ -1,6 +1,5 @@
 package id.co.evolution.financefy.activity;
 
-import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
 import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
 
@@ -24,6 +23,7 @@ import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 import javax.inject.Inject;
@@ -41,7 +41,7 @@ import id.co.evolution.financefy.viewmodel.ViewModelSavings;
 import id.co.evolution.financefy.viewmodel.ViewModelSavingsProgress;
 
 @AndroidEntryPoint
-public class UpdateSavingsActivity extends AppCompatActivity implements View.OnClickListener {
+public class CreateSavingsProgressActivity extends AppCompatActivity implements View.OnClickListener {
     String date = "";
     private String jumlah = "";
     String month = "";
@@ -50,15 +50,13 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
     ViewModelSavingsProgress viewModelSavingsProgress;
     ViewModelSavings viewModelSaving;
     DialogCalculator dialogCalculator;
+    List<ModelSavingsProgress> listSavings;
 
     @Inject
     SavingsProgressRepository savingsProgressRepository;
     @Inject
     SavingsRepository savingsRepository;
     ModelSavings modelSavings;
-    ModelSavingsProgress modelSavingsProgress;
-    int position;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,12 +81,11 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
         modelSavings =(ModelSavings) getIntent().getSerializableExtra("savings");
-        position = getIntent().getIntExtra("position", 0);
-        viewModelSavingsProgress.findSavingsById(getIntent().getIntExtra("id", 0)).observe(this, modelSavingsProgress -> {
-            this.modelSavingsProgress = modelSavingsProgress;
-            loadData();
-        });
 
+
+        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(this, modelSavings -> {
+            listSavings = modelSavings;
+        });
 
         binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
@@ -130,22 +127,6 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
         binding.btnCalculator.setOnClickListener(this);
     }
 
-    private void loadData() {
-        cur_calendar.get(Calendar.YEAR);
-        cur_calendar.get(Calendar.MONTH);
-        cur_calendar.get(Calendar.DAY_OF_MONTH);
-
-
-        jumlah = Tools.convertToCurrency(modelSavingsProgress.getProcessValue());
-        date = modelSavingsProgress.getDate_progress_savings();
-        month = modelSavingsProgress.getMonth();
-
-        binding.txtHeader.setText("Update data");
-        binding.txtDate.setText(date);
-        binding.etTitle.setText(modelSavingsProgress.getTitle());
-        binding.etAmount.setText(jumlah);
-        binding.etDescription.setText(modelSavingsProgress.getDescription());
-    }
 
     private void showDatePickerDialog() {
         DatePickerDialog datePickerDialog = DatePickerDialog.newInstance((view, year, monthOfYear, dayOfMonth) -> {
@@ -205,11 +186,10 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
 
                     new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                             .setTitleText("Submit")
-                            .setContentText("Apakah anda yakin ingin update data ?")
+                            .setContentText("Apakah anda yakin ingin submit data ?")
                             .setConfirmText("Ya")
                             .setConfirmClickListener(sweetAlertDialog -> {
                                 ModelSavingsProgress model = new ModelSavingsProgress();
-                                model.setId(getIntent().getIntExtra("id", 0));
                                 model.setDate_progress_savings(date);
                                 model.setMonth(month);
                                 model.setProcessValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
@@ -218,9 +198,8 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
                                 model.setId_savings(modelSavings.getId());
                                 onSubmit(model);
                                 Intent intent = new Intent();
-                                intent.putExtra("savings_progress",model);
-                                intent.putExtra("position", position);
-                                setResult(REQUEST_CODE_SAVINGS, intent);
+                                intent.putExtra("savings", modelSavings);
+                                setResult(RESULT_OK, intent);
                                 finish();
                             })
                             .setCancelText("Tidak")
@@ -231,7 +210,18 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
     }
 
     private void onSubmit(ModelSavingsProgress model) {
+        boolean isUpdate = false;
+        for (ModelSavingsProgress modelSavings : listSavings) {
+            if (modelSavings.getTitle().contains(model.getTitle()) && modelSavings.getDate_progress_savings().contains(model.getDate_progress_savings())) {
+                model.setId(modelSavings.getId());
+                model.setProcessValue(modelSavings.getProcessValue());
+                isUpdate = true;
+            }
+        }
+
+        if(isUpdate)
         viewModelSavingsProgress.inputUpdateSavings("Update", model);
+        else viewModelSavingsProgress.inputUpdateSavings("Create", model);
 
         viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(this, modelSavingsProgresses -> {
             long processValue=0;
@@ -240,7 +230,6 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
 
             modelSavings.setProcessValue(processValue);
             viewModelSaving.inputUpdateSavings("Update",modelSavings);
-
         });
     }
 }

@@ -58,12 +58,10 @@ public class AdapterAnalysisFinance extends RecyclerView.Adapter<AdapterAnalysis
         Log.e("TAG", "onBindViewHolder: "+data.get(i).getTotalValue());
         if (data.get(i).getTipe().equalsIgnoreCase("pengeluaran")) {
             holder.binding.txtJumlah.setTextColor(ContextCompat.getColor(context, R.color.red));
-            holder.binding.progressFinance.setProgressDrawable(ContextCompat.getDrawable(context,R.drawable.progress_expense_drawable));
         } else {
             holder.binding.txtJumlah.setTextColor(ContextCompat.getColor(context, R.color.green));
-            holder.binding.progressFinance.setProgressDrawable(ContextCompat.getDrawable(context,R.drawable.progress_income_drawable));
         }
-
+        holder.binding.progressFinance.setProgressDrawable(ContextCompat.getDrawable(context,R.drawable.progress_income_drawable));
     }
 
     @Override
