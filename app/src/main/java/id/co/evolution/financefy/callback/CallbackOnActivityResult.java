@@ -29,7 +29,7 @@ public class CallbackOnActivityResult implements DefaultLifecycleObserver {
     private ActivityResultLauncher<Intent> mStartForResult;
     private final Context mContext;
     private final OnCallbackResult mOnCallbackResult;
-   public static int REQUEST_CODE_FINANCE = 3, REQUEST_CODE_SAVINGS = 4, REQUEST_CODE_UPDATE_SAVINGS;
+   public static int REQUEST_CODE_FINANCE = 3, REQUEST_CODE_CREATE_PROGRESS_SAVINGS = 4, REQUEST_CODE_SAVINGS = 5, REQUEST_CODE_UPDATE_SAVINGS_TARGET=6;
 
     public CallbackOnActivityResult(Context context, @NonNull ActivityResultRegistry registry, OnCallbackResult onCallbackResult) {
         mRegistry = registry;

@@ -1,9 +1,11 @@
 package id.co.evolution.financefy.fragment;
 
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS_TARGET;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 
+import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -30,6 +33,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAccountBinding;
 import id.co.evolution.financefy.dialog.DialogCreateUser;
 import id.co.evolution.financefy.dialog.DialogSavings;
@@ -47,7 +51,7 @@ import id.co.evolution.financefy.viewmodel.ViewModelSavings;
 import id.co.evolution.financefy.viewmodel.ViewModelUser;
 
 @AndroidEntryPoint
-public class FragmentAccount extends Fragment {
+public class FragmentAccount extends Fragment implements CallbackOnActivityResult.OnCallbackResult{
     Calendar today;
     Calendar prevNextYear;
     List<ModelUser> dataUser = new ArrayList<>();
@@ -78,11 +82,20 @@ public class FragmentAccount extends Fragment {
     int id_savings_user = 0;
     long date_ship_millis;
     MainActivity mainActivity;
+    CallbackOnActivityResult mCallbackOnActivityResult;
 
     //TODO NOTE SAVINGS : Menabung, FINANCE : JURNAL KEUANGAN
 
     public FragmentAccount() {
         // Required empty public constructor
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mCallbackOnActivityResult = new CallbackOnActivityResult(getContext(), requireActivity().getActivityResultRegistry(), this);
+        getLifecycle().addObserver(mCallbackOnActivityResult);
+
     }
 
     @Override
@@ -313,7 +326,7 @@ public class FragmentAccount extends Fragment {
                                         .show();
                                 break;
                             case EDIT:
-
+                                mCallbackOnActivityResult.updateDataSavingsTarget(this.dataSavings,index,this.dataSavings.get(index));
                                 break;
                         }
                     });
@@ -347,5 +360,18 @@ public class FragmentAccount extends Fragment {
         boolean visibleAccountSavings = user.getCategory().equalsIgnoreCase(getString(R.string.menabung));
         binding.layoutAccountSavings.placeAccountSavings.setVisibility(visibleAccountSavings ? View.VISIBLE : View.GONE);
         binding.layoutAccountFinanceJournal.placeAccountFinanceJournal.setVisibility(!visibleAccountSavings ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void result(ActivityResult result, Intent intent) {
+        if (result.getResultCode() == REQUEST_CODE_UPDATE_SAVINGS_TARGET) {
+
+
+            if (intent != null) {
+                ModelSavings modelSaving = (ModelSavings) intent.getSerializableExtra("savings");
+
+                setDataSavings(modelSaving);
+            }
+        }
     }
 }

@@ -2,7 +2,7 @@ package id.co.evolution.financefy.fragment;
 
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_FINANCE;
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
-import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS;
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS_TARGET;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 
 import android.annotation.SuppressLint;
@@ -110,6 +110,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     @Inject
     SavingsProgressRepository savingsProgressRepository;
 
+    Tools.TYPE type;
     public enum TYPE_LAYOUT_MANAGER {
         GRID,
         HORIZONTAL,
@@ -598,7 +599,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     private void loadDataSavings(List<ModelSavingsProgress> data) {
         savingsData = new ArrayList<>(data);
         loadTotalSavingsTarget();
-        loadDataHeaderSavings();
+
         if (filterNominal != null)
             data = savingsFilter.filterNominal(filterNominal, data);
 
@@ -649,6 +650,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                         });
                         break;
                     case REMOVED:
+                        type = Tools.TYPE.REMOVED;
                         new SweetAlertDialog(getContext(), SweetAlertDialog.WARNING_TYPE)
                                 .setTitleText("Hapus")
                                 .setContentText("Apakah anda yakin ingin hapus tabungan '"+modelSavings.getTitle()+"'?")
@@ -660,7 +662,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                                     if(index-1 < 0){
                                         modelSavings = savingsTargetData.get(index+1);
                                         setSavingsTarget();
-                                        viewModelSavingsProgress.findAllSavingsByIdSavings(savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                                        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                                             if (dataSavingsProgress != null) {
                                                 loadDataSavings(dataSavingsProgress);
                                             }
@@ -668,7 +670,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                                     } else {
                                         modelSavings = savingsTargetData.get(index-1);
                                         setSavingsTarget();
-                                        viewModelSavingsProgress.findAllSavingsByIdSavings(savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                                        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                                             if (dataSavingsProgress != null) {
                                                 loadDataSavings(dataSavingsProgress);
                                             }
@@ -713,8 +715,6 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
             loadDataFinance(financeData);
 
         } else if (result.getResultCode() == REQUEST_CODE_SAVINGS) {
-
-
             if (intent != null) {
                 ModelSavingsProgress modelSavingsProgress = (ModelSavingsProgress) intent.getSerializableExtra("savings_progress");
 
@@ -724,12 +724,12 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 }
 
 
-                loadTotalSavingsTarget();
+
                 Log.e("TAG", "result: " + new Gson().toJson(modelSavings));
                 Log.e("TAG", "result: " + new Gson().toJson(modelSavingsProgress));
                 loadDataSavings(savingsData);
             }
-        } else if (result.getResultCode() == REQUEST_CODE_UPDATE_SAVINGS) {
+        } else if (result.getResultCode() == REQUEST_CODE_UPDATE_SAVINGS_TARGET) {
 
 
             if (intent != null) {
@@ -747,9 +747,12 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     }
 
     private void loadTotalSavingsTarget() {
-      viewModelSavings.findSavingsById(modelSavings.getId()).observe(getViewLifecycleOwner(),modelSavings1 ->{
-          modelSavings.setProcessValue(modelSavings1.getProcessValue());
-          setSavingsTarget();
+      viewModelSavings.findSavingsById(mainActivity.modelSavings.getId()).observe(getViewLifecycleOwner(),modelSavings1 ->{
+          if(modelSavings1!=null){
+              mainActivity.modelSavings.setProcessValue(modelSavings1.getProcessValue());
+              setSavingsTarget();
+              loadDataHeaderSavings();
+          }
       });
     }
 

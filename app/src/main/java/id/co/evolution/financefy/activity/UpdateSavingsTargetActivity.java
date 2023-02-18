@@ -1,7 +1,7 @@
 package id.co.evolution.financefy.activity;
 
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
-import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS;
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS_TARGET;
 import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
 
@@ -198,13 +198,14 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
                                 model.setId(modelSavings.getId());
                                 model.setDate_target(date);
                                 model.setId_savings_user(id_user);
+                                model.setProcessValue(modelSavings.getProcessValue());
                                 model.setTargetValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
                                 model.setTitle(binding.etTitle.getText().toString().trim());
                                 viewModelSaving.inputUpdateSavings("Update", model);
 
                                 Intent intent = new Intent();
                                 intent.putExtra("savings", model);
-                                setResult(REQUEST_CODE_UPDATE_SAVINGS, intent);
+                                setResult(REQUEST_CODE_UPDATE_SAVINGS_TARGET, intent);
                                 finish();
                             })
                             .setCancelText("Tidak")
