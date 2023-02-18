@@ -74,7 +74,7 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
             w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
 
-        viewModelFinance = new ViewModelProvider(this,new ViewModelFactory(financeRepository)).get(ViewModelFinance.class);
+        viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
         position = getIntent().getIntExtra("position", 0);
         id_user = getIntent().getIntExtra("id_user", 0);

@@ -2,6 +2,7 @@ package id.co.evolution.financefy.fragment;
 
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_FINANCE;
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 
 import android.annotation.SuppressLint;
@@ -31,6 +32,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.gson.Gson;
+import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -43,6 +45,8 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.activity.UpdateSavingsActivity;
+import id.co.evolution.financefy.activity.UpdateSavingsTargetActivity;
 import id.co.evolution.financefy.adapter.AdapterFinance;
 import id.co.evolution.financefy.adapter.AdapterSavings;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
@@ -632,14 +636,57 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
             for (ModelSavings savings : savingsTargetData)
                 dataSavings.add(savings.getTitle());
 
-            dialogSavings = new DialogSavings(getContext(),getLayoutInflater(), (index, result) -> {
+            dialogSavings = new DialogSavings(getContext(),getLayoutInflater(), (type,index, result) -> {
                 modelSavings = savingsTargetData.get(index);
-                setSavingsTarget();
-                viewModelSavingsProgress.findAllSavingsByIdSavings(savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
-                    if (dataSavingsProgress != null) {
-                        loadDataSavings(dataSavingsProgress);
-                    }
-                });
+                switch (type){
+                    case CLICKED:
+
+                        setSavingsTarget();
+                        viewModelSavingsProgress.findAllSavingsByIdSavings(savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                            if (dataSavingsProgress != null) {
+                                loadDataSavings(dataSavingsProgress);
+                            }
+                        });
+                        break;
+                    case REMOVED:
+                        new SweetAlertDialog(getContext(), SweetAlertDialog.WARNING_TYPE)
+                                .setTitleText("Hapus")
+                                .setContentText("Apakah anda yakin ingin hapus tabungan '"+modelSavings.getTitle()+"'?")
+                                .setConfirmText("Ya")
+                                .setConfirmClickListener(sweetAlertDialog -> {
+                                    new SavingsRepository.RemoveSavings(modelSavings,savingsRepository.savingsDao).execute();
+
+
+                                    if(index-1 < 0){
+                                        modelSavings = savingsTargetData.get(index+1);
+                                        setSavingsTarget();
+                                        viewModelSavingsProgress.findAllSavingsByIdSavings(savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                                            if (dataSavingsProgress != null) {
+                                                loadDataSavings(dataSavingsProgress);
+                                            }
+                                        });
+                                    } else {
+                                        modelSavings = savingsTargetData.get(index-1);
+                                        setSavingsTarget();
+                                        viewModelSavingsProgress.findAllSavingsByIdSavings(savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                                            if (dataSavingsProgress != null) {
+                                                loadDataSavings(dataSavingsProgress);
+                                            }
+                                        });
+                                    }
+
+                                    savingsTargetData.remove(index);
+                                    sweetAlertDialog.dismiss();
+                                })
+                                .setCancelText("Tidak")
+                                .show();
+                        break;
+                    case EDIT:
+                        mCallbackOnActivityResult.updateDataSavingsTarget(savingsTargetData,index,modelSavings);
+                        break;
+
+                }
+
             });
             dialogSavings.showDialogSavings(dataSavings);
         });
@@ -681,6 +728,19 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 Log.e("TAG", "result: " + new Gson().toJson(modelSavings));
                 Log.e("TAG", "result: " + new Gson().toJson(modelSavingsProgress));
                 loadDataSavings(savingsData);
+            }
+        } else if (result.getResultCode() == REQUEST_CODE_UPDATE_SAVINGS) {
+
+
+            if (intent != null) {
+                this.modelSavings = (ModelSavings) intent.getSerializableExtra("savings");
+
+                setSavingsTarget();
+                viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                    if (dataSavingsProgress != null) {
+                        loadDataSavings(dataSavingsProgress);
+                    }
+                });
             }
         }
 

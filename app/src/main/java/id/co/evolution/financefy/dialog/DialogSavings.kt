@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import id.co.evolution.financefy.R
 import id.co.evolution.financefy.adapter.AdapterSavingsTarget
+import id.co.evolution.financefy.helper.Tools
 
 class DialogSavings(
    val context: Context,
@@ -27,7 +28,7 @@ class DialogSavings(
         val adapter = AdapterSavingsTarget(resourceTypeArray
         ) { type, data, position ->
             dialog.dismiss()
-            dialogSavingsCallback.onSubmit(position, resourceTypeArray[position])
+            dialogSavingsCallback.onSubmit(type as Tools.TYPE,position, resourceTypeArray[position])
         }
 
         rvListSavingsTarget.layoutManager =
@@ -59,7 +60,7 @@ class DialogSavings(
     }
 
     interface DialogSavingsCallback {
-        fun onSubmit(index:Int=0,result: String)
+        fun onSubmit(type: Tools.TYPE, index:Int=0, result: String)
     }
 
 }

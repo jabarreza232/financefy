@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.gson.Gson;
+import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -284,11 +285,41 @@ public class FragmentAccount extends Fragment {
                 setDataSavings(mainActivity.modelSavings!=null? mainActivity.modelSavings:modelSavings.get(0));
 
                 binding.layoutAccountSavings.placeChooseSavings.setOnClickListener(v -> {
-                    dialogSavings = new DialogSavings(getContext(),getLayoutInflater(), (index, result) -> {
-                        setDataSavings(modelSavings.get(index));
+
+                    dialogSavings = new DialogSavings(getContext(),getLayoutInflater(), (type,index, result) -> {
+                        switch (type) {
+                            case CLICKED:
+                                setDataSavings(modelSavings.get(index));
+                                break;
+                            case REMOVED:
+                                new SweetAlertDialog(getContext(), SweetAlertDialog.WARNING_TYPE)
+                                        .setTitleText("Hapus")
+                                        .setContentText("Apakah anda yakin ingin hapus tabungan '" + modelSavings.get(index).getTitle() + "'?")
+                                        .setConfirmText("Ya")
+                                        .setConfirmClickListener(sweetAlertDialog -> {
+                                            ModelSavings modelSaving;
+                                            if(index-1 < 0){
+                                                modelSaving = modelSavings.get(index + 1);
+                                            } else {
+                                                modelSaving = modelSavings.get(index - 1);
+                                            }
+                                            setDataSavings(modelSaving);
+
+                                            new SavingsRepository.RemoveSavings(modelSavings.get(index), savingsRepository.savingsDao).execute();
+                                            modelSavings.remove(index);
+                                            sweetAlertDialog.dismiss();
+                                        })
+                                        .setCancelText("Tidak")
+                                        .show();
+                                break;
+                            case EDIT:
+
+                                break;
+                        }
                     });
 
                     dialogSavings.showDialogSavings(dataSavings);
+
                 });
             }
         });

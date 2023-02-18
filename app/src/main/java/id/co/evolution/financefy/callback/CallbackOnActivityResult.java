@@ -19,6 +19,7 @@ import java.util.List;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.activity.UpdateFinanceActivity;
 import id.co.evolution.financefy.activity.UpdateSavingsActivity;
+import id.co.evolution.financefy.activity.UpdateSavingsTargetActivity;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
@@ -28,7 +29,7 @@ public class CallbackOnActivityResult implements DefaultLifecycleObserver {
     private ActivityResultLauncher<Intent> mStartForResult;
     private final Context mContext;
     private final OnCallbackResult mOnCallbackResult;
-   public static int REQUEST_CODE_FINANCE = 3, REQUEST_CODE_SAVINGS = 4;
+   public static int REQUEST_CODE_FINANCE = 3, REQUEST_CODE_SAVINGS = 4, REQUEST_CODE_UPDATE_SAVINGS;
 
     public CallbackOnActivityResult(Context context, @NonNull ActivityResultRegistry registry, OnCallbackResult onCallbackResult) {
         mRegistry = registry;
@@ -58,6 +59,13 @@ public class CallbackOnActivityResult implements DefaultLifecycleObserver {
         Intent i = new Intent(mContext, UpdateSavingsActivity.class);
         i.putExtra("id", data.get(position).getId());
         i.putExtra("position",position);
+        i.putExtra("savings",savings);
+        mStartForResult.launch(i);
+    }
+
+    public void updateDataSavingsTarget(List<ModelSavings> data, int position, ModelSavings savings) {
+        Intent i = new Intent(mContext, UpdateSavingsTargetActivity.class);
+        i.putExtra("id_user", data.get(position).getId_savings_user());
         i.putExtra("savings",savings);
         mStartForResult.launch(i);
     }

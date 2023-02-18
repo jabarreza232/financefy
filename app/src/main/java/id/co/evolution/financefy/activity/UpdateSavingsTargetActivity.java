@@ -1,0 +1,216 @@
+package id.co.evolution.financefy.activity;
+
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS;
+import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
+import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Build;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.google.gson.Gson;
+import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+
+import java.text.NumberFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.databinding.ActivityCreateSavingsTargetBinding;
+import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.helper.Tools;
+import id.co.evolution.financefy.model.ModelSavings;
+import id.co.evolution.financefy.repository.SavingsRepository;
+import id.co.evolution.financefy.viewmodel.ViewModelSavings;
+
+@AndroidEntryPoint
+public class UpdateSavingsTargetActivity extends AppCompatActivity implements View.OnClickListener{
+    String date = "";
+    private String jumlah = "";
+    String month = "";
+    ActivityCreateSavingsTargetBinding binding;
+    Calendar cur_calendar = Calendar.getInstance();
+    ViewModelSavings viewModelSaving;
+    DialogCalculator dialogCalculator;
+
+
+    @Inject
+    SavingsRepository savingsRepository;
+    ModelSavings modelSavings;
+    private int id_user;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_target);
+        //TODO HIDE STATUS BAR
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window w = getWindow();
+            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
+
+        cur_calendar.get(Calendar.YEAR);
+        cur_calendar.get(Calendar.MONTH);
+        cur_calendar.get(Calendar.DAY_OF_MONTH);
+        long date_ship_milis = cur_calendar.getTimeInMillis();
+        viewModelSaving = new ViewModelProvider(this).get(ViewModelSavings.class);
+        viewModelSaving.init(savingsRepository);
+
+        binding.txtHeader.setText("Input data");
+        binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
+        date = getFormattedDateSimple(date_ship_milis);
+        month = getFormattedMonthSimple(date_ship_milis);
+        modelSavings =(ModelSavings) getIntent().getSerializableExtra("savings");
+        Log.e("TAG", "onCreate: "+ new Gson().toJson(modelSavings));
+        id_user = getIntent().getIntExtra("id_user", 0);
+        binding.etAmount.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (!s.toString().equals(jumlah)) {
+                    binding.etAmount.removeTextChangedListener(this);
+                    String cleanString = s.toString().replaceAll("[Rp,.]", "");
+                    if (!cleanString.isEmpty()) {
+                        double parsed = Double.parseDouble(cleanString);
+                        Locale localeID = new Locale("in", "ID");
+                        String formatted = NumberFormat.getCurrencyInstance(localeID).format((parsed));
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                            formatted = formatted.replaceAll(",00", "");
+                        }
+                        jumlah = formatted;
+                        binding.etAmount.setText(formatted);
+                        binding.etAmount.setSelection(formatted.length());
+                    }
+
+                    binding.etAmount.addTextChangedListener(this);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
+        binding.placeDate.setOnClickListener(this);
+
+        binding.imgBack.setOnClickListener(this);
+        binding.placeSubmit.setOnClickListener(this);
+        binding.btnCalculator.setOnClickListener(this);
+
+        loadData();
+    }
+    private void loadData() {
+        cur_calendar.get(Calendar.YEAR);
+        cur_calendar.get(Calendar.MONTH);
+        cur_calendar.get(Calendar.DAY_OF_MONTH);
+
+
+        jumlah = Tools.convertToCurrency(modelSavings.getTargetValue());
+        date = modelSavings.getDate_target();
+
+        binding.txtHeader.setText("Update data");
+        binding.txtDate.setText(date);
+        binding.etTitle.setText(modelSavings.getTitle());
+        binding.etAmount.setText(jumlah);
+    }
+    private void showDatePickerDialog() {
+        DatePickerDialog datePickerDialog = DatePickerDialog.newInstance((view, year, monthOfYear, dayOfMonth) -> {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, monthOfYear);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            long date_ship_milis = calendar.getTimeInMillis();
+            binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
+            date = getFormattedDateSimple(date_ship_milis);
+
+            Log.e("TAG", "onDateSet: " + date);
+            month = getFormattedMonthSimple(date_ship_milis);
+        });
+
+        datePickerDialog.setMinDate(cur_calendar);
+        datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
+        datePickerDialog.show(getSupportFragmentManager(), "PickerDialog");
+    }
+
+
+
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.place_date:
+                showDatePickerDialog();
+                break;
+            case R.id.img_back:
+                finish();
+                break;
+
+            case R.id.btn_calculator:
+                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
+                    jumlah = result;
+                    binding.etAmount.setText(Tools.convertToCurrency(result));
+                });
+                dialogCalculator.show();
+                break;
+            case R.id.place_submit:
+                if (binding.etTitle.getText().toString().isEmpty()) {
+                    binding.tilTitle.setError("Silahkan input judul terlebih dahulu");
+                } else {
+                    binding.tilTitle.setError(null);
+                }
+
+                if (binding.etAmount.getText().toString().isEmpty()) {
+                    binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
+                } else {
+                    binding.tilAmount.setError(null);
+                }
+
+                if (!binding.etAmount.getText().toString().isEmpty()) {
+
+                    new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                            .setTitleText("Submit")
+                            .setContentText("Apakah anda yakin ingin submit data ?")
+                            .setConfirmText("Ya")
+                            .setConfirmClickListener(sweetAlertDialog -> {
+                                ModelSavings model = new ModelSavings();
+                                model.setId(modelSavings.getId());
+                                model.setDate_target(date);
+                                model.setId_savings_user(id_user);
+                                model.setTargetValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
+                                model.setTitle(binding.etTitle.getText().toString().trim());
+                                viewModelSaving.inputUpdateSavings("Update", model);
+
+                                Intent intent = new Intent();
+                                intent.putExtra("savings", model);
+                                setResult(REQUEST_CODE_UPDATE_SAVINGS, intent);
+                                finish();
+                            })
+                            .setCancelText("Tidak")
+                            .show();
+                }
+                break;
+        }
+    }
+}

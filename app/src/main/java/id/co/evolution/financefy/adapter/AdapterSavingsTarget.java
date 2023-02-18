@@ -42,7 +42,7 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int i) {
         holder.binding.txtJudul.setText(data.get(i));
-
+        holder.binding.imgRemove.setVisibility(data.size() > 1 ? View.VISIBLE : View.INVISIBLE);
         holder.binding.imgRemove.setOnClickListener(v -> methodCallback.onClick(TYPE.REMOVED, data, i));
         holder.binding.imgEdit.setOnClickListener(v -> methodCallback.onClick(TYPE.EDIT, data, i));
         holder.binding.txtJudul.setOnClickListener(v -> methodCallback.onClick(TYPE.CLICKED, data, i));
@@ -64,7 +64,7 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
     }
 
 
-   public interface MethodCallback<T, R> {
+    public interface MethodCallback<T, R> {
         void onClick(T type, List<R> data, int position);
     }
 }
