@@ -642,7 +642,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                     case CLICKED:
 
                         setSavingsTarget();
-                        viewModelSavingsProgress.findAllSavingsByIdSavings(savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                        viewModelSavingsProgress.getSavingsByMonth(month,savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                             if (dataSavingsProgress != null) {
                                 loadDataSavings(dataSavingsProgress);
                             }
@@ -747,12 +747,10 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     }
 
     private void loadTotalSavingsTarget() {
-        long processValue = 0;
-        for (ModelSavingsProgress model : savingsData)
-            processValue += model.getProcessValue();
-
-        modelSavings.setProcessValue(processValue);
-        setSavingsTarget();
+      viewModelSavings.findSavingsById(modelSavings.getId()).observe(getViewLifecycleOwner(),modelSavings1 ->{
+          modelSavings.setProcessValue(modelSavings1.getProcessValue());
+          setSavingsTarget();
+      });
     }
 
     private void setSavingsTarget() {
