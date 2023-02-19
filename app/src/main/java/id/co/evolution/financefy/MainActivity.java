@@ -5,6 +5,8 @@ import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUES
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
 import static id.co.evolution.financefy.helper.Tools.getObjectAnimator;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
@@ -19,6 +21,8 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -115,14 +119,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             item.setChecked(true);
             binding.layout.fabAdd.hide();
             showHideFabSavings(false);
-            if(isFabOpen) startAnimationFabSavings();
+            if (isFabOpen) startAnimationFabSavings();
+
 
             switch (item.getTitle().toString().toLowerCase()) {
                 case "records":
                     fragment = new FragmentAll();
                     changeFragment(fragment);
                     binding.layout.fabAdd.show();
-                    if(!user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) showHideFabSavings(true);
                     break;
                 case "analysis":
                     fragment = new FragmentAnalysis();
@@ -219,16 +223,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ObjectAnimator animatorFabSavingsProgress = getObjectAnimator(binding.layout.fabAddSavingsProgress, View.ALPHA, 1, 300);
         ObjectAnimator animatorFabSavingsTargetClose = getObjectAnimator(binding.layout.fabAddSavingsTarget, View.ALPHA, 0, 300);
         ObjectAnimator animatorFabSavingsProgressClose = getObjectAnimator(binding.layout.fabAddSavingsProgress, View.ALPHA, 0, 300);
-        if(!animatorSet.isStarted()){
+        if (!animatorSet.isStarted()) {
             if (!isFabOpen) {
                 isFabOpen = true;
                 animatorSet.playTogether(animatorFabOpen, animatorFabSavingsTarget, animatorFabSavingsProgress);
+                isShowFabAddSavings(animatorFabSavingsProgress,binding.layout.fabAddSavingsProgress);
+                isShowFabAddSavings(animatorFabSavingsTarget,binding.layout.fabAddSavingsTarget);
             } else {
                 isFabOpen = false;
                 animatorSet.playTogether(animatorFabSavingsProgressClose, animatorFabSavingsTargetClose, animatorFabClose);
             }
             animatorSet.start();
+
+            isHideFabAddSavings(animatorFabSavingsProgressClose,binding.layout.fabAddSavingsProgress);
+            isHideFabAddSavings(animatorFabSavingsTargetClose,binding.layout.fabAddSavingsTarget);
+
             animatorSet = new AnimatorSet();
+
         }
+
+    }
+
+    private void isHideFabAddSavings(ObjectAnimator objectAnimator, ExtendedFloatingActionButton fabSavings){
+        objectAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                fabSavings.setVisibility(View.GONE);
+            }
+        });
+
+    }
+    private void isShowFabAddSavings(ObjectAnimator objectAnimator, ExtendedFloatingActionButton fabSavings){
+        objectAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                fabSavings.show();
+            }
+        });
+
     }
 }

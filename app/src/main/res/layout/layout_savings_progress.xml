@@ -24,12 +24,13 @@
 
 
             <TextView
-                android:drawableRight="@drawable/ic_arrow_drop_down"
                 android:id="@+id/txt_title"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_marginTop="5dp"
+                android:drawableRight="@drawable/ic_arrow_drop_down"
                 android:fontFamily="@font/lato_bold"
+                android:gravity="center"
                 android:textColor="@android:color/black"
                 android:textSize="15sp"
                 tools:text="Pencapaian" />
@@ -38,7 +39,8 @@
             <TextView
                 android:id="@+id/txt_percentage"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
+                android:gravity="center"
                 android:layout_alignParentEnd="true"
                 android:layout_marginTop="7dp"
                 android:layout_marginEnd="10dp"
@@ -53,7 +55,7 @@
                 style="@android:style/Widget.ProgressBar.Horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/txt_percentage"
+                android:layout_below="@id/txt_title"
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="10dp"
                 android:progressDrawable="@drawable/progress_income_drawable"

@@ -80,10 +80,10 @@ public class AdapterSavings extends RecyclerView.Adapter<AdapterSavings.ViewHold
         }
 
         public void bindData(ModelNestedSavings modelNestedFinance){
-            showNestedFinance(modelNestedFinance);
+            showNestedSavings(modelNestedFinance);
         }
 
-        private void showNestedFinance(ModelNestedSavings modelNestedFinance){
+        private void showNestedSavings(ModelNestedSavings modelNestedFinance){
             AdapterNestedSavings adapterFinance = new AdapterNestedSavings(total_value, modelNestedFinance.getSavingsProgresses(), (data, position) -> methodCallback.onClick(data,position));
 
             if (type == TYPE_LAYOUT_MANAGER.GRID) {
