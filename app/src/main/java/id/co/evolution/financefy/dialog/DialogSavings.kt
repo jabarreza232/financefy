@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import id.co.evolution.financefy.R
 import id.co.evolution.financefy.adapter.AdapterSavingsTarget
 import id.co.evolution.financefy.helper.Tools
+import id.co.evolution.financefy.model.ModelSavings
 
 class DialogSavings(
    val context: Context,
@@ -22,13 +23,13 @@ class DialogSavings(
         dialog.setContentView(dialogView)
     }
 
-    fun showDialogSavings(resourceTypeArray: MutableList<String>) {
+    fun showDialogSavings(resourceTypeArray: MutableList<ModelSavings>) {
         val rvListSavingsTarget: RecyclerView = findViewGroupById(R.id.rv_savings_target)
 
         val adapter = AdapterSavingsTarget(resourceTypeArray
         ) { type, data, position ->
             dialog.dismiss()
-            dialogSavingsCallback.onSubmit(type as Tools.TYPE,position, resourceTypeArray[position])
+            dialogSavingsCallback.onSubmit(type as Tools.TYPE,position, resourceTypeArray[position].title)
         }
 
         rvListSavingsTarget.layoutManager =

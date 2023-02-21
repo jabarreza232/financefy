@@ -633,9 +633,6 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
         binding.layoutSavingsProgress.txtDay.setText("Sisa " + Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target()) + " hari");
         binding.layoutSavingsProgress.txtTitle.setOnClickListener(v -> {
-            List<String> dataSavings = new ArrayList<>();
-            for (ModelSavings savings : savingsTargetData)
-                dataSavings.add(savings.getTitle());
 
             dialogSavings = new DialogSavings(getContext(),getLayoutInflater(), (type,index, result) -> {
                 modelSavings = savingsTargetData.get(index);
@@ -690,7 +687,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 }
 
             });
-            dialogSavings.showDialogSavings(dataSavings);
+            dialogSavings.showDialogSavings(savingsTargetData);
         });
     }
 
@@ -734,6 +731,10 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
             if (intent != null) {
                 this.modelSavings = (ModelSavings) intent.getSerializableExtra("savings");
+                for (int i = 0; i < savingsTargetData.size(); i++) {
+                    if (savingsTargetData.get(i).getId() == modelSavings.getId())
+                        savingsTargetData.set(i, modelSavings);
+                }
 
                 setSavingsTarget();
                 viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {

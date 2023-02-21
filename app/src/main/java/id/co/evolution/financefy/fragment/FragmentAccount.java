@@ -290,9 +290,6 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     private void refreshDataSavings() {
         viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(), modelSavings -> {
             dataSavings = modelSavings;
-            List<String> dataSavings = new ArrayList<>();
-            for (ModelSavings savings : modelSavings)
-                dataSavings.add(savings.getTitle());
 
             if (dataSavings.size() > 0) {
                 setDataSavings(mainActivity.modelSavings!=null? mainActivity.modelSavings:modelSavings.get(0));

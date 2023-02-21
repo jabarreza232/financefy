@@ -9,20 +9,26 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Calendar;
 import java.util.List;
 
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ListSavingsTargetBinding;
+import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.helper.Tools.TYPE;
+import id.co.evolution.financefy.model.ModelSavings;
 
 public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTarget.ViewHolder> {
 
-    List<String> data;
+    List<ModelSavings> data;
     MethodCallback methodCallback;
-
-    public AdapterSavingsTarget(List<String> data, MethodCallback methodCallback) {
+    Calendar today;
+    public AdapterSavingsTarget(List<ModelSavings> data, MethodCallback methodCallback) {
         this.data = data;
         this.methodCallback = methodCallback;
+        today = Calendar.getInstance();
+        today.get(Calendar.YEAR);
+        today.get(Calendar.MONTH);
     }
 
 
@@ -41,11 +47,19 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
     @SuppressLint("RecyclerView")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int i) {
-        holder.binding.txtJudul.setText(data.get(i));
-        holder.binding.imgRemove.setVisibility(data.size() > 1 ? View.VISIBLE : View.INVISIBLE);
+        ModelSavings modelSavings=data.get(i);
+        holder.binding.txtJudul.setText(modelSavings.getTitle());
+        holder.binding.imgRemove.setVisibility(data.size() > 1 ? View.VISIBLE : View.GONE);
+        holder.binding.txtProgress.setText(Tools.convertToCurrency(modelSavings.getProcessValue()) + " s/d " + Tools.convertToCurrency(modelSavings.getTargetValue()));
+        holder.binding.progressSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
+        holder.binding.progressSavings.setMax(100);
+        holder.binding.txtPercentage.setText(Tools.calculatePercentage((double) modelSavings.getProcessValue(), (double) modelSavings.getTargetValue()) + "%");
+
+        holder.binding.txtDay.setText("Sisa " + Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target()) + " hari");
+
         holder.binding.imgRemove.setOnClickListener(v -> methodCallback.onClick(TYPE.REMOVED, data, i));
         holder.binding.imgEdit.setOnClickListener(v -> methodCallback.onClick(TYPE.EDIT, data, i));
-        holder.binding.txtJudul.setOnClickListener(v -> methodCallback.onClick(TYPE.CLICKED, data, i));
+        holder.binding.cvSavingsTarget.setOnClickListener(v -> methodCallback.onClick(TYPE.CLICKED, data, i));
     }
 
     @Override

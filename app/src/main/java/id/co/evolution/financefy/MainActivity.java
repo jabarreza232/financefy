@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 setUpFragment();
             });
         } else {
-            showHideFabSavings(true);
             viewModelSavings.findAllSavingsByIdUser(user.getId()).observe(this, dataSavings -> {
                 if (dataSavings.size() == 0) {
                     modelSavings = new ModelSavings("Beli HP", 50_000_000, 10_000, user.getId(), "March 03, 2022");
