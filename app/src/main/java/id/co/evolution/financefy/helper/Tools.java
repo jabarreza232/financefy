@@ -1,7 +1,10 @@
 package id.co.evolution.financefy.helper;
 
 import android.animation.ObjectAnimator;
+import android.graphics.Color;
 import android.os.Build;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Property;
 import android.view.View;
 
@@ -34,6 +37,14 @@ public class Tools {
         SimpleDateFormat newFormat = new SimpleDateFormat("MM-yyyy");
         return newFormat.format(new Date(dateTime));
     }
+    public static SpannableString changeTitleColor(String text,int color){
+        SpannableString title = new SpannableString(text);
+        title.setSpan(new ForegroundColorSpan(color), 0, title.length(), 0);
+        return title;
+    }
+    public static String changeTitleColor(String text,String color){
+        return "<font color='"+color+"'>"+text+"</font>";
+    }
 
     public static long getRestOfTheDay(String startDate, String endDate) {
         SimpleDateFormat df = new SimpleDateFormat("MMMM dd, yyyy");
@@ -46,7 +57,18 @@ public class Tools {
         } catch (ParseException e) {
             return 0;
         }
+    }
 
+    public static long calculateRecommendationDay(long target, long day) {
+        return target / day;
+    }
+
+    public static long calculateRecommendationMonth(long target, long day,int maximumDayOfMonth) {
+        return calculateRecommendationDay(target, day) * maximumDayOfMonth;
+    }
+
+    public static long calculateRecommendationYear(long target, long day,int maximumDayOfYear) {
+        return calculateRecommendationDay(target, day) * maximumDayOfYear;
     }
 
     public static long getFormattedMonthToTime(String dateTime) {
@@ -64,7 +86,7 @@ public class Tools {
         return newFormat.format(new Date(dateTime));
     }
 
-    public static ObjectAnimator getObjectAnimator(View view, Property property, float values,long duration) {
+    public static ObjectAnimator getObjectAnimator(View view, Property property, float values, long duration) {
         return ObjectAnimator.ofFloat(view, property, values).setDuration(duration);
     }
 

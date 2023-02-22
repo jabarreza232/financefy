@@ -329,7 +329,6 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
                     });
 
                     dialogSavings.showDialogSavings(dataSavings);
-
                 });
             }
         });

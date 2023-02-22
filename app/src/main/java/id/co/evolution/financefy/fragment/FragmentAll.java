@@ -3,14 +3,18 @@ package id.co.evolution.financefy.fragment;
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_FINANCE;
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS_TARGET;
+import static id.co.evolution.financefy.helper.Tools.calculatePercentage;
+import static id.co.evolution.financefy.helper.Tools.changeTitleColor;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,7 +34,9 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -111,6 +117,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     SavingsProgressRepository savingsProgressRepository;
 
     Tools.TYPE type;
+
     public enum TYPE_LAYOUT_MANAGER {
         GRID,
         HORIZONTAL,
@@ -238,7 +245,6 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
                 loadDataByWeek();
             }
-
         });
 
         binding.btnNext.setOnClickListener(v -> {
@@ -265,6 +271,24 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 loadDataByWeek();
             }
         });
+        FloatingActionButton fabAdd = ((MainActivity)getActivity()).binding.layout.fabAdd;
+
+        binding.rvList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy<0 && !fabAdd.isShown())
+                    fabAdd.show();
+                else if(dy>0 && fabAdd.isShown()&&!((MainActivity)getActivity()).isFabOpen)
+                    fabAdd.hide();
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
+
     }
 
 
@@ -625,39 +649,43 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
     @SuppressLint("SetTextI18n")
     private void loadDataHeaderSavings() {
+        long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
+        long recommendationSavingsDay= Tools.calculateRecommendationDay(modelSavings.getTargetValue(),restOfTheDay);
+        double percentage = calculatePercentage((double) modelSavings.getProcessValue(), (double) modelSavings.getTargetValue());
         binding.layoutSavingsProgress.txtTitle.setText(modelSavings.getTitle());
-        binding.layoutSavingsProgress.txtProgress.setText(Tools.convertToCurrency(modelSavings.getProcessValue()) + " s/d " + Tools.convertToCurrency(modelSavings.getTargetValue()));
-        binding.layoutSavingsProgress.progressSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
+        binding.layoutSavingsProgress.txtProgress.setText(convertToCurrency(modelSavings.getProcessValue()) + " s/d " + convertToCurrency(modelSavings.getTargetValue()));
+        binding.layoutSavingsProgress.progressSavings.setProgress((int) calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutSavingsProgress.progressSavings.setMax(100);
-        binding.layoutSavingsProgress.txtPercentage.setText(Tools.calculatePercentage((double) modelSavings.getProcessValue(), (double) modelSavings.getTargetValue()) + "%");
+        double txtPercentage= percentage>=100?100:percentage;
+        binding.layoutSavingsProgress.txtPercentage.setText(txtPercentage + "%");
+        binding.layoutSavingsProgress.txtDay.setText("Sisa " +  restOfTheDay+ " hari");
+        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perhari: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavingsDay),"green")));
 
-        binding.layoutSavingsProgress.txtDay.setText("Sisa " + Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target()) + " hari");
         binding.layoutSavingsProgress.txtTitle.setOnClickListener(v -> {
 
-            dialogSavings = new DialogSavings(getContext(),getLayoutInflater(), (type,index, result) -> {
+            dialogSavings = new DialogSavings(getContext(), getLayoutInflater(), (type, index, result) -> {
                 modelSavings = savingsTargetData.get(index);
-                switch (type){
+                switch (type) {
                     case CLICKED:
 
                         setSavingsTarget();
-                        viewModelSavingsProgress.getSavingsByMonth(month,savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                        viewModelSavingsProgress.getSavingsByMonth(month, savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                             if (dataSavingsProgress != null) {
                                 loadDataSavings(dataSavingsProgress);
                             }
                         });
                         break;
                     case REMOVED:
-                        type = Tools.TYPE.REMOVED;
                         new SweetAlertDialog(getContext(), SweetAlertDialog.WARNING_TYPE)
                                 .setTitleText("Hapus")
-                                .setContentText("Apakah anda yakin ingin hapus tabungan '"+modelSavings.getTitle()+"'?")
+                                .setContentText("Apakah anda yakin ingin hapus tabungan '" + modelSavings.getTitle() + "'?")
                                 .setConfirmText("Ya")
                                 .setConfirmClickListener(sweetAlertDialog -> {
-                                    new SavingsRepository.RemoveSavings(modelSavings,savingsRepository.savingsDao).execute();
+                                    new SavingsRepository.RemoveSavings(modelSavings, savingsRepository.savingsDao).execute();
 
 
-                                    if(index-1 < 0){
-                                        modelSavings = savingsTargetData.get(index+1);
+                                    if (index - 1 < 0) {
+                                        modelSavings = savingsTargetData.get(index + 1);
                                         setSavingsTarget();
                                         viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                                             if (dataSavingsProgress != null) {
@@ -665,7 +693,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                                             }
                                         });
                                     } else {
-                                        modelSavings = savingsTargetData.get(index-1);
+                                        modelSavings = savingsTargetData.get(index - 1);
                                         setSavingsTarget();
                                         viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                                             if (dataSavingsProgress != null) {
@@ -681,7 +709,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                                 .show();
                         break;
                     case EDIT:
-                        mCallbackOnActivityResult.updateDataSavingsTarget(savingsTargetData,index,modelSavings);
+                        mCallbackOnActivityResult.updateDataSavingsTarget(savingsTargetData, index, modelSavings);
                         break;
 
                 }
@@ -721,7 +749,6 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 }
 
 
-
                 Log.e("TAG", "result: " + new Gson().toJson(modelSavings));
                 Log.e("TAG", "result: " + new Gson().toJson(modelSavingsProgress));
                 loadDataSavings(savingsData);
@@ -744,17 +771,16 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 });
             }
         }
-
     }
 
     private void loadTotalSavingsTarget() {
-      viewModelSavings.findSavingsById(mainActivity.modelSavings.getId()).observe(getViewLifecycleOwner(),modelSavings1 ->{
-          if(modelSavings1!=null){
-              mainActivity.modelSavings.setProcessValue(modelSavings1.getProcessValue());
-              setSavingsTarget();
-              loadDataHeaderSavings();
-          }
-      });
+        viewModelSavings.findSavingsById(mainActivity.modelSavings.getId()).observe(getViewLifecycleOwner(), modelSavings1 -> {
+            if (modelSavings1 != null) {
+                mainActivity.modelSavings.setProcessValue(modelSavings1.getProcessValue());
+                setSavingsTarget();
+                loadDataHeaderSavings();
+            }
+        });
     }
 
     private void setSavingsTarget() {

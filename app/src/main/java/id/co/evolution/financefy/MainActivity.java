@@ -49,7 +49,7 @@ import id.co.evolution.financefy.viewmodel.ViewModelSavings;
 
 @AndroidEntryPoint
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    ActivityMainBinding binding;
+    public ActivityMainBinding binding;
     public ViewModelFinance viewModelFinance;
     public ViewModelSavings viewModelSavings;
     public List<ModelFinance> dataFinance = new ArrayList<>();
@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Inject
     TinyDb tinyDb;
-    boolean isFabOpen = false;
+    public boolean isFabOpen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
