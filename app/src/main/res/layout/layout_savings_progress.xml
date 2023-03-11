@@ -106,23 +106,21 @@
                     android:id="@+id/txt_recommendation_saving"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/txt_choose_recommendation"
+                    android:layout_toStartOf="@id/img_choose_recommendation"
                     android:fontFamily="@font/ubuntu_b"
                     android:padding="10dp"
                     android:text="Rekomendasi menabung perhari: Rp.500.000"
-                    android:textSize="15sp"
                     android:textColor="@color/white"
-                    />
+                    android:textSize="15sp" />
 
                 <ImageView
-                    android:id="@+id/txt_choose_recommendation"
+                    android:id="@+id/img_choose_recommendation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:padding="10dp"
-                    android:visibility="gone"
                     android:src="@drawable/ic_baseline_more_vert_24"
-                    app:tint="@color/blackTextColor" />
+                    app:tint="@color/white" />
 
             </RelativeLayout>
 

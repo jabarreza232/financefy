@@ -53,7 +53,7 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
         holder.binding.txtProgress.setText(Tools.convertToCurrency(modelSavings.getProcessValue()) + " s/d " + Tools.convertToCurrency(modelSavings.getTargetValue()));
         holder.binding.progressSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         holder.binding.progressSavings.setMax(100);
-        holder.binding.txtPercentage.setText(Tools.calculatePercentage((double) modelSavings.getProcessValue(), (double) modelSavings.getTargetValue()) + "%");
+        holder.binding.txtPercentage.setText(modelSavings.getPercentage((int)modelSavings.getTargetValue(), holder.itemView.getContext()) );
 
         holder.binding.txtDay.setText("Sisa " + Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target()) + " hari");
 

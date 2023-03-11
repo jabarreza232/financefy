@@ -15,6 +15,7 @@ import id.co.evolution.financefy.model.ModelFilter;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
 import id.co.evolution.financefy.model.ModelNestedSavings;
+import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
 
 public class SavingsFilter {
@@ -42,6 +43,15 @@ public class SavingsFilter {
             Collections.sort(list, ModelNestedSavings.shortedPeriodLongestToLatest);
         } else {
             Collections.sort(list, ModelNestedSavings.shortedPeriodLatestToLongest);
+        }
+
+        return list;
+    }
+    public List<ModelSavingsProgress> filterPeriodSavingProgress(@NonNull String filterPeriod, List<ModelSavingsProgress> list) {
+        if (filterPeriod.equalsIgnoreCase("terlama")) {
+            Collections.sort(list, ModelSavingsProgress.shortedPeriodLongestToLatest);
+        } else {
+            Collections.sort(list, ModelSavingsProgress.shortedPeriodLatestToLongest);
         }
 
         return list;
@@ -97,11 +107,10 @@ public class SavingsFilter {
     }
 
 
-    public long totalValueByType(List<ModelFinance> data, String type) {
+    public long totalValueByType(List<ModelSavingsProgress> data) {
         long value = 0;
-        for (ModelFinance modelFinance : data)
-            if (modelFinance.getTipe().equalsIgnoreCase(type))
-                value += (long) modelFinance.getJumlahValue();
+        for (ModelSavingsProgress modelFinance : data)
+                value += (long) modelFinance.getProcessValue();
 
         return value;
     }
@@ -116,29 +125,28 @@ public class SavingsFilter {
         return list;
     }
 
-    public List<ModelFinance> listAnalysis(List<ModelFinance> data, String type) {
-        List<ModelFinance> list = new ArrayList<>();
+    public List<ModelSavingsProgress> listAnalysis(List<ModelSavingsProgress> data) {
+        List<ModelSavingsProgress> list = new ArrayList<>();
         HashSet<String> hashsetCategory = new HashSet<>();
 
-        for (ModelFinance modelFinance : data) {
-            hashsetCategory.add(modelFinance.getKategori());
+        for (ModelSavingsProgress modelFinance : data) {
+            hashsetCategory.add(modelFinance.getTitle());
         }
 
         for (String category : hashsetCategory) {
-            ModelFinance modelFinance = new ModelFinance();
-            modelFinance.setKategori(category);
+            ModelSavingsProgress modelFinance = new ModelSavingsProgress();
+            modelFinance.setTitle(category);
             double totalValue = 0;
             String date = null;
-            for (ModelFinance finance : data) {
-                if (category.contains(finance.getKategori())) {
-                    totalValue = totalValue + finance.getJumlahValue();
-                    date = finance.getDate();
+            for (ModelSavingsProgress finance : data) {
+                if (category.equalsIgnoreCase(finance.getTitle())) {
+                    totalValue = totalValue + finance.getProcessValue();
+                    date = finance.getDate_progress_savings();
                 }
             }
-            modelFinance.setJumlah(Tools.convertToCurrency(totalValue));
-            modelFinance.setTotalValue(totalValueByType(data, type));
-            modelFinance.setTipe(type);
-            modelFinance.setDate(date);
+            modelFinance.setProcessValue((long) totalValue);
+            modelFinance.setTotalValue((int) totalValueByType(data));
+            modelFinance.setDate_progress_savings(date);
             list.add(modelFinance);
         }
         return list;

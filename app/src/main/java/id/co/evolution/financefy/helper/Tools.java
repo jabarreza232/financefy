@@ -60,7 +60,17 @@ public class Tools {
     }
 
     public static long calculateRecommendationDay(long target, long day) {
+        if(day>0)
         return target / day;
+        else return target;
+    }
+
+    public static long calculateRecommendationMonth(long recommendationPerDay) {
+        return recommendationPerDay * 30;
+    }
+
+    public static long calculateRecommendationYear(long recommendationPerDay) {
+        return recommendationPerDay *365;
     }
 
     public static long calculateRecommendationMonth(long target, long day,int maximumDayOfMonth) {

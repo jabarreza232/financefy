@@ -38,6 +38,8 @@ import id.co.evolution.financefy.databinding.ActivityMainBinding;
 import id.co.evolution.financefy.fragment.FragmentAccount;
 import id.co.evolution.financefy.fragment.FragmentAll;
 import id.co.evolution.financefy.fragment.FragmentAnalysis;
+import id.co.evolution.financefy.fragment.FragmentAnalysisSavings;
+import id.co.evolution.financefy.fragment.FragmentSettings;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelSavings;
@@ -66,6 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Inject
     TinyDb tinyDb;
     public boolean isFabOpen = false;
+    public boolean isUserDailyFinance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             binding.layout.fabAdd.hide();
             showHideFabSavings(false);
             if (isFabOpen) startAnimationFabSavings();
-
+            isUserDailyFinance=user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan));
 
             switch (item.getTitle().toString().toLowerCase()) {
                 case "records":
@@ -128,7 +131,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     binding.layout.fabAdd.show();
                     break;
                 case "analysis":
+                    if(isUserDailyFinance)
                     fragment = new FragmentAnalysis();
+                    else fragment = new FragmentAnalysisSavings();
+
                     changeFragment(fragment);
                     break;
                 case "accounts":
@@ -136,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     changeFragment(fragment);
                     break;
                 case "settings":
-                    fragment = new FragmentAll();
+                    fragment = new FragmentSettings();
                     changeFragment(fragment);
                     break;
                 default:

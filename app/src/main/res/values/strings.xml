@@ -54,6 +54,10 @@
     <string name="pemasukan">Pemasukan</string>
     <string name="pengeluaran">Pengeluaran</string>
     <string name="bulanan">Bulanan</string>
+    <string name="achieved">Tercapai</string>
     <string name="choose_account">Pilih Akun</string>
+    <string name="month">Bulan</string>
+    <string name="year">Tahun</string>
+    <string name="day">Hari</string>
 
 </resources>

@@ -28,7 +28,8 @@ public class ModelSavingsProgress implements Serializable {
     String date_progress_savings;
     @ColumnInfo(name = "month")
     String month;
-
+    @Ignore
+    int totalValue;
     public ModelSavingsProgress(int id) {
         this.id = id;
     }
@@ -39,11 +40,21 @@ public class ModelSavingsProgress implements Serializable {
     public String getDate_progress_savings() {
         return date_progress_savings;
     }
+    public String getDefaultDate(){
+        return Tools.convertDateFormat(date_progress_savings);
+    }
 
     public void setDate_progress_savings(String date_progress_savings) {
         this.date_progress_savings = date_progress_savings;
     }
 
+    public int getTotalValue() {
+        return totalValue;
+    }
+
+    public void setTotalValue(int totalValue) {
+        this.totalValue = totalValue;
+    }
 
     public int getId() {
         return id;
@@ -77,7 +88,8 @@ public class ModelSavingsProgress implements Serializable {
         this.id_savings = id_savings;
     }
     public String getPercentage(int totalValue){
-        return String.valueOf(Tools.calculatePercentage(processValue, totalValue));
+        double percentage = Tools.calculatePercentage(processValue, totalValue);
+        return String.valueOf(percentage>=100? 100:percentage);
     }
     public String getDescription() {
         return description;
@@ -117,4 +129,38 @@ public class ModelSavingsProgress implements Serializable {
     public int hashCode() {
         return Objects.hash(id, title, processValue, id_savings, date_progress_savings);
     }
+
+
+    public static Comparator<ModelSavingsProgress> shortedPeriodLatestToLongest = new Comparator<ModelSavingsProgress>() {
+        @Override
+        public int compare(ModelSavingsProgress jc1, ModelSavingsProgress jc2) {
+            //TODO membuat filter date tahun, bulan, tanggal
+
+            int result =Tools.getDateFromDateFormat(jc2.getDefaultDate(),"year") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"year");
+            if(result == 0)
+                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"month") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"month");
+
+            if(result ==0)
+                result = Tools.getDateFromDateFormat(jc2.getDefaultDate(),"date") - Tools.getDateFromDateFormat(jc1.getDefaultDate(),"date");
+
+            return  result;
+        }
+    };
+
+    public static Comparator<ModelSavingsProgress> shortedPeriodLongestToLatest = new Comparator<ModelSavingsProgress>() {
+        @Override
+        public int compare(ModelSavingsProgress jc1, ModelSavingsProgress jc2) {
+
+            //TODO membuat filter date tahun, bulan, tanggal
+            int result =Tools.getDateFromDateFormat(jc1.getDefaultDate(),"year") - Tools.getDateFromDateFormat(jc2.getDefaultDate(),"year");
+            if(result == 0)
+                result = Tools.getDateFromDateFormat(jc1.getDefaultDate(),"month") - Tools.getDateFromDateFormat(jc2.getDefaultDate(),"month");
+
+            if(result ==0)
+                result = Tools.getDateFromDateFormat(jc1.getDefaultDate(),"date") - Tools.getDateFromDateFormat(jc2.getDefaultDate(),"date");
+
+            return result;
+        }
+    };
+
 }

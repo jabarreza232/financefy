@@ -11,7 +11,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
@@ -22,6 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -31,7 +31,6 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -51,8 +50,6 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.activity.UpdateSavingsActivity;
-import id.co.evolution.financefy.activity.UpdateSavingsTargetActivity;
 import id.co.evolution.financefy.adapter.AdapterFinance;
 import id.co.evolution.financefy.adapter.AdapterSavings;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
@@ -271,15 +268,15 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 loadDataByWeek();
             }
         });
-        FloatingActionButton fabAdd = ((MainActivity)getActivity()).binding.layout.fabAdd;
+        FloatingActionButton fabAdd = ((MainActivity) getActivity()).binding.layout.fabAdd;
 
         binding.rvList.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy<0 && !fabAdd.isShown())
+                if (dy < 0 && !fabAdd.isShown())
                     fabAdd.show();
-                else if(dy>0 && fabAdd.isShown()&&!((MainActivity)getActivity()).isFabOpen)
+                else if (dy > 0 && fabAdd.isShown() && !((MainActivity) getActivity()).isFabOpen)
                     fabAdd.hide();
             }
 
@@ -289,8 +286,45 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
             }
         });
 
+        binding.layoutSavingsProgress.imgChooseRecommendation.setOnClickListener(v -> {
+
+            showMenu(v);
+        });
     }
 
+    private void showMenu(View view) {
+        PopupMenu popupMenu = new PopupMenu(getContext(), view);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_choose_recommendation, popupMenu.getMenu());
+
+
+        long restOfTheDay = Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
+
+        popupMenu.getMenu().findItem(R.id.year).setVisible(restOfTheDay>=365);
+
+        popupMenu.getMenu().findItem(R.id.month).setVisible(restOfTheDay>=30);
+
+        popupMenu.setOnMenuItemClickListener(menuItem -> {
+            long recommendationSavings = 0;
+            long recommendationSavingsDay = Tools.calculateRecommendationDay(modelSavings.getTargetValue(), restOfTheDay);
+
+            switch (menuItem.getItemId()) {
+                case R.id.year:
+                    recommendationSavings = Tools.calculateRecommendationYear(recommendationSavingsDay);
+                    binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi pertahun: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+                    break;
+                case R.id.month:
+                    recommendationSavings = Tools.calculateRecommendationMonth(recommendationSavingsDay);
+                    binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perbulan: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+                    break;
+                case R.id.day:
+                    recommendationSavings = recommendationSavingsDay;
+                    binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perhari: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+                    break;
+            }
+            return true;
+        });
+        popupMenu.show();
+    }
 
     @SuppressLint("SetTextI18n")
     private void initiateSayHaloWithTime() {
@@ -649,17 +683,18 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
     @SuppressLint("SetTextI18n")
     private void loadDataHeaderSavings() {
-        long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
-        long recommendationSavingsDay= Tools.calculateRecommendationDay(modelSavings.getTargetValue(),restOfTheDay);
+        long restOfTheDay = Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
         double percentage = calculatePercentage((double) modelSavings.getProcessValue(), (double) modelSavings.getTargetValue());
+        String txtPercentage = percentage >= 100 ? getString(R.string.achieved) : percentage+"%";
+        long recommendationSavingsDay = Tools.calculateRecommendationDay(modelSavings.getTargetValue(), restOfTheDay);
+
         binding.layoutSavingsProgress.txtTitle.setText(modelSavings.getTitle());
         binding.layoutSavingsProgress.txtProgress.setText(convertToCurrency(modelSavings.getProcessValue()) + " s/d " + convertToCurrency(modelSavings.getTargetValue()));
         binding.layoutSavingsProgress.progressSavings.setProgress((int) calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutSavingsProgress.progressSavings.setMax(100);
-        double txtPercentage= percentage>=100?100:percentage;
-        binding.layoutSavingsProgress.txtPercentage.setText(txtPercentage + "%");
-        binding.layoutSavingsProgress.txtDay.setText("Sisa " +  restOfTheDay+ " hari");
-        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perhari: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavingsDay),"green")));
+        binding.layoutSavingsProgress.txtPercentage.setText(txtPercentage);
+        binding.layoutSavingsProgress.txtDay.setText("Sisa " + restOfTheDay + " hari");
+        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perhari: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavingsDay), "green")));
 
         binding.layoutSavingsProgress.txtTitle.setOnClickListener(v -> {
 
@@ -667,7 +702,6 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 modelSavings = savingsTargetData.get(index);
                 switch (type) {
                     case CLICKED:
-
                         setSavingsTarget();
                         viewModelSavingsProgress.getSavingsByMonth(month, savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                             if (dataSavingsProgress != null) {

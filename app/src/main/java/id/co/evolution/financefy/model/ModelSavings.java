@@ -1,11 +1,16 @@
 package id.co.evolution.financefy.model;
 
+import android.content.Context;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 import java.util.Objects;
+
+import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.helper.Tools;
 
 @Entity(tableName = "savings")
 public class ModelSavings implements Serializable {
@@ -48,6 +53,10 @@ public class ModelSavings implements Serializable {
 
     public String getTitle() {
         return title;
+    }
+    public String getPercentage(int totalValue, Context context){
+        double percentage = Tools.calculatePercentage(processValue, totalValue);
+        return percentage >= 100 ? context.getString(R.string.achieved) : percentage + "%";
     }
 
     public void setTitle(String title) {
