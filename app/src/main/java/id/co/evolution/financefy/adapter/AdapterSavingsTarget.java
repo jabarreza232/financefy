@@ -23,6 +23,9 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
     List<ModelSavings> data;
     MethodCallback methodCallback;
     Calendar today;
+
+
+
     public AdapterSavingsTarget(List<ModelSavings> data, MethodCallback methodCallback) {
         this.data = data;
         this.methodCallback = methodCallback;
@@ -31,7 +34,10 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
         today.get(Calendar.MONTH);
     }
 
-
+    public void bindData(List<ModelSavings>data){
+        this.data = data;
+        notifyDataSetChanged();
+    }
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -53,7 +59,7 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
         holder.binding.txtProgress.setText(Tools.convertToCurrency(modelSavings.getProcessValue()) + " s/d " + Tools.convertToCurrency(modelSavings.getTargetValue()));
         holder.binding.progressSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         holder.binding.progressSavings.setMax(100);
-        holder.binding.txtPercentage.setText(modelSavings.getPercentage((int)modelSavings.getTargetValue(), holder.itemView.getContext()) );
+        holder.binding.txtPercentage.setText(modelSavings.getPercentage(holder.itemView.getContext()) );
 
         holder.binding.txtDay.setText("Sisa " + Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target()) + " hari");
 

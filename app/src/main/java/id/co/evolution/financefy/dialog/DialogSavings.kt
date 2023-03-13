@@ -3,7 +3,10 @@ package id.co.evolution.financefy.dialog
 import android.app.Dialog
 import android.content.Context
 import android.view.*
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import id.co.evolution.financefy.R
@@ -12,29 +15,86 @@ import id.co.evolution.financefy.helper.Tools
 import id.co.evolution.financefy.model.ModelSavings
 
 class DialogSavings(
-   val context: Context,
+    val context: Context,
     val inflater: LayoutInflater,
     private val dialogSavingsCallback: DialogSavingsCallback
 ) {
     val dialog: Dialog = Dialog(context)
     val dialogView: View = inflater.inflate(R.layout.dialog_choose_savings_target, null)
+    private val btnInProgress: Button = findViewById(R.id.btn_in_progress);
+    private val btnAchieved: Button = findViewById(R.id.btn_achieved);
+    private val btnAll: Button = findViewById(R.id.btn_all);
+    private val placeEmpty: LinearLayout = findViewGroupById(R.id.place_empty)
 
     init {
         dialog.setContentView(dialogView)
     }
 
-    fun showDialogSavings(resourceTypeArray: MutableList<ModelSavings>) {
+    fun showDialogSavings(mutableSavingsData: MutableList<ModelSavings>) {
         val rvListSavingsTarget: RecyclerView = findViewGroupById(R.id.rv_savings_target)
 
-        val adapter = AdapterSavingsTarget(resourceTypeArray
+        val adapter = AdapterSavingsTarget(
+            mutableSavingsData
         ) { type, data, position ->
             dialog.dismiss()
-            dialogSavingsCallback.onSubmit(type as Tools.TYPE,position, resourceTypeArray[position].title)
+            dialogSavingsCallback.onSubmit(
+                type as Tools.TYPE,
+                position,
+                mutableSavingsData[position].title
+            )
         }
+
+        var mutableListData: MutableList<ModelSavings> = mutableListOf()
 
         rvListSavingsTarget.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         rvListSavingsTarget.adapter = adapter
+
+        btnInProgress.setOnClickListener {
+            mutableListData = mutableListOf()
+            setBackgroundButton(
+                R.drawable.button_blue_background,
+                R.drawable.shape_line_black,
+                R.drawable.shape_line_black
+            )
+            setTextColorButton(R.color.white, R.color.blackTextColor, R.color.blackTextColor)
+
+            mutableSavingsData.forEach {
+                if (!it.getPercentage(context).contains(context.getString(R.string.achieved)))
+                    mutableListData.add(it)
+            }
+            adapter.bindData(mutableListData)
+            setUpPlaceEmpty(adapter)
+        }
+
+        btnAchieved.setOnClickListener {
+            mutableListData = mutableListOf()
+            setBackgroundButton(
+                R.drawable.shape_line_black,
+                R.drawable.button_blue_background,
+                R.drawable.shape_line_black
+            )
+            setTextColorButton(R.color.blackTextColor, R.color.white, R.color.blackTextColor)
+
+            mutableSavingsData.forEach {
+                if (it.getPercentage(context).contains(context.getString(R.string.achieved)))
+                    mutableListData.add(it)
+            }
+            adapter.bindData(mutableListData)
+            setUpPlaceEmpty(adapter)
+        }
+
+        btnAll.setOnClickListener {
+            setBackgroundButton(
+                R.drawable.shape_line_black,
+                R.drawable.shape_line_black,
+                R.drawable.button_blue_background
+            )
+            setTextColorButton(R.color.blackTextColor, R.color.blackTextColor, R.color.white)
+            adapter.bindData(mutableSavingsData)
+            setUpPlaceEmpty(adapter)
+        }
+
 
         val window = dialog.window
         val wlp = window!!.attributes
@@ -49,7 +109,31 @@ class DialogSavings(
 
         dialog.show()
     }
+    private fun setUpPlaceEmpty(adapter:AdapterSavingsTarget){
+        placeEmpty.visibility = if (adapter.itemCount == 0)
+            View.VISIBLE
+        else View.GONE
 
+    }
+    private fun setBackgroundButton(
+        bgButtonProgress: Int,
+        bgButtonAchieved: Int,
+        bgButtonAll: Int
+    ) {
+        btnInProgress.background = ContextCompat.getDrawable(context, bgButtonProgress)
+        btnAchieved.background = ContextCompat.getDrawable(context, bgButtonAchieved)
+        btnAll.background = ContextCompat.getDrawable(context, bgButtonAll)
+    }
+
+    private fun setTextColorButton(
+        bgButtonProgress: Int,
+        bgButtonAchieved: Int,
+        bgButtonAll: Int
+    ) {
+        btnInProgress.setTextColor(ContextCompat.getColor(context, bgButtonProgress))
+        btnAchieved.setTextColor(ContextCompat.getColor(context, bgButtonAchieved))
+        btnAll.setTextColor(ContextCompat.getColor(context, bgButtonAll))
+    }
 
     private fun <T : View> findViewById(value: Int): T {
         return dialogView.findViewById(value)
@@ -61,7 +145,7 @@ class DialogSavings(
     }
 
     interface DialogSavingsCallback {
-        fun onSubmit(type: Tools.TYPE, index:Int=0, result: String)
+        fun onSubmit(type: Tools.TYPE, index: Int = 0, result: String)
     }
 
 }

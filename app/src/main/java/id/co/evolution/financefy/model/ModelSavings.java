@@ -54,8 +54,8 @@ public class ModelSavings implements Serializable {
     public String getTitle() {
         return title;
     }
-    public String getPercentage(int totalValue, Context context){
-        double percentage = Tools.calculatePercentage(processValue, totalValue);
+    public String getPercentage( Context context){
+        double percentage = Tools.calculatePercentage(processValue, targetValue);
         return percentage >= 100 ? context.getString(R.string.achieved) : percentage + "%";
     }
 

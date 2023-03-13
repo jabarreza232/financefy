@@ -37,6 +37,55 @@
                     android:layout_marginBottom="10dp"
                     android:background="@color/colorAccent" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:layout_margin="5dp"
+                >
+
+                <Button
+                    android:id="@+id/btn_in_progress"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/shape_line_black"
+                    android:layout_marginEnd="5dp"
+                    android:fontFamily="@font/ubuntu_r"
+                    android:padding="10dp"
+                    android:textAllCaps="false"
+                    android:text="@string/in_progress"
+                    android:textAlignment="center"
+                    android:textColor="@color/blackTextColor" />
+
+                <Button
+                    android:id="@+id/btn_achieved"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="5dp"
+                    android:textAllCaps="false"
+                    android:background="@drawable/shape_line_black"
+                    android:fontFamily="@font/ubuntu_r"
+                    android:padding="10dp"
+                    android:text="@string/achieved"
+                    android:textAlignment="center"
+                    android:textColor="@color/blackTextColor" />
+                <Button
+                    android:id="@+id/btn_all"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:textAllCaps="false"
+                    android:background="@drawable/button_blue_background"
+                    android:fontFamily="@font/ubuntu_r"
+                    android:padding="10dp"
+                    android:text="@string/semuanya"
+                    android:textAlignment="center"
+                    android:textColor="@color/white" />
+
+            </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_savings_target"
@@ -44,6 +93,31 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp" />
 
+                <LinearLayout
+                    android:id="@+id/place_empty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="36dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/empty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/empty_box" />
+
+                    <TextView
+                        android:id="@+id/txt_empty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="@font/ubuntu_b"
+                        android:text="Tidak ada data"
+                        android:textAlignment="center"
+                        android:textColor="@color/blackTextColor"
+                        android:textSize="19sp" />
+                </LinearLayout>
 
             </LinearLayout>
 

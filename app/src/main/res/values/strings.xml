@@ -59,5 +59,6 @@
     <string name="month">Bulan</string>
     <string name="year">Tahun</string>
     <string name="day">Hari</string>
+    <string name="in_progress">Proses</string>
 
 </resources>

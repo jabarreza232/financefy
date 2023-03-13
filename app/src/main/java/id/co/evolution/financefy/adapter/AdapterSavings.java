@@ -27,11 +27,6 @@ public class AdapterSavings extends RecyclerView.Adapter<AdapterSavings.ViewHold
     TYPE_LAYOUT_MANAGER type;
     int total_value;
 
-    public enum TYPE_NESTED_FINANCE {
-        ANALYSIS,
-        DEFAULT
-    }
-
     public void setTotal_value(int total_value) {
         this.total_value = total_value;
     }
