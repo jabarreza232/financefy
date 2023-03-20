@@ -524,7 +524,11 @@ public class FragmentAnalysisSavings extends Fragment {
         binding.layoutSavingsProgress.progressSavings.setProgress((int) calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutSavingsProgress.progressSavings.setMax(100);
         binding.layoutSavingsProgress.txtPercentage.setText(txtPercentage);
-        binding.layoutSavingsProgress.txtDay.setText("Sisa " +  restOfTheDay+ " hari");
+        if(restOfTheDay>0)
+            binding.layoutSavingsProgress.txtDay.setText("Sisa " + restOfTheDay + " hari");
+        else
+            binding.layoutSavingsProgress.txtDay.setText("Selesai");
+
         binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perhari: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavingsDay),"green")));
 
         binding.layoutSavingsProgress.txtTitle.setOnClickListener(v -> {

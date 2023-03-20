@@ -21,6 +21,8 @@ public class ModelUser {
     String type;
     @ColumnInfo(name = "category")
     String category;
+    @ColumnInfo(name = "uuid")
+    String uuid;
 
 
     public ModelUser() {
@@ -48,6 +50,14 @@ public class ModelUser {
 
     public int getId() {
         return id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public void setId(int id) {

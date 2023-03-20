@@ -54,14 +54,17 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int i) {
         ModelSavings modelSavings=data.get(i);
+        long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
         holder.binding.txtJudul.setText(modelSavings.getTitle());
         holder.binding.imgRemove.setVisibility(data.size() > 1 ? View.VISIBLE : View.GONE);
         holder.binding.txtProgress.setText(Tools.convertToCurrency(modelSavings.getProcessValue()) + " s/d " + Tools.convertToCurrency(modelSavings.getTargetValue()));
         holder.binding.progressSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         holder.binding.progressSavings.setMax(100);
         holder.binding.txtPercentage.setText(modelSavings.getPercentage(holder.itemView.getContext()) );
-
-        holder.binding.txtDay.setText("Sisa " + Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target()) + " hari");
+        if(restOfTheDay>0)
+            holder.binding.txtDay.setText("Sisa " + restOfTheDay + " hari");
+        else
+            holder.binding.txtDay.setText("Selesai");
 
         holder.binding.imgRemove.setOnClickListener(v -> methodCallback.onClick(TYPE.REMOVED, data, i));
         holder.binding.imgEdit.setOnClickListener(v -> methodCallback.onClick(TYPE.EDIT, data, i));
