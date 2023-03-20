@@ -8,7 +8,7 @@ import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
 import id.co.evolution.financefy.model.ModelUser;
 
-@Database(entities = {ModelFinance.class, ModelUser.class, ModelSavings.class, ModelSavingsProgress.class}, version = 5, exportSchema = false)
+@Database(entities = {ModelFinance.class, ModelUser.class, ModelSavings.class, ModelSavingsProgress.class}, version = 6, exportSchema = false)
 public abstract class FinanceDB extends RoomDatabase {
     public abstract FinanceDao financeDao();
 

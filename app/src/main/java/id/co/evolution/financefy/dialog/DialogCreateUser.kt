@@ -54,6 +54,8 @@ class DialogCreateUser(
     private var placeDate: RelativeLayout
     private var txtType: TextView
     private var txtDate: TextView
+    private var txtHeaderTargetSavings: TextView
+    private var viewLineHeaderSavings: View
     private var txtCategory: TextView
     private var txtHeader: TextView
     private var btnSubmit: CardView
@@ -73,6 +75,8 @@ class DialogCreateUser(
         placeDate = findViewById(R.id.place_date)
         txtType = findViewById(R.id.txt_type)
         txtCategory = findViewById(R.id.txt_category)
+        txtHeaderTargetSavings = findViewById(R.id.txt_header_target_savings)
+        viewLineHeaderSavings = findViewById(R.id.view_line_target_savings)
         txtDate = findViewById(R.id.txt_date)
         btnSubmit = findViewById(R.id.cv_submit)
         btnClose = findViewById(R.id.img_close)
@@ -400,17 +404,19 @@ class DialogCreateUser(
     }
 
     fun setVisibilityPlaceSavings() {
-        placeTarget.visibility = getVisibilityPlaceSavings()
-        tilTitle.visibility = getVisibilityPlaceSavings()
-        placeDate.visibility = getVisibilityPlaceSavings()
-    }
+        val isShow =category.equals(
+            context.getString(R.string.menabung),
+            ignoreCase = true
+        )
 
-    private fun getVisibilityPlaceSavings(): Int {
-        return if (category.equals(
-                context.getString(R.string.menabung),
-                ignoreCase = true
-            )
-        ) View.VISIBLE else View.GONE
+        placeTarget.showHideView(isShow)
+        tilTitle.showHideView(isShow)
+        placeDate.showHideView(isShow)
+        txtHeaderTargetSavings.showHideView(isShow)
+        viewLineHeaderSavings.showHideView(isShow)
+    }
+    private infix fun View.showHideView(isShow: Boolean){
+      visibility = if(isShow)View.VISIBLE else View.GONE
     }
 
     interface DialogCreateUserCallback {
