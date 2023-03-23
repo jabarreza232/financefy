@@ -1,28 +1,20 @@
 package id.co.evolution.financefy.fragment;
 
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS_TARGET;
 import static id.co.evolution.financefy.helper.Tools.calculatePercentage;
 import static id.co.evolution.financefy.helper.Tools.changeTitleColor;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
-import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
@@ -33,7 +25,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.PopupMenu;
-import android.widget.Toast;
+
+import androidx.activity.result.ActivityResult;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.LegendEntry;
@@ -67,7 +68,6 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.adapter.AdapterAnalysisFinance;
 import id.co.evolution.financefy.adapter.AdapterAnalysisSavings;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAnalysisSavingsBinding;
@@ -82,8 +82,6 @@ import id.co.evolution.financefy.helper.SavingsFilter;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
-import id.co.evolution.financefy.model.ModelNestedFinance;
-import id.co.evolution.financefy.model.ModelNestedSavings;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
 import id.co.evolution.financefy.model.ModelUser;
@@ -96,9 +94,9 @@ import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 import id.co.evolution.financefy.viewmodel.ViewModelSavings;
 import id.co.evolution.financefy.viewmodel.ViewModelSavingsProgress;
 import id.co.evolution.financefy.viewmodel.ViewModelUser;
-
+import id.co.evolution.financefy.fragment.FragmentAll.TYPE_RECOMMENDATION_SAVINGS;
 @AndroidEntryPoint
-public class FragmentAnalysisSavings extends Fragment {
+public class FragmentAnalysisSavings extends Fragment implements CallbackOnActivityResult.OnCallbackResult {
     public Calendar today;
     Calendar prevNextMonth;
     List<ModelFinance> dataFinance = new ArrayList<>();
@@ -110,7 +108,7 @@ public class FragmentAnalysisSavings extends Fragment {
     TYPE_CHART typeChart = TYPE_CHART.BAR_CHART;
     @Inject
     FinanceFilter financeFilter;
-    String filterType, filterPeriod;
+    String  filterPeriod,filterNominal;
     String month;
     @Inject
     LocalizedWeekHelper localizedWeekHelper;
@@ -134,28 +132,51 @@ public class FragmentAnalysisSavings extends Fragment {
     @Inject
     SavingsFilter savingsFilter;
 
-    public enum CATEGORY_INCOME {
-        HASIL_USAHA,
-        BONUS,
-        GAJI
-    }
-
-    public enum CATEGORY_EXPENSE {
-        BELANJA_UMUM,
-        MAkANAN,
-        PULSA_HP,
-        TRANSPORTASI,
-        TAGIHAN,
-        PAKET_INTERNET
-    }
-
+    TYPE_RECOMMENDATION_SAVINGS typeRecommendationSavings;
     CallbackOnActivityResult mCallbackOnActivityResult;
-    int mPositionItem;
+
     long date_ship_millis;
 
     MainActivity mainActivity;
     @Inject
     TinyDb tinyDb;
+
+    @Override
+    public void result(ActivityResult result, Intent intent) {
+        if (result.getResultCode() == REQUEST_CODE_SAVINGS) {
+            if (intent != null) {
+                ModelSavingsProgress modelSavingsProgress = (ModelSavingsProgress) intent.getSerializableExtra("savings_progress");
+
+                for (int i = 0; i < savingsData.size(); i++) {
+                    if (savingsData.get(i).getId() == modelSavingsProgress.getId())
+                        savingsData.set(i, modelSavingsProgress);
+                }
+
+
+                Log.e("TAG", "result: " + new Gson().toJson(modelSavings));
+                Log.e("TAG", "result: " + new Gson().toJson(modelSavingsProgress));
+                loadDataSavings(savingsData);
+            }
+        } else if (result.getResultCode() == REQUEST_CODE_UPDATE_SAVINGS_TARGET) {
+
+
+            if (intent != null) {
+                this.modelSavings = (ModelSavings) intent.getSerializableExtra("savings");
+                for (int i = 0; i < savingsTargetData.size(); i++) {
+                    if (savingsTargetData.get(i).getId() == modelSavings.getId())
+                        savingsTargetData.set(i, modelSavings);
+                }
+
+                setSavingsTarget();
+                viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                    if (dataSavingsProgress != null) {
+                        loadDataSavings(dataSavingsProgress);
+                    }
+                });
+            }
+        }
+    }
+
     public enum TYPE_CHART {
         PIE_CHART,
         BAR_CHART
@@ -168,6 +189,13 @@ public class FragmentAnalysisSavings extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mCallbackOnActivityResult = new CallbackOnActivityResult(getContext(), requireActivity().getActivityResultRegistry(), this);
+        getLifecycle().addObserver(mCallbackOnActivityResult);
+
+    }
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -175,6 +203,8 @@ public class FragmentAnalysisSavings extends Fragment {
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
         user = mainActivity.user;
         modelSavings = mainActivity.modelSavings;
+        typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
+
         Log.e("cek_list_week: ", localizedWeekHelper.getFirstDay(-7).substring(0, (localizedWeekHelper.getFirstDay(-7).length() - 3)));
         setHasOptionsMenu(true);
         binding.layoutSavingsProgress.imgChooseRecommendation.setOnClickListener(v -> {
@@ -201,15 +231,18 @@ public class FragmentAnalysisSavings extends Fragment {
             switch (menuItem.getItemId()) {
                 case R.id.year:
                     recommendationSavings = Tools.calculateRecommendationYear(recommendationSavingsDay);
-                    binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi pertahun: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+                    setTextRecommendationSavings("pertahun", recommendationSavings);
+                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.YEAR;
                     break;
                 case R.id.month:
                     recommendationSavings = Tools.calculateRecommendationMonth(recommendationSavingsDay);
-                    binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perbulan: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+                    setTextRecommendationSavings("perbulan", recommendationSavings);
+                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.MONTH;
                     break;
                 case R.id.day:
                     recommendationSavings = recommendationSavingsDay;
-                    binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perhari: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+                    setTextRecommendationSavings("perhari", recommendationSavings);
+                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
                     break;
             }
             return true;
@@ -226,7 +259,7 @@ public class FragmentAnalysisSavings extends Fragment {
         today.get(Calendar.MONTH);
         prevNextMonth = Calendar.getInstance();
         date_ship_millis = today.getTimeInMillis();
-        filterType = getString(R.string.pemasukan);
+
         filterPeriod = getString(R.string.bulanan);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelUser = new ViewModelProvider(this).get(ViewModelUser.class);
@@ -389,7 +422,7 @@ public class FragmentAnalysisSavings extends Fragment {
 
             @Override
             public void resultFilterNominal(@NonNull String result) {
-
+                filterNominal = result;
             }
 
             @Override
@@ -485,7 +518,7 @@ public class FragmentAnalysisSavings extends Fragment {
         loadTotalSavingsTarget();
 
         data = savingsFilter.listAnalysis(data);
-
+        if(filterNominal!=null) data = savingsFilter.filterNominal(filterNominal,data);
         adapter = new AdapterAnalysisSavings(getActivity(), data);
         adapter.setTotalValue(modelSavings.getTargetValue());
         binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -513,6 +546,9 @@ public class FragmentAnalysisSavings extends Fragment {
         });
     }
 
+    private void setTextRecommendationSavings(String type, long recommendationSavings) {
+        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi " + type + ": ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+    }
     private void loadDataHeader() {
         long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
         long recommendationSavingsDay= Tools.calculateRecommendationDay(modelSavings.getTargetValue(),restOfTheDay);
@@ -529,15 +565,18 @@ public class FragmentAnalysisSavings extends Fragment {
         else
             binding.layoutSavingsProgress.txtDay.setText("Selesai");
 
-        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perhari: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavingsDay),"green")));
-
+        if (typeRecommendationSavings == TYPE_RECOMMENDATION_SAVINGS.DAY) {
+            setTextRecommendationSavings("perhari", recommendationSavingsDay);
+        } else if (typeRecommendationSavings == TYPE_RECOMMENDATION_SAVINGS.MONTH) {
+            setTextRecommendationSavings("perbulan", Tools.calculateRecommendationMonth(recommendationSavingsDay));
+        } else {
+            setTextRecommendationSavings("pertahun", Tools.calculateRecommendationYear(recommendationSavingsDay));
+        }
         binding.layoutSavingsProgress.txtTitle.setOnClickListener(v -> {
-
             dialogSavings = new DialogSavings(getContext(), getLayoutInflater(), (type, index, result) -> {
                 modelSavings = savingsTargetData.get(index);
                 switch (type) {
                     case CLICKED:
-
                         setSavingsTarget();
                         viewModelSavingsProgress.getSavingsByMonth(month, savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                             if (dataSavingsProgress != null) {
@@ -695,11 +734,10 @@ public class FragmentAnalysisSavings extends Fragment {
 
         @Override
         protected List<IBarDataSet> doInBackground(Void... voids) {
-            List<ModelNestedSavings> listNestedFinance = savingsFilter.filterNestedSavings(data);
             listDate = new ArrayList<>();
 
             List<IBarDataSet> barDataSets = new ArrayList<>();
-            ArrayList<BarEntry> entriesBonus = new ArrayList<>();
+            ArrayList<BarEntry> entriesSavings = new ArrayList<>();
 
 
             List<ModelSavingsProgress> listData = savingsFilter.listAnalysis(data);
@@ -707,13 +745,13 @@ public class FragmentAnalysisSavings extends Fragment {
 
             int index=0;
             for (ModelSavingsProgress modelIncome : listData) {
-                Spanned data = Html.fromHtml(modelIncome.getDate_progress_savings().toLowerCase());
-                entriesBonus.add(new BarEntry(index, modelIncome.getProcessValue(), data.toString()));
+                Spanned data = Html.fromHtml(modelIncome.getDate_progress_savings().toLowerCase()+"<br>"+modelIncome.getTitle().toLowerCase());
+                entriesSavings.add(new BarEntry(index, modelIncome.getProcessValue(), data.toString()));
                 listDate.add(modelIncome.getTitle());
                 index++;
             }
 
-            BarDataSet barDataSetBonus = new BarDataSet(entriesBonus, "");
+            BarDataSet barDataSetBonus = new BarDataSet(entriesSavings, "");
             barDataSetBonus.setColor(ContextCompat.getColor(getContext(), R.color.blueColor));
             barDataSets.add(barDataSetBonus);
 
@@ -763,7 +801,6 @@ public class FragmentAnalysisSavings extends Fragment {
             xAxis.setAxisMinimum(0f);
             xAxis.setDrawGridLines(true);
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-
             xAxis.setLabelCount(listDate.size());
             xAxis.setValueFormatter(new ValueFormatter() {
                 @Override
@@ -775,7 +812,7 @@ public class FragmentAnalysisSavings extends Fragment {
                     }
 
 //
-                    return date;
+                    return "";
                 }
             });
 //        binding.barChartAnalysis.setDrawValueAboveBar(false);

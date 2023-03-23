@@ -34,6 +34,7 @@ class DialogCreateUser(
     var type = ""
     var category = ""
     var date_target = ""
+    var proccess_value = ""
     var arrayCategoryFromResource: Int = 0
     var isAddAccount = false
     private lateinit var arrayCategory: Array<String>
@@ -96,15 +97,18 @@ class DialogCreateUser(
         this.dialogCreateUserCallback = dialogCreateUserCallback
         this.fragmentManager = fragmentManager
         this.user = userUpdate
-        this.savings = savingsUpdate
-        this.countSavings = countSavings
+        this.savings = savingsUpdate ?: ModelSavings()
 
+        this.countSavings = countSavings
     }
 
     fun showDialogCreateUser(isAddAccount: Boolean) {
         this.isAddAccount = isAddAccount
         val textHeader = if (isAddAccount) "Input User" else "Update User"
+        val textHeaderSavings = if (isAddAccount||countSavings==0) "Input Target Savings" else "Update Target Savings"
         txtHeader.text = textHeader
+
+        txtHeaderTargetSavings.text = textHeaderSavings
 
         if (!isAddAccount) {
             user.let {
@@ -125,6 +129,7 @@ class DialogCreateUser(
                     etTarget.setText(Tools.convertToCurrency(it.targetValue))
                     date_target = it.date_target
                     jumlah = Tools.convertToCurrency(it.targetValue).replace("[Rp,.]".toRegex(), "")
+                    proccess_value = Tools.convertToCurrency(it.processValue).replace("[Rp,.]".toRegex(), "")
                 }
             }
         }
@@ -285,10 +290,10 @@ class DialogCreateUser(
 
 
                         savings.id_savings_user = user.id
-                        if(savings.title != null){
+                        if(etTitle.text.toString().isNotEmpty()){
                             savings.title = etTitle.text.toString()
                             savings.date_target = date_target
-                            savings.processValue = 0
+                            if(proccess_value.isNotEmpty()) savings.processValue = Tools.replaceCurrencyStringToLong(proccess_value)
                             savings.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
                         }
                     }

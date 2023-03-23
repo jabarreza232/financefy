@@ -114,6 +114,13 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     SavingsProgressRepository savingsProgressRepository;
 
     Tools.TYPE type;
+    TYPE_RECOMMENDATION_SAVINGS typeRecommendationSavings;
+
+    public enum TYPE_RECOMMENDATION_SAVINGS {
+        YEAR,
+        MONTH,
+        DAY
+    }
 
     public enum TYPE_LAYOUT_MANAGER {
         GRID,
@@ -158,7 +165,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_all, container, false);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
-
+        typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
         filterType = getString(R.string.semuanya);
         filterPeriod = getString(R.string.bulanan);
 
@@ -299,9 +306,9 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
         long restOfTheDay = Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
 
-        popupMenu.getMenu().findItem(R.id.year).setVisible(restOfTheDay>=365);
+        popupMenu.getMenu().findItem(R.id.year).setVisible(restOfTheDay >= 365);
 
-        popupMenu.getMenu().findItem(R.id.month).setVisible(restOfTheDay>=30);
+        popupMenu.getMenu().findItem(R.id.month).setVisible(restOfTheDay >= 30);
 
         popupMenu.setOnMenuItemClickListener(menuItem -> {
             long recommendationSavings = 0;
@@ -310,20 +317,27 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
             switch (menuItem.getItemId()) {
                 case R.id.year:
                     recommendationSavings = Tools.calculateRecommendationYear(recommendationSavingsDay);
-                    binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi pertahun: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+                    setTextRecommendationSavings("pertahun", recommendationSavings);
+                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.YEAR;
                     break;
                 case R.id.month:
                     recommendationSavings = Tools.calculateRecommendationMonth(recommendationSavingsDay);
-                    binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perbulan: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+                    setTextRecommendationSavings("perbulan", recommendationSavings);
+                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.MONTH;
                     break;
                 case R.id.day:
                     recommendationSavings = recommendationSavingsDay;
-                    binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perhari: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+                    setTextRecommendationSavings("perhari", recommendationSavings);
+                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
                     break;
             }
             return true;
         });
         popupMenu.show();
+    }
+
+    private void setTextRecommendationSavings(String type, long recommendationSavings) {
+        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi " + type + ": ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
     }
 
     @SuppressLint("SetTextI18n")
@@ -618,7 +632,6 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 });
             }
         }
-
     }
 
     private void loadDataByWeek() {
@@ -685,7 +698,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     private void loadDataHeaderSavings() {
         long restOfTheDay = Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
         double percentage = calculatePercentage((double) modelSavings.getProcessValue(), (double) modelSavings.getTargetValue());
-        String txtPercentage = percentage >= 100 ? getString(R.string.achieved) : percentage+"%";
+        String txtPercentage = percentage >= 100 ? getString(R.string.achieved) : percentage + "%";
         long recommendationSavingsDay = Tools.calculateRecommendationDay(modelSavings.getTargetValue(), restOfTheDay);
 
         binding.layoutSavingsProgress.txtTitle.setText(modelSavings.getTitle());
@@ -693,13 +706,17 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
         binding.layoutSavingsProgress.progressSavings.setProgress((int) calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutSavingsProgress.progressSavings.setMax(100);
         binding.layoutSavingsProgress.txtPercentage.setText(txtPercentage);
-        if(restOfTheDay>0)
-        binding.layoutSavingsProgress.txtDay.setText("Sisa " + restOfTheDay + " hari");
+        if (restOfTheDay > 0)
+            binding.layoutSavingsProgress.txtDay.setText("Sisa " + restOfTheDay + " hari");
         else
-        binding.layoutSavingsProgress.txtDay.setText("Selesai");
-
-        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi perhari: ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavingsDay), "green")));
-
+            binding.layoutSavingsProgress.txtDay.setText("Selesai");
+        if (typeRecommendationSavings == TYPE_RECOMMENDATION_SAVINGS.DAY) {
+            setTextRecommendationSavings("perhari", recommendationSavingsDay);
+        } else if (typeRecommendationSavings == TYPE_RECOMMENDATION_SAVINGS.MONTH) {
+            setTextRecommendationSavings("perbulan", Tools.calculateRecommendationMonth(recommendationSavingsDay));
+        } else {
+            setTextRecommendationSavings("pertahun", Tools.calculateRecommendationYear(recommendationSavingsDay));
+        }
         binding.layoutSavingsProgress.txtTitle.setOnClickListener(v -> {
 
             dialogSavings = new DialogSavings(getContext(), getLayoutInflater(), (type, index, result) -> {

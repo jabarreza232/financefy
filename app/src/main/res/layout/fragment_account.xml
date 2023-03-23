@@ -14,21 +14,24 @@
             android:orientation="vertical"
             tools:context=".fragment.FragmentAll">
 
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/TextInputLayoutOutlineTheme"
+
+            <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/shape_line_gray"
                 android:layout_margin="10dp"
-                android:hint="@string/choose_account">
-
-                <AutoCompleteTextView
+                >
+                <Spinner
                     android:id="@+id/spin_choose_account"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                       android:layout_margin="5dp"
+                    android:layout_height="60dp"
                     android:ellipsize="end"
-                    android:inputType="none"
-                    tools:text="M Jabbar" />
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:inputType="none"/>
+
+            </FrameLayout>
+
+
 
 
             <FrameLayout
