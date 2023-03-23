@@ -745,7 +745,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
 
             int index=0;
             for (ModelSavingsProgress modelIncome : listData) {
-                Spanned data = Html.fromHtml(modelIncome.getDate_progress_savings().toLowerCase()+"<br>"+modelIncome.getTitle().toLowerCase());
+                Spanned data = Html.fromHtml(Tools.convertDateFormat(modelIncome.getDate_progress_savings())+"<br>"+modelIncome.getTitle().toLowerCase());
                 entriesSavings.add(new BarEntry(index, modelIncome.getProcessValue(), data.toString()));
                 listDate.add(modelIncome.getTitle());
                 index++;
