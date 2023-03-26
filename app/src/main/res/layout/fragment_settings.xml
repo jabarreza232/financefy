@@ -1,14 +1,187 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".fragment.FragmentSettings">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginTop="30dp"
+        android:text="GROUPS"
+        android:textColor="@color/colorPrimary"
+        android:textSize="15sp" />
 
-</FrameLayout>
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="5dp"
+        app:cardBackgroundColor="#E1E1E1"
+        app:cardCornerRadius="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_baseline_palette_24"
+            android:drawablePadding="5dp"
+            android:padding="10dp"
+            android:drawableTint="@color/colorPrimary"
+            android:text="Ubah Tema"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15sp" />
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="5dp"
+        app:cardBackgroundColor="#E1E1E1"
+        app:cardCornerRadius="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_baseline_attach_money_24"
+            android:drawablePadding="5dp"
+            android:padding="10dp"
+            android:drawableTint="@color/colorPrimary"
+            android:text="Mata Uang"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15sp" />
+    </androidx.cardview.widget.CardView>
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:cardBackgroundColor="#E1E1E1"
+        app:cardCornerRadius="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_baseline_cached_24"
+            android:drawableTint="@color/colorPrimary"
+            android:drawablePadding="5dp"
+            android:padding="10dp"
+            android:text="Hapus Cache"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15sp" />
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginTop="30dp"
+        android:text="SECURITY"
+        android:textColor="@color/colorPrimary"
+        android:textSize="15sp" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="3dp"
+        app:cardBackgroundColor="#E1E1E1"
+        app:cardCornerRadius="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_baseline_security_24"
+            android:drawableTint="@color/colorPrimary"
+
+            android:drawablePadding="5dp"
+            android:padding="10dp"
+            android:text="Atur Pin"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15sp" />
+    </androidx.cardview.widget.CardView>
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:layout_marginTop="30dp"
+        android:text="ADVANCED"
+        android:textColor="@color/colorPrimary"
+        android:textSize="15sp" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="5dp"
+        app:cardBackgroundColor="#E1E1E1"
+        app:cardCornerRadius="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_baseline_notifications_24"
+            android:drawableTint="@color/colorPrimary"
+            android:drawablePadding="5dp"
+            android:padding="10dp"
+            android:text="Notifikasi"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15sp" />
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="5dp"
+        app:cardBackgroundColor="#E1E1E1"
+        app:cardCornerRadius="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_baseline_language_24"
+            android:drawableTint="@color/colorPrimary"
+            android:drawablePadding="5dp"
+            android:padding="10dp"
+            android:text="Bahasa"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15sp" />
+    </androidx.cardview.widget.CardView>
+
+<androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        app:cardBackgroundColor="#E1E1E1"
+        app:cardCornerRadius="5dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableStart="@drawable/ic_baseline_info_24"
+            android:drawableTint="@color/colorPrimary"
+            android:drawablePadding="5dp"
+            android:padding="10dp"
+            android:text="Tentang"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15sp" />
+    </androidx.cardview.widget.CardView>
+
+
+
+</LinearLayout>

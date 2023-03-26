@@ -27,6 +27,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -46,6 +47,7 @@ import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.repository.SavingsRepository;
+import id.co.evolution.financefy.repository.UserRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 import id.co.evolution.financefy.viewmodel.ViewModelSavings;
 
@@ -62,6 +64,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     FinanceRepository financeRepository;
     @Inject
     SavingsRepository savingsRepository;
+    @Inject
+    UserRepository userRepository;
+
     public ModelUser user;
     public ModelSavings modelSavings = new ModelSavings();
 
@@ -81,14 +86,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         viewModelSavings.init(savingsRepository);
         user = tinyDb.getObject("user", ModelUser.class);
         modelSavings = tinyDb.getObject("savings", ModelSavings.class);
+
         if (user == null) {
-            user = new ModelUser("Reza", "Pribadi", "Menabung");
+            user = new ModelUser("Guest Account", "Pribadi", "Jurnal Keuangan");
+            user.setUuid(UUID.randomUUID().toString());
+
+            new UserRepository.InputUpdateUser(user, "create", userRepository.userDao)
+                    .execute();
+
+            tinyDb.putObject("user", user);
         }
 
         if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
             showHideFabSavings(false);
 
-            viewModelFinance.getAllFinance().observe(this, modelFinances -> {
+            viewModelFinance.getFinanceByUserId(user.getId()).observe(this, modelFinances -> {
                 dataFinance = modelFinances;
                 setUpFragment();
             });

@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -199,25 +200,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
         if (user != null) {
             loadDataByMonth(date_ship_millis);
             initiateSayHaloWithTime();
-        } else {
-            viewModelUser.getAllUser().observe(getViewLifecycleOwner(), modelUserWithFinances -> {
-                if (modelUserWithFinances.size() == 0) {
-                    user = new ModelUser("Reza", "Pribadi", "Menabung");
-                    tinyDb.putObject("user", user);
-                    mainActivity.user = user;
-                    viewModelUser.inputUpdateUser("create", user);
-                } else {
-                    for (ModelUser modelUser : modelUserWithFinances)
-                        user = modelUser;
-//                        mainActivity.user = user;
-                }
-
-
-                loadDataByMonth(date_ship_millis);
-                initiateSayHaloWithTime();
-            });
         }
-
 
         binding.placeMonth.setOnClickListener(v -> showDialogMonthPicker());
 
