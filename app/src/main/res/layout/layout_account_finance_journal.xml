@@ -104,7 +104,7 @@
                 android:drawablePadding="5dp"
                 android:fontFamily="@font/calibri"
                 android:padding="16dp"
-                android:text="Rp.50.000"
+                android:text="Rp.0"
                 android:textColor="@color/red" />
 
         </LinearLayout>
