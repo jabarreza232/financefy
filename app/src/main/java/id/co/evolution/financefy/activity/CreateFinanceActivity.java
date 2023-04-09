@@ -34,8 +34,10 @@ import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.dialog.DialogFinance;
+import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelPrimaryColor;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
@@ -49,12 +51,21 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
     @Inject
       FinanceRepository financeRepository;
     public  int id_user;
+    @Inject
+    TinyDb tinyDb;
+    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
 
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
+
+        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+
+        Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
+        Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
+
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow();

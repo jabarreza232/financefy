@@ -32,7 +32,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateSavingsProgressBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
+import id.co.evolution.financefy.model.ModelPrimaryColor;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
 import id.co.evolution.financefy.repository.SavingsProgressRepository;
@@ -53,14 +55,25 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
     List<ModelSavingsProgress> listSavings;
 
     @Inject
+    TinyDb tinyDb;
+    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
+
+
+    @Inject
     SavingsProgressRepository savingsProgressRepository;
     @Inject
     SavingsRepository savingsRepository;
     ModelSavings modelSavings;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_progress);
+
+        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+        Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
+        Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
+
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow();
@@ -144,7 +157,7 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
 
         datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR), cur_calendar.get(Calendar.YEAR));
         datePickerDialog.setMaxDate(cur_calendar);
-        datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
+        datePickerDialog.setAccentColor(getResources().getColor(modelPrimaryColor.getColorPrimary()));
         datePickerDialog.show(getSupportFragmentManager(), "PickerDialog");
     }
 

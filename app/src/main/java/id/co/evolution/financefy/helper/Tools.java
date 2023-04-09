@@ -1,12 +1,17 @@
 package id.co.evolution.financefy.helper;
 
 import android.animation.ObjectAnimator;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Property;
 import android.view.View;
+
+import androidx.core.content.ContextCompat;
+
+import id.co.evolution.financefy.dummy.DummyPrimaryColor.PRIMARY_COLOR;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -17,6 +22,9 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.model.ModelPrimaryColor;
 
 public class Tools {
     public static int REQUEST_CODE_CALLBACK = 3;
@@ -32,7 +40,33 @@ public class Tools {
         EDIT,
         REMOVED
     }
+   public static ModelPrimaryColor modelPrimaryColor=new ModelPrimaryColor("purple",R.color.colorPrimary,R.color.colorPrimaryDark);
 
+    public static void setThemeActivity(Resources.Theme theme,ModelPrimaryColor modelPrimaryColor){
+        if(modelPrimaryColor!=null){
+            if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Orange.toString()))
+                theme.applyStyle(R.style.AppThemeOrange,true);
+            else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Brown.toString()))
+                theme.applyStyle(R.style.AppThemeBrown,true);
+            else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Green.toString()))
+                theme.applyStyle(R.style.AppThemeGreen,true);
+            else theme.applyStyle(R.style.AppTheme,true);
+
+        }
+    }
+    public static void setBackgroundColorView(View view,ModelPrimaryColor modelPrimaryColor){
+        if(modelPrimaryColor!=null){
+            view.setBackgroundColor(ContextCompat.getColor(view.getContext(),modelPrimaryColor.getColorPrimary()));
+        }
+    }
+
+    public static void setBackgroundTintView(View view,ModelPrimaryColor modelPrimaryColor){
+        if(modelPrimaryColor!=null){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                view.setBackgroundTintList(ContextCompat.getColorStateList(view.getContext(),modelPrimaryColor.getColorPrimary()));
+            }
+        }
+    }
     public static String getFormattedMonthSimple(Long dateTime) {
         SimpleDateFormat newFormat = new SimpleDateFormat("MM-yyyy");
         return newFormat.format(new Date(dateTime));

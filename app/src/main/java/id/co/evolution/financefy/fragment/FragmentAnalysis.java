@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -96,6 +97,7 @@ public class FragmentAnalysis extends Fragment {
     FinanceFilter financeFilter;
     String filterType, filterPeriod;
     String month;
+    TypedValue value = new TypedValue();
     @Inject
     LocalizedWeekHelper localizedWeekHelper;
     int prevNextWeek = 0;
@@ -156,6 +158,8 @@ public class FragmentAnalysis extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_analysis, container, false);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
         user = mainActivity.user;
+        Tools.setBackgroundColorView(binding.llAppBar,mainActivity.modelPrimaryColor);
+        getActivity().getTheme().resolveAttribute(android.R.attr.textColorPrimary, value, true);
 
         Log.e("cek_list_week: ", localizedWeekHelper.getFirstDay(-7).substring(0, (localizedWeekHelper.getFirstDay(-7).length() - 3)));
         setHasOptionsMenu(true);
@@ -190,7 +194,7 @@ public class FragmentAnalysis extends Fragment {
 
         binding.placeMonth.setOnClickListener(v -> showDialogMonthPicker());
 
-        binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
+        binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.colorGrey50)));
         binding.btnNext.setEnabled(false);
 
         binding.btnPrev.setOnClickListener(v -> {
@@ -205,9 +209,9 @@ public class FragmentAnalysis extends Fragment {
 
                 nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.white)));
                 else
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.colorGrey50)));
 
                 binding.btnNext.setEnabled(nextWeekEnabled);
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
@@ -523,6 +527,7 @@ public class FragmentAnalysis extends Fragment {
             return dataSet;
         }
 
+        @SuppressLint("ResourceType")
         @Override
         protected void onPostExecute(PieDataSet pieDataSet) {
             super.onPostExecute(pieDataSet);
@@ -542,13 +547,15 @@ public class FragmentAnalysis extends Fragment {
             l.setYEntrySpace(0f);
             l.setYOffset(0f);
             l.setTextSize(13);
+            l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
 
             l.setCustom(legendEntries);
             binding.pieChartAnalysis.animateXY(2000, 2000);
             binding.pieChartAnalysis.getDescription().setEnabled(false);
             binding.pieChartAnalysis.setCenterText(filterType);
             binding.pieChartAnalysis.setCenterTextSize(17);
-            binding.pieChartAnalysis.setCenterTextColor(ContextCompat.getColor(getContext(), R.color.blackTextColor));
+            binding.pieChartAnalysis.setNoDataTextColor(Color.BLACK);
+            binding.pieChartAnalysis.setCenterTextColor(Color.BLACK);
             binding.pieChartAnalysis.setCenterTextTypeface(Typeface.DEFAULT_BOLD);
             binding.pieChartAnalysis.setPaddingRelative(10, 10, 10, 10);
 
@@ -581,7 +588,6 @@ public class FragmentAnalysis extends Fragment {
         float groupSpace = 0.08f;
         float barSpace = 0.02f; // x3 DataSet
         float barWidth = 0.28f; // x3 DataSet
-
 
         List<ModelFinance> data;
         List<String> listDate;
@@ -724,6 +730,7 @@ public class FragmentAnalysis extends Fragment {
             return barDataSets;
         }
 
+        @SuppressLint("ResourceType")
         @Override
         protected void onPostExecute(List<IBarDataSet> barDataSets) {
 
@@ -755,6 +762,7 @@ public class FragmentAnalysis extends Fragment {
             l.setXEntrySpace(4f);
             l.setWordWrapEnabled(true);
             l.setYOffset(6f);
+            l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
 
 
             XAxis xAxis = binding.barChartAnalysis.getXAxis();
@@ -765,6 +773,7 @@ public class FragmentAnalysis extends Fragment {
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
 
             xAxis.setLabelCount(listDate.size());
+            xAxis.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
             xAxis.setValueFormatter(new ValueFormatter() {
                 @Override
                 public String getFormattedValue(float value) {
@@ -810,6 +819,7 @@ public class FragmentAnalysis extends Fragment {
 
             leftAxis.setDrawGridLines(false);
             leftAxis.setSpaceTop(35f);
+            leftAxis.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
             leftAxis.setAxisMinimum(0f); // this replaces setStartAtZero(true)
             binding.barChartAnalysis.getAxisRight().setEnabled(false);
             binding.barChartAnalysis.invalidate();

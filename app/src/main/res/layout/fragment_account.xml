@@ -10,7 +10,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/white"
+            android:background="?attr/colorSurface"
             android:orientation="vertical"
             tools:context=".fragment.FragmentAll">
 
@@ -53,7 +53,7 @@
                         android:layout_toStartOf="@id/img_edit"
                         android:fontFamily="@font/ubuntu_b"
                         android:text="@string/sample_name"
-                        android:textColor="@color/blackTextColor"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:textSize="15sp" />
 
                     <ImageView
@@ -61,7 +61,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
-                        android:src="@drawable/ic_baseline_more_vert_24" />
+                        android:src="@drawable/ic_baseline_more_vert_24"
+                        app:tint="?attr/colorOnSurface" />
 
 
                     <TextView
@@ -72,7 +73,7 @@
                         android:layout_toStartOf="@id/img_more"
                         android:fontFamily="@font/ubuntu_r"
                         android:text="Pribadi - Menabung"
-                        android:textColor="@color/blackTextColor"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:textSize="13sp" />
 
                 </RelativeLayout>

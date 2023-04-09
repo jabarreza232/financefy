@@ -2,6 +2,7 @@ package id.co.evolution.financefy.dialog
 
 import android.app.Dialog
 import android.content.Context
+import android.util.TypedValue
 import android.view.*
 import android.widget.Button
 import android.widget.LinearLayout
@@ -25,9 +26,11 @@ class DialogSavings(
     private val btnAchieved: Button = findViewById(R.id.btn_achieved);
     private val btnAll: Button = findViewById(R.id.btn_all);
     private val placeEmpty: LinearLayout = findViewGroupById(R.id.place_empty)
+    val value:TypedValue= TypedValue()
 
     init {
         dialog.setContentView(dialogView)
+        context.theme.resolveAttribute(android.R.attr.textColorPrimary,value,true)
     }
 
     fun showDialogSavings(mutableSavingsData: MutableList<ModelSavings>) {
@@ -57,7 +60,7 @@ class DialogSavings(
                 R.drawable.shape_line_black,
                 R.drawable.shape_line_black
             )
-            setTextColorButton(R.color.white, R.color.blackTextColor, R.color.blackTextColor)
+            setTextColorButton(R.color.white, value.resourceId, value.resourceId)
 
             mutableSavingsData.forEach {
                 if (!it.getPercentage(context).contains(context.getString(R.string.achieved)))
@@ -74,7 +77,7 @@ class DialogSavings(
                 R.drawable.button_blue_background,
                 R.drawable.shape_line_black
             )
-            setTextColorButton(R.color.blackTextColor, R.color.white, R.color.blackTextColor)
+            setTextColorButton(value.resourceId, R.color.white, value.resourceId)
 
             mutableSavingsData.forEach {
                 if (it.getPercentage(context).contains(context.getString(R.string.achieved)))
@@ -90,7 +93,7 @@ class DialogSavings(
                 R.drawable.shape_line_black,
                 R.drawable.button_blue_background
             )
-            setTextColorButton(R.color.blackTextColor, R.color.blackTextColor, R.color.white)
+            setTextColorButton(value.resourceId, value.resourceId, R.color.white)
             adapter.bindData(mutableSavingsData)
             setUpPlaceEmpty(adapter)
         }

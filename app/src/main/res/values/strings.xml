@@ -60,5 +60,6 @@
     <string name="year">Tahun</string>
     <string name="day">Hari</string>
     <string name="in_progress">Proses</string>
+    <string name="switch_theme">Ganti Tema</string>
 
 </resources>

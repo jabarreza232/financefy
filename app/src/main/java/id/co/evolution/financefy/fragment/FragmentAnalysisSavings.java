@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -136,7 +137,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
     CallbackOnActivityResult mCallbackOnActivityResult;
 
     long date_ship_millis;
-
+    TypedValue value = new TypedValue();
     MainActivity mainActivity;
     @Inject
     TinyDb tinyDb;
@@ -200,10 +201,12 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_analysis_savings, container, false);
+        Tools.setBackgroundColorView(binding.llAppBar,mainActivity.modelPrimaryColor);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
         user = mainActivity.user;
         modelSavings = mainActivity.modelSavings;
         typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
+        getActivity().getTheme().resolveAttribute(android.R.attr.textColorPrimary, value, true);
 
         Log.e("cek_list_week: ", localizedWeekHelper.getFirstDay(-7).substring(0, (localizedWeekHelper.getFirstDay(-7).length() - 3)));
         setHasOptionsMenu(true);
@@ -688,6 +691,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             l.setYEntrySpace(0f);
             l.setYOffset(0f);
             l.setTextSize(13);
+            l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
 
             l.setCustom(legendEntries);
             binding.pieChartAnalysis.animateXY(2000, 2000);
@@ -791,6 +795,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             l.setXEntrySpace(4f);
             l.setWordWrapEnabled(true);
             l.setYOffset(6f);
+            l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
 
             binding.barChartAnalysis.getLegend().setEnabled(false);
 
@@ -802,6 +807,8 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             xAxis.setDrawGridLines(true);
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
             xAxis.setLabelCount(listDate.size());
+            xAxis.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
+
             xAxis.setValueFormatter(new ValueFormatter() {
                 @Override
                 public String getFormattedValue(float value) {
@@ -843,6 +850,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             leftAxis.setDrawGridLines(false);
             leftAxis.setSpaceTop(35f);
             leftAxis.setXOffset(5f);
+            leftAxis.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
             leftAxis.setAxisMinimum(0f); // this replaces setStartAtZero(true)
             binding.barChartAnalysis.getAxisRight().setEnabled(false);
             binding.barChartAnalysis.invalidate();

@@ -34,7 +34,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateSavingsTargetBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
+import id.co.evolution.financefy.model.ModelPrimaryColor;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.repository.SavingsRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelSavings;
@@ -49,6 +51,10 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
     ViewModelSavings viewModelSaving;
     DialogCalculator dialogCalculator;
 
+    @Inject
+    TinyDb tinyDb;
+    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
+
 
     @Inject
     SavingsRepository savingsRepository;
@@ -59,6 +65,11 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_target);
+
+        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+        Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
+        Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
+
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow();
@@ -149,7 +160,7 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
         });
 
         datePickerDialog.setMinDate(cur_calendar);
-        datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
+        datePickerDialog.setAccentColor(getResources().getColor(modelPrimaryColor.getColorPrimary()));
         datePickerDialog.show(getSupportFragmentManager(), "PickerDialog");
     }
 

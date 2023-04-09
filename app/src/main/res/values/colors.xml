@@ -1,7 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--Color Purple-->
     <color name="colorPrimary">#592C7B</color>
     <color name="colorPrimaryDark">#41205A</color>
+    <!--Color Orange-->
+    <color name="colorPrimaryOrange">#FF9800</color>
+    <color name="colorPrimaryDarkOrange">#F57C00</color>
+    <!--Color Teal-->
+    <color name="colorPrimaryGreen">#009688</color>
+    <color name="colorPrimaryDarkGreen">#00796B</color>
+    <!--Color Brown-->
+    <color name="colorPrimaryBrown">#795548</color>
+    <color name="colorPrimaryDarkBrown">#5D4037</color>
+
+
+
     <color name="colorAccent">#0960CA</color>
     <color name="colorDefaultText">#808080</color>
     <color name="colorText">#DE595E</color>

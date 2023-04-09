@@ -34,7 +34,7 @@
                     android:layout_marginTop="5dp"
                     android:layout_toStartOf="@id/txt_percentage"
                     android:fontFamily="@font/ubuntu_b"
-                    android:textColor="@android:color/black"
+                    android:textColor="?android:textColorPrimary"
                     android:textSize="13sp"
                     tools:text="Dapat Uang jajan" />
 
@@ -48,7 +48,7 @@
                     android:fontFamily="@font/ubuntu_r"
                     android:gravity="center"
                     android:text="20%"
-                    android:textColor="@android:color/black"
+                    android:textColor="?android:textColorPrimary"
                     android:textSize="13sp"
                     tools:text="20%" />
 
@@ -72,7 +72,7 @@
                     android:layout_marginTop="7dp"
                     android:layout_marginEnd="10dp"
                     android:fontFamily="@font/ubuntu_r"
-                    android:textColor="@android:color/black"
+                    android:textColor="?android:textColorPrimary"
                     android:textSize="13sp"
                     tools:text="Rp.20.000 s/d Rp.50.000" />
 
@@ -85,7 +85,7 @@
                     android:layout_marginTop="7dp"
                     android:layout_marginEnd="10dp"
                     android:fontFamily="@font/ubuntu_r"
-                    android:textColor="@android:color/black"
+                    android:textColor="?android:textColorPrimary"
                     android:textSize="13sp"
                     tools:text="Sisa 28 hari" />
 
@@ -128,7 +128,8 @@
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                app:tint="@color/blackTextColor" />
+                app:tint="?attr/colorOnSurface"
+                />
         </RelativeLayout>
 
     </androidx.cardview.widget.CardView>

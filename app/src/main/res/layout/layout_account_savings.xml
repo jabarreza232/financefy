@@ -6,7 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="?attr/colorSurface"
     android:orientation="vertical"
     android:id="@+id/place_account_savings"
     android:visibility="gone">
@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:padding="16dp"
             android:text="Pilih Tabungan"
-            android:textColor="@color/blackTextColor" />
+            android:textColor="?android:attr/textColorPrimary" />
 
         <ImageView
             android:layout_width="wrap_content"
@@ -32,7 +32,8 @@
             android:layout_alignParentRight="true"
             android:padding="16dp"
             android:src="@drawable/ic_arrow_drop_down"
-            app:tint="@color/blackTextColor" />
+            app:tint="?attr/colorOnSurface"
+            />
 
 
     </RelativeLayout>
@@ -60,7 +61,7 @@
                 android:fontFamily="@font/lato_bold"
                 android:padding="10dp"
                 android:text="Target"
-                android:textColor="@color/blackTextColor"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="15sp" />
 
             <View
@@ -77,7 +78,8 @@
                 android:fontFamily="@font/calibri"
                 android:padding="16dp"
                 android:text="Rp.50.000"
-                android:textColor="@color/blackTextColor" />
+                android:drawableTint="?attr/colorOnSurface"
+                android:textColor="?android:textColorPrimary" />
 
         </LinearLayout>
 
@@ -100,7 +102,7 @@
                     android:fontFamily="@font/lato_bold"
                     android:padding="10dp"
                     android:text="Progress"
-                    android:textColor="@color/blackTextColor"
+                    android:textColor="?android:textColorPrimary"
                     android:textSize="15sp" />
 
                 <View
@@ -123,7 +125,7 @@
                         android:layout_toStartOf="@id/txt_percentage_savings"
                         android:fontFamily="@font/ubuntu_r"
                         android:text="Rp.15.000"
-                        android:textColor="@android:color/black"
+                        android:textColor="?android:textColorPrimary"
                         android:textSize="13sp" />
 
 
@@ -147,7 +149,7 @@
                         android:fontFamily="@font/lato_bold"
                         android:padding="10dp"
                         android:text="17%"
-                        android:textColor="@android:color/black"
+                        android:textColor="?android:textColorPrimary"
                         android:textSize="13sp" />
 
                 </RelativeLayout>

@@ -6,7 +6,8 @@
     app:cardCornerRadius="5dp"
     app:cardElevation="5dp"
     >
-<androidx.core.widget.NestedScrollView
+
+    <androidx.core.widget.NestedScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -44,7 +45,7 @@
                 android:fontFamily="@font/ubuntu_b"
                 android:text="Tipe"
                 android:id="@+id/txt_type"
-                android:textColor="@color/blackTextColor"
+                android:textColor="?android:textColorPrimary"
                 android:textSize="15sp" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -60,7 +61,7 @@
                 android:layout_marginBottom="10dp"
                 android:fontFamily="@font/ubuntu_b"
                 android:text="Nominal"
-                android:textColor="@color/blackTextColor"
+                android:textColor="?android:textColorPrimary"
                 android:textSize="15sp" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -75,7 +76,7 @@
                 android:layout_marginBottom="10dp"
                 android:fontFamily="@font/ubuntu_b"
                 android:text="Jangka Waktu"
-                android:textColor="@color/blackTextColor"
+                android:textColor="?android:textColorPrimary"
                 android:textSize="15sp" />
 
             <androidx.recyclerview.widget.RecyclerView

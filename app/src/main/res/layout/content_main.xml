@@ -58,11 +58,13 @@
                 android:alpha="0"
                 app:icon="@drawable/ic_baseline_hourglass_top_24"
                 app:iconGravity="end"
-                android:visibility="gone"
                 android:layout_above="@id/fab_add_savings_target"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone"
                 app:iconTint="@color/white" />
 
             <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:visibility="gone"
                 android:id="@+id/fab_add_savings_target"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -76,7 +78,6 @@
                 app:backgroundTint="@color/blueColor"
                 app:icon="@drawable/ic_baseline_gps_fixed_24"
                 app:iconGravity="end"
-                android:visibility="gone"
                 android:layout_above="@id/fab_add"
                 app:iconTint="@color/white" />
 
@@ -102,10 +103,11 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:background="@drawable/shape_bottom_navigation"
-                app:itemIconTint="@drawable/state_bottom_navigation"
-                app:itemTextColor="@drawable/state_bottom_navigation"
                 app:labelVisibilityMode="labeled"
                 app:menu="@menu/menu_bottom_navigation" />
         </RelativeLayout>
+        <!--                app:itemIconTint="@drawable/state_bottom_navigation"-->
+        <!--                app:itemTextColor="@drawable/state_bottom_navigation"-->
+
     </androidx.core.widget.NestedScrollView>
 </layout>

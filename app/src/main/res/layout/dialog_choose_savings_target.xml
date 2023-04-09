@@ -56,8 +56,8 @@
                     android:padding="10dp"
                     android:textAllCaps="false"
                     android:text="@string/in_progress"
-                    android:textAlignment="center"
-                    android:textColor="@color/blackTextColor" />
+                    android:textAlignment="center"                   android:textColor="?android:textColorPrimary"
+                    />
 
                 <Button
                     android:id="@+id/btn_achieved"
@@ -71,7 +71,8 @@
                     android:padding="10dp"
                     android:text="@string/achieved"
                     android:textAlignment="center"
-                    android:textColor="@color/blackTextColor" />
+                    android:textColor="?android:textColorPrimary"
+                    />
                 <Button
                     android:id="@+id/btn_all"
                     android:layout_width="0dp"
@@ -115,7 +116,7 @@
                         android:fontFamily="@font/ubuntu_b"
                         android:text="Tidak ada data"
                         android:textAlignment="center"
-                        android:textColor="@color/blackTextColor"
+                        android:textColor="?android:textColorPrimary"
                         android:textSize="19sp" />
                 </LinearLayout>
 

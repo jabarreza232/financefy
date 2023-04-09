@@ -12,11 +12,14 @@ import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -42,7 +45,9 @@ import id.co.evolution.financefy.fragment.FragmentAnalysis;
 import id.co.evolution.financefy.fragment.FragmentAnalysisSavings;
 import id.co.evolution.financefy.fragment.FragmentSettings;
 import id.co.evolution.financefy.helper.TinyDb;
+import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelPrimaryColor;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.FinanceRepository;
@@ -74,10 +79,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TinyDb tinyDb;
     public boolean isFabOpen = false;
     public boolean isUserDailyFinance;
+    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        changeUINightMode();
+
+        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+        Tools.setThemeActivity(getTheme(),modelPrimaryColor);
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
@@ -124,8 +135,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         binding.layout.fabAddSavingsProgress.setOnClickListener(this);
         binding.layout.fabAddSavingsTarget.setOnClickListener(this);
 
+        changeColorBottomNavigation(modelPrimaryColor);
+
     }
 
+    private void changeUINightMode(){
+        String nightMode = tinyDb.getString("night_mode");
+        if(TextUtils.equals(nightMode,"mode_night_yes")){
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        }else{
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+    }
+
+    private void changeColorBottomNavigation(ModelPrimaryColor modelPrimaryColor){
+        int[][] states = new int[][] {
+                new int[] { android.R.attr.state_checked}, // state_checked
+                new int[] { }  //
+        };
+
+        int[] colors = new int[] {
+                ContextCompat.getColor(this,modelPrimaryColor.getColorPrimary()),
+                ContextCompat.getColor(this,R.color.colorGrey50)};
+        ColorStateList dynamicColorList = new ColorStateList(states, colors);
+
+        binding.layout.bnMain.setItemIconTintList(dynamicColorList);
+        binding.layout.bnMain.setItemTextColor(dynamicColorList);
+    }
     private void setUpFragment() {
         changeFragment(new FragmentAll());
         binding.layout.bnMain.setOnItemSelectedListener(item -> {
@@ -172,19 +208,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void changeFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_frame, fragment, fragment.getClass().getSimpleName()).addToBackStack(null).commit();
-    }
-
-    private ColorStateList getBottomNavigationColor() {
-        int[][] states = new int[][]{
-                new int[]{android.R.attr.state_checked}, // state_checked
-                new int[]{}  //
-        };
-
-        int[] colors = new int[]{
-                R.color.colorPrimaryDark,
-                R.color.colorGrey50
-        };
-        return new ColorStateList(states, colors);
     }
 
     @Override

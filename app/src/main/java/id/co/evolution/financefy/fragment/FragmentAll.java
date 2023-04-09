@@ -170,6 +170,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
         filterType = getString(R.string.semuanya);
         filterPeriod = getString(R.string.bulanan);
 
+        Tools.setBackgroundColorView(binding.llAppBar,mainActivity.modelPrimaryColor);
         Log.e("cek_list_week: ", localizedWeekHelper.getFirstDay(-7).substring(0, (localizedWeekHelper.getFirstDay(-7).length() - 3)));
         setHasOptionsMenu(true);
         return binding.getRoot();

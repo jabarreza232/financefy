@@ -2,6 +2,7 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/rl_background"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -49,7 +50,7 @@
                     android:fontFamily="@font/lato_bold"
                     android:padding="10dp"
                     android:text="Input Finance"
-                    android:textColor="@color/blackTextColor"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:textSize="19sp" />
 
                 <View
@@ -72,7 +73,7 @@
                         android:layout_height="wrap_content"
                         android:padding="16dp"
                         android:text="Date"
-                        android:textColor="@color/blackTextColor" />
+                        android:textColor="?android:attr/textColorPrimary" />
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -80,7 +81,7 @@
                         android:layout_alignParentRight="true"
                         android:padding="16dp"
                         android:src="@drawable/ic_date_range"
-                        app:tint="@color/blackTextColor" />
+                        app:tint="?attr/colorOnSurface" />
 
 
                 </RelativeLayout>
@@ -98,7 +99,7 @@
                         android:layout_height="wrap_content"
                         android:padding="16dp"
                         android:text="Type"
-                        android:textColor="@color/blackTextColor" />
+                        android:textColor="?android:attr/textColorPrimary" />
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -106,7 +107,7 @@
                         android:layout_alignParentRight="true"
                         android:padding="16dp"
                         android:src="@drawable/ic_arrow_drop_down"
-                        app:tint="@color/blackTextColor" />
+                        app:tint="?android:attr/textColorPrimary" />
 
 
                 </RelativeLayout>
@@ -124,7 +125,7 @@
                         android:layout_height="wrap_content"
                         android:padding="16dp"
                         android:text="Category"
-                        android:textColor="@color/blackTextColor" />
+                        android:textColor="?android:attr/textColorPrimary" />
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -132,7 +133,7 @@
                         android:layout_alignParentRight="true"
                         android:padding="16dp"
                         android:src="@drawable/ic_arrow_drop_down"
-                        app:tint="@color/blackTextColor" />
+                        app:tint="?android:attr/textColorPrimary" />
 
 
                 </RelativeLayout>
@@ -148,7 +149,9 @@
                         android:layout_height="wrap_content"
                         android:layout_toStartOf="@id/btn_calculator"
                         android:hint="Amount of money"
-                        app:errorEnabled="true">
+                        app:boxStrokeColor="?android:attr/textColorPrimary"
+                        app:errorEnabled="true"
+                        app:hintTextColor="?android:attr/textColorPrimary">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_amount"
@@ -173,7 +176,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Note"
-                    app:errorEnabled="true">
+                    app:boxStrokeColor="?android:attr/textColorPrimary"
+                    app:errorEnabled="true"
+                    app:hintTextColor="?android:attr/textColorPrimary">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/et_description"
@@ -182,7 +187,8 @@
                         android:gravity="top|start"
                         android:inputType="text|textMultiLine"
                         android:lines="3"
-                        android:maxLines="6" />
+                        android:maxLines="6"
+                        android:textColor="?android:attr/textColorPrimary" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
