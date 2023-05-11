@@ -24,7 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.model.ModelExchangeCurrency;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
 
 public class Tools {
