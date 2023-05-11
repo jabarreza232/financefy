@@ -29,6 +29,7 @@ import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -89,6 +90,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     long date_ship_millis;
     MainActivity mainActivity;
     CallbackOnActivityResult mCallbackOnActivityResult;
+    Locale locale;
 
     //TODO NOTE SAVINGS : Menabung, FINANCE : JURNAL KEUANGAN
 
@@ -114,6 +116,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         today.get(Calendar.YEAR);
         prevNextYear = Calendar.getInstance();
         date_ship_millis = today.getTimeInMillis();
+        locale =mainActivity.user.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
         isAddSavings = false;
         return binding.getRoot();
     }
@@ -231,6 +234,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             modelSavings = modelUser.getCategory().equalsIgnoreCase(getString(R.string.menabung)) ? modelSavings : new ModelSavings();
             mainActivity.modelSavings = modelSavings;
             tinyDb.putObject("savings", modelSavings);
+            tinyDb.putString("currency",modelUser.getType_currency());
 
             refreshDataUser(modelUser, modelSavings);
         });
@@ -278,21 +282,25 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             if (mainActivity.user != null) setDataUser(mainActivity.user);
         });
 
-        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(), savings -> {
+        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), savings -> {
             //TODO Hanya Sebagai pengecekan user apakah target menabung ada atau tidak
             // untuk kebutuhan visibility form category menabung.
             count_savings = savings.size();
         });
+
+        if(modelUser!=null)
+        locale =modelUser.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+
     }
 
 
     private void refreshDataFinance() {
 
-        viewModelFinance.getFinanceByUserId(mainActivity.user.getId()).observe(getViewLifecycleOwner(), modelFinance -> {
+        viewModelFinance.getFinanceByUserId(mainActivity.user.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelFinance -> {
             dataFinance = modelFinance;
 
-            binding.layoutAccountFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(dataFinance)));
-            binding.layoutAccountFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(dataFinance)));
+            binding.layoutAccountFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(dataFinance),locale));
+            binding.layoutAccountFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(dataFinance),locale));
         });
 
 //
@@ -313,7 +321,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
     private void refreshDataSavings() {
 
-        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(), modelSavings -> {
+        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings -> {
             dataSavings = modelSavings;
 
             if (dataSavings.size() > 0) {
@@ -367,8 +375,8 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
         tinyDb.putObject("savings", modelSavings);
         binding.layoutAccountSavings.txtChooseSavings.setText(modelSavings.getTitle());
-        binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue()));
-        binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue()));
+        binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue(),locale));
+        binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue(),locale));
         binding.layoutAccountSavings.txtPercentageSavings.setText(txtPercentage);
         binding.layoutAccountSavings.progressBarTargetSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutAccountSavings.progressBarTargetSavings.setMax(100);
@@ -383,7 +391,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         boolean visibleAccountSavings = user.getCategory().equalsIgnoreCase(getString(R.string.menabung));
         binding.layoutAccountSavings.placeAccountSavings.setVisibility(visibleAccountSavings ? View.VISIBLE : View.GONE);
         binding.layoutAccountFinanceJournal.placeAccountFinanceJournal.setVisibility(!visibleAccountSavings ? View.VISIBLE : View.GONE);
-        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(), savings -> {
+        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), savings -> {
             //TODO Hanya Sebagai pengecekan user apakah target menabung ada atau tidak
             // untuk kebutuhan visibility form category menabung.
             count_savings = savings.size();

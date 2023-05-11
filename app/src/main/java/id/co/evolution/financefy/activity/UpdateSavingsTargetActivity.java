@@ -61,6 +61,7 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
     ModelSavings modelSavings;
     private int id_user;
 
+    Locale locale;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +70,7 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
         modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
         Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
+        locale =tinyDb.getString("currency").equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -100,14 +102,10 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().equals(jumlah)) {
                     binding.etAmount.removeTextChangedListener(this);
-                    String cleanString = s.toString().replaceAll("[Rp,.]", "");
+                    String cleanString = s.toString().replaceAll("[Rp,.$]", "");
                     if (!cleanString.isEmpty()) {
                         double parsed = Double.parseDouble(cleanString);
-                        Locale localeID = new Locale("in", "ID");
-                        String formatted = NumberFormat.getCurrencyInstance(localeID).format((parsed));
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            formatted = formatted.replaceAll(",00", "");
-                        }
+                        String formatted = Tools.convertToCurrency(parsed,locale);
                         jumlah = formatted;
                         binding.etAmount.setText(formatted);
                         binding.etAmount.setSelection(formatted.length());
@@ -137,7 +135,7 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
         cur_calendar.get(Calendar.DAY_OF_MONTH);
 
 
-        jumlah = Tools.convertToCurrency(modelSavings.getTargetValue());
+        jumlah = Tools.convertToCurrency(modelSavings.getTargetValue(),locale);
         date = modelSavings.getDate_target();
 
         binding.txtHeader.setText("Update data");
@@ -181,7 +179,7 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
             case R.id.btn_calculator:
                 dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
                     jumlah = result;
-                    binding.etAmount.setText(Tools.convertToCurrency(result));
+                    binding.etAmount.setText(Tools.convertToCurrency(result,locale));
                 });
                 dialogCalculator.show();
                 break;
@@ -212,6 +210,7 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
                                 model.setProcessValue(modelSavings.getProcessValue());
                                 model.setTargetValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
                                 model.setTitle(binding.etTitle.getText().toString().trim());
+                                model.setType_currency(modelSavings.getType_currency());
                                 viewModelSaving.inputUpdateSavings("Update", model);
 
                                 Intent intent = new Intent();

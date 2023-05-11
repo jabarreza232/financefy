@@ -13,6 +13,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.Locale;
 
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.callback.MethodCallback;
@@ -25,12 +26,16 @@ import id.co.evolution.financefy.model.ModelSavingsProgress;
 public class AdapterAnalysisSavings extends RecyclerView.Adapter<AdapterAnalysisSavings.ViewHolder> {
     Context context;
     List<ModelSavingsProgress> data;
-
+    Locale locale;
     long totalValue;
+
     public AdapterAnalysisSavings(Context context, List<ModelSavingsProgress> data) {
         this.context = context;
         this.data = data;
+    }
 
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
 
     public void setTotalValue(long totalValue) {
@@ -54,7 +59,7 @@ public class AdapterAnalysisSavings extends RecyclerView.Adapter<AdapterAnalysis
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int i) {
         holder.binding.txtKategori.setText(data.get(i).getTitle());
-        holder.binding.txtJumlah.setText(Tools.convertToCurrency(data.get(i).getProcessValue()));
+        holder.binding.txtJumlah.setText(Tools.convertToCurrency(data.get(i).getProcessValue(),locale));
         double percentage = Tools.calculatePercentage(data.get(i).getProcessValue(), totalValue);
         holder.binding.txtPercentage.setText(data.get(i).getPercentage((int)totalValue) + "% ");
         holder.binding.progressFinance.setProgress((int)percentage);

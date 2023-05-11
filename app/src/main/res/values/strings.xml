@@ -28,6 +28,11 @@
         <item>@string/pribadi</item>
         <item>@string/usaha</item>
     </array>
+
+    <array name="type_currency">
+        <item>@string/idr</item>
+        <item>@string/usd</item>
+    </array>
     <array name="type_finance">
         <item>@string/pemasukan</item>
         <item>@string/pengeluaran</item>
@@ -46,6 +51,10 @@
 
     <string name="pribadi">Pribadi</string>
     <string name="usaha">Usaha</string>
+
+
+    <string name="idr">IDR</string>
+    <string name="usd">USD</string>
 
     <string name="menabung">Menabung</string>
     <string name="jurnal_keuangan">Jurnal Keuangan</string>

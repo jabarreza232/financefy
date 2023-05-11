@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.vipulasri.timelineview.TimelineView;
 
 import java.util.List;
+import java.util.Locale;
 
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.callback.MethodCallback;
@@ -26,12 +27,17 @@ public class AdapterSavings extends RecyclerView.Adapter<AdapterSavings.ViewHold
     MethodCallback methodCallback;
     TYPE_LAYOUT_MANAGER type;
     int total_value;
+    Locale locale;
 
     public void setTotal_value(int total_value) {
         this.total_value = total_value;
     }
 
-    public AdapterSavings( List<ModelNestedSavings> data, MethodCallback methodCallback) {
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
+
+    public AdapterSavings(List<ModelNestedSavings> data, MethodCallback methodCallback) {
         this.data = data;
         this.methodCallback = methodCallback;
     }
@@ -79,7 +85,8 @@ public class AdapterSavings extends RecyclerView.Adapter<AdapterSavings.ViewHold
         }
 
         private void showNestedSavings(ModelNestedSavings modelNestedFinance){
-            AdapterNestedSavings adapterFinance = new AdapterNestedSavings(total_value, modelNestedFinance.getSavingsProgresses(), (data, position) -> methodCallback.onClick(data,position));
+            AdapterNestedSavings adapterNestedSavings = new AdapterNestedSavings(total_value, modelNestedFinance.getSavingsProgresses(), (data, position) -> methodCallback.onClick(data,position));
+            adapterNestedSavings.setLocale(locale);
 
             if (type == TYPE_LAYOUT_MANAGER.GRID) {
                 binding.rvFinance.setLayoutManager(new GridLayoutManager(itemView.getContext(), 2));
@@ -87,7 +94,7 @@ public class AdapterSavings extends RecyclerView.Adapter<AdapterSavings.ViewHold
                 binding.rvFinance.setLayoutManager(new LinearLayoutManager(itemView.getContext()));
             }
             binding.rvFinance.setNestedScrollingEnabled(false);
-            binding.rvFinance.setAdapter(adapterFinance);
+            binding.rvFinance.setAdapter(adapterNestedSavings);
         }
     }
 }

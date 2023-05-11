@@ -35,6 +35,7 @@ import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
 import id.co.evolution.financefy.model.ModelSavings;
+import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.SavingsRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelSavings;
 
@@ -56,7 +57,9 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
     @Inject
     SavingsRepository savingsRepository;
     ModelSavings modelSavings;
-    private int id_user;
+    ModelUser modelUser;
+    Locale locale;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +69,7 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
         modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
         Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
+        locale =tinyDb.getString("currency").equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -85,7 +89,7 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
         modelSavings =(ModelSavings) getIntent().getSerializableExtra("savings");
-        id_user = getIntent().getIntExtra("id_user", 0);
+        modelUser = (ModelUser) getIntent().getSerializableExtra("user");
         binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -96,14 +100,11 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().equals(jumlah)) {
                     binding.etAmount.removeTextChangedListener(this);
-                    String cleanString = s.toString().replaceAll("[Rp,.]", "");
+                    String cleanString = s.toString().replaceAll("[Rp,.$]", "");
                     if (!cleanString.isEmpty()) {
                         double parsed = Double.parseDouble(cleanString);
-                        Locale localeID = new Locale("in", "ID");
-                        String formatted = NumberFormat.getCurrencyInstance(localeID).format((parsed));
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            formatted = formatted.replaceAll(",00", "");
-                        }
+                        String formatted = Tools.convertToCurrency(parsed,locale);
+
                         jumlah = formatted;
                         binding.etAmount.setText(formatted);
                         binding.etAmount.setSelection(formatted.length());
@@ -162,7 +163,7 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
             case R.id.btn_calculator:
                 dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
                     jumlah = result;
-                    binding.etAmount.setText(Tools.convertToCurrency(result));
+                    binding.etAmount.setText(Tools.convertToCurrency(result,locale));
                 });
                 dialogCalculator.show();
                 break;
@@ -188,7 +189,8 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
                             .setConfirmClickListener(sweetAlertDialog -> {
                                 ModelSavings model = new ModelSavings();
                                 model.setDate_target(date);
-                                model.setId_savings_user(id_user);
+                                model.setId_savings_user(modelUser.getId());
+                                model.setType_currency(modelUser.getType_currency());
                                 model.setTargetValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
                                 model.setTitle(binding.etTitle.getText().toString().trim());
                                 viewModelSaving.inputUpdateSavings("Create", model);

@@ -111,6 +111,33 @@
 
 
             </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/place_type_currency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/shape_date">
+
+                <TextView
+                    android:id="@+id/txt_type_currency"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:text="Type Currency"
+                    android:textColor="@color/blackTextColor" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:padding="16dp"
+                    android:src="@drawable/ic_arrow_drop_down"
+                    app:tint="@color/blackTextColor" />
+
+
+            </RelativeLayout>
+
             <TextView
                 android:id="@+id/txt_header_target_savings"
                 android:layout_width="match_parent"

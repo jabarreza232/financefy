@@ -26,16 +26,16 @@ public class SavingsRepository {
         return savingsDao.getAll();
     }
 
-    public LiveData<ModelSavings> getSavingsById(int id) {
-        return savingsDao.findById(id);
+    public LiveData<ModelSavings> getSavingsById(int id,String type_currency) {
+        return savingsDao.findById(id,type_currency);
     }
 
-    public LiveData<List<ModelSavings>> getSavingsByDate(String date) {
-        return savingsDao.findByDate(date);
+    public LiveData<List<ModelSavings>> getSavingsByDate(String date,String type_currency) {
+        return savingsDao.findByDate(date,type_currency);
     }
 
-    public LiveData<List<ModelSavings>> getSavingsByIdUser(int id_user) {
-        return savingsDao.findByIdUser(id_user);
+    public LiveData<List<ModelSavings>> getSavingsByIdUser(int id_user,String type_currency) {
+        return savingsDao.findByIdUser(id_user,type_currency);
     }
 
     public static class InputUpdateSavings extends AsyncTask<Void, Void, Void> {

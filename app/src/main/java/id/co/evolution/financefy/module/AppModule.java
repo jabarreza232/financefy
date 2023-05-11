@@ -102,7 +102,7 @@ public class AppModule {
     }
     @Provides
     SavingsProgressDao savingsProgressDao(@NonNull FinanceDB financeDB) {
-        return financeDB.savingsPrgoressDao();
+        return financeDB.savingsProgressDao();
     }
 
 }

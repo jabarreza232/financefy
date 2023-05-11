@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.vipulasri.timelineview.TimelineView;
 
 import java.util.List;
+import java.util.Locale;
 
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ListFinanceBinding;
@@ -28,7 +29,7 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
     MethodCallback methodCallback;
    TYPE_LAYOUT_MANAGER type;
     TYPE_NESTED_FINANCE type_nested_finance=TYPE_NESTED_FINANCE.DEFAULT;
-
+    Locale locale;
 
     public enum TYPE_NESTED_FINANCE {
         ANALYSIS,
@@ -39,6 +40,10 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
         this.context = context;
         this.data = data;
         this.methodCallback = methodCallback;
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
 
     public void setType(FragmentAll.TYPE_LAYOUT_MANAGER type) {
@@ -92,6 +97,7 @@ public class AdapterFinance extends RecyclerView.Adapter<AdapterFinance.ViewHold
 
         private void showNestedFinance(ModelNestedFinance modelNestedFinance){
             AdapterNestedFinance adapterFinance = new AdapterNestedFinance(context, modelNestedFinance.getFinances(), (data, position) -> methodCallback.onClick(data,position));
+            adapterFinance.setLocale(locale);
 
             if (type ==TYPE_LAYOUT_MANAGER.GRID) {
                 binding.rvFinance.setLayoutManager(new GridLayoutManager(context, 2));

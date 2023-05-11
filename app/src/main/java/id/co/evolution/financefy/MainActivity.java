@@ -85,9 +85,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         changeUINightMode();
+        String type_currency = tinyDb.getString("currency");
+        if(type_currency==null||type_currency.isEmpty()){
+            tinyDb.putString("currency","IDR");
+            type_currency="IDR";
+        }
 
-        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
-        Tools.setThemeActivity(getTheme(),modelPrimaryColor);
+        if(tinyDb.getObject("model_primary_color", ModelPrimaryColor.class)!=null){
+            modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+            Tools.setThemeActivity(getTheme(),modelPrimaryColor);
+        }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
@@ -101,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (user == null) {
             user = new ModelUser("Guest Account", "Pribadi", "Jurnal Keuangan");
             user.setUuid(UUID.randomUUID().toString());
-
+            user.setType_currency(type_currency);
             new UserRepository.InputUpdateUser(user, "create", userRepository.userDao)
                     .execute();
 
@@ -111,12 +118,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
             showHideFabSavings(false);
 
-            viewModelFinance.getFinanceByUserId(user.getId()).observe(this, modelFinances -> {
+            viewModelFinance.getFinanceByUserId(user.getId(),user.getType_currency()).observe(this, modelFinances -> {
                 dataFinance = modelFinances;
                 setUpFragment();
             });
         } else {
-            viewModelSavings.findAllSavingsByIdUser(user.getId()).observe(this, dataSavings -> {
+            viewModelSavings.findAllSavingsByIdUser(user.getId(),user.getType_currency()).observe(this, dataSavings -> {
                 if (dataSavings.size() == 0) {
                     modelSavings = new ModelSavings("Beli HP", 50_000_000, 10_000, user.getId(), "March 03, 2022");
                     tinyDb.putObject("savings", modelSavings);
@@ -136,6 +143,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         binding.layout.fabAddSavingsTarget.setOnClickListener(this);
 
         changeColorBottomNavigation(modelPrimaryColor);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
 
     }
 
@@ -235,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
                 Log.e("TAG", "onClick: " + user.getId());
                 Intent intent = new Intent(this, CreateFinanceActivity.class);
-                intent.putExtra("id_user", user.getId());
+                intent.putExtra("user", user);
                 startActivityForResult(intent, REQUEST_CODE_FINANCE);
             } else {
                 startAnimationFabSavings();
@@ -251,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (v.getId() == R.id.fab_add_savings_target) {
             Intent intent = new Intent(this, CreateSavingsTargetActivity.class);
             intent.putExtra("savings", modelSavings);
-            intent.putExtra("id_user", user.getId());
+            intent.putExtra("user", user);
             startActivityForResult(intent, REQUEST_CODE_SAVINGS);
         }
     }

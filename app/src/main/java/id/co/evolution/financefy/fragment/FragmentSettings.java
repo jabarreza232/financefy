@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
@@ -29,6 +30,8 @@ import id.co.evolution.financefy.model.ModelPrimaryColor;
 @AndroidEntryPoint
 public class FragmentSettings extends Fragment {
     MainActivity mainActivity;
+    @Inject
+    TinyDb tinyDb;
 
     public FragmentSettings() {
         // Required empty public constructor
@@ -55,36 +58,34 @@ public class FragmentSettings extends Fragment {
             getActivity().finish();
         });
 
+        binding.txtMoney.setOnClickListener(v->{
+            setCurrencySettings();
+        });
 //        changeColorThemeSettings(mainActivity.modelPrimaryColor);
         return binding.getRoot();
     }
 
-    private void changeColorThemeSettings(ModelPrimaryColor modelPrimaryColor) {
-        binding.txtGroups.setTextColor(ContextCompat.getColor(getContext(),modelPrimaryColor.getColorPrimary()));
-        binding.txtAdvanced.setTextColor(ContextCompat.getColor(getContext(),modelPrimaryColor.getColorPrimary()));
-        binding.txtSecurity.setTextColor(ContextCompat.getColor(getContext(),modelPrimaryColor.getColorPrimary()));
+    private void setCurrencySettings() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Mata Uang");
+        final String[] tipe = {"IDR (Rp)", "USD ($)"};
 
-        setTextAndDrawableColor(binding.txtSwitchTheme,modelPrimaryColor);
+        builder.setItems(tipe, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    tinyDb.putString("currency","IDR");
+                    dialog.dismiss();
+                    break;
+                case 1:
+                    tinyDb.putString("currency","USD");
+                    dialog.dismiss();
+                    break;
+            }
 
-        setTextAndDrawableColor(binding.txtMoney,modelPrimaryColor);
-
-        setTextAndDrawableColor(binding.txtDeleteCache,modelPrimaryColor);
-
-        setTextAndDrawableColor(binding.txtPinSetting,modelPrimaryColor);
-
-        setTextAndDrawableColor(binding.txtNotification,modelPrimaryColor);
-
-        setTextAndDrawableColor(binding.txtLanguage,modelPrimaryColor);
-
-        setTextAndDrawableColor(binding.txtInfo,modelPrimaryColor);
+            binding.txtSelectedMoney.setText(tipe[which]);
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
-    private void setTextAndDrawableColor(TextView textView,ModelPrimaryColor modelPrimaryColor){
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            textView.setCompoundDrawableTintList(ContextCompat.getColorStateList(getContext(), modelPrimaryColor.getColorPrimary()));
-        }
-        textView.setTextColor(ContextCompat.getColor(getContext(),modelPrimaryColor.getColorPrimary()));
-
-    }
 }

@@ -64,6 +64,7 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
     @Inject
     SavingsRepository savingsRepository;
     ModelSavings modelSavings;
+    Locale locale;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +74,7 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
         modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
         Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
+        locale =tinyDb.getString("currency").equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -96,7 +98,7 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
         modelSavings =(ModelSavings) getIntent().getSerializableExtra("savings");
 
 
-        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(this, modelSavings -> {
+        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId(),modelSavings.getType_currency()).observe(this, modelSavings -> {
             listSavings = modelSavings;
         });
 
@@ -110,14 +112,11 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().equals(jumlah)) {
                     binding.etAmount.removeTextChangedListener(this);
-                    String cleanString = s.toString().replaceAll("[Rp,.]", "");
+                    String cleanString = s.toString().replaceAll("[Rp,.$]", "");
                     if (!cleanString.isEmpty()) {
                         double parsed = Double.parseDouble(cleanString);
-                        Locale localeID = new Locale("in", "ID");
-                        String formatted = NumberFormat.getCurrencyInstance(localeID).format((parsed));
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            formatted = formatted.replaceAll(",00", "");
-                        }
+                        String formatted = Tools.convertToCurrency(parsed,locale);
+
                         jumlah = formatted;
                         binding.etAmount.setText(formatted);
                         binding.etAmount.setSelection(formatted.length());
@@ -178,7 +177,7 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
             case R.id.btn_calculator:
                 dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
                     jumlah = result;
-                    binding.etAmount.setText(Tools.convertToCurrency(result));
+                    binding.etAmount.setText(Tools.convertToCurrency(result,locale));
                 });
                 dialogCalculator.show();
                 break;
@@ -209,6 +208,7 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
                                 model.setDescription(binding.etDescription.getText().toString().trim());
                                 model.setTitle(binding.etTitle.getText().toString().trim());
                                 model.setId_savings(modelSavings.getId());
+                                model.setType_currency(modelSavings.getType_currency());
                                 onSubmit(model);
                                 Intent intent = new Intent();
                                 intent.putExtra("savings", modelSavings);
@@ -236,7 +236,7 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
         viewModelSavingsProgress.inputUpdateSavings("Update", model);
         else viewModelSavingsProgress.inputUpdateSavings("Create", model);
 
-        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(this, modelSavingsProgresses -> {
+        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId(),modelSavings.getType_currency()).observe(this, modelSavingsProgresses -> {
             long processValue=0;
             for (ModelSavingsProgress modelSavingsProgress:modelSavingsProgresses)
                 processValue+= modelSavingsProgress.getProcessValue();

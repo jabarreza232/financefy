@@ -38,6 +38,7 @@ import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
+import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
@@ -50,10 +51,11 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
     public  List<ModelFinance> listFinance;
     @Inject
       FinanceRepository financeRepository;
-    public  int id_user;
     @Inject
     TinyDb tinyDb;
     public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
+    Locale locale;
+    ModelUser modelUser;
 
     @SuppressLint("ObsoleteSdkInt")
     @Override
@@ -83,9 +85,10 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
-        id_user = getIntent().getIntExtra("id_user", 0);
+        modelUser = (ModelUser) getIntent().getSerializableExtra("user");
+        locale =modelUser.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
-        viewModelFinance.getFinanceByUserId(id_user).observe(this, modelFinances -> {
+        viewModelFinance.getFinanceByUserId(modelUser.getId(),modelUser.getType_currency()).observe(this, modelFinances -> {
             listFinance = modelFinances;
         });
 
@@ -99,17 +102,13 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().equals(jumlah)) {
                     binding.etAmount.removeTextChangedListener(this);
-                    String cleanString = s.toString().replaceAll("[Rp,.]", "");
+                    String cleanString = s.toString().replaceAll("[Rp,.$]", "");
                     if (!cleanString.isEmpty()) {
                         double parsed = Double.parseDouble(cleanString);
-                        Locale localeID = new Locale("in", "ID");
-                        String formatted = NumberFormat.getCurrencyInstance(localeID).format((parsed));
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            formatted = formatted.replaceAll(",00", "");
-                        }
-                        jumlah = formatted;
-                        binding.etAmount.setText(formatted);
-                        binding.etAmount.setSelection(formatted.length());
+
+                        jumlah = Tools.convertToCurrency(parsed,locale);
+                        binding.etAmount.setText(Tools.convertToCurrency(parsed,locale));
+                        binding.etAmount.setSelection(Tools.convertToCurrency(parsed,locale).length());
                     }
 
                     binding.etAmount.addTextChangedListener(this);
@@ -158,7 +157,7 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
 
             case R.id.btn_calculator:
                 dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
-                    jumlah = Tools.convertToCurrency(result);
+                    jumlah = Tools.convertToCurrency(result,locale);
                     binding.etAmount.setText(jumlah);
                 });
                 dialogCalculator.show();
@@ -185,12 +184,13 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
                                 public void onClick(SweetAlertDialog sweetAlertDialog) {
                                     ModelFinance model = new ModelFinance();
                                     model.setDate(date);
-                                    model.setJumlah(jumlah);
+                                    model.setJumlah(Tools.replaceCurrencyStringToDouble(jumlah));
                                     model.setTipe(type);
                                     model.setKategori(category);
                                     model.setKeterangan(binding.etDescription.getText().toString().trim());
                                     model.setMonth(month);
-                                    model.setId_finance_user(id_user);
+                                    model.setId_finance_user(modelUser.getId());
+                                    model.setType_currency(modelUser.getType_currency());
 
                                     onSubmit(model);
                                     Intent intent = new Intent();
@@ -216,7 +216,7 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
             if (modelFinance.getKategori().contains(model.getKategori()) && modelFinance.getDate().contains(model.getDate())) {
                 double jumlahValue = modelFinance.getJumlahValue() + model.getJumlahValue();
                 model.setId(modelFinance.getId());
-                model.setJumlah(Tools.convertToCurrency(jumlahValue));
+                model.setJumlah(jumlahValue);
                 isUpdate = true;
             }
         }

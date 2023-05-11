@@ -68,7 +68,7 @@ public class BaseFinanceActivity extends AppCompatActivity {
                 binding.txtKategori.setText(category);
             }
         });
-        dialogFinance.showDialogCategory(arrayCategoryFromResource);
+        dialogFinance.showDialog(arrayCategoryFromResource,"Pilih Kategori");
     }
 
     public void showDialogType() {
@@ -81,6 +81,6 @@ public class BaseFinanceActivity extends AppCompatActivity {
             category = arrayCategory[0];
             binding.txtType.setText(type);
         });
-        dialogFinance.showDialogType(R.array.type_finance);
+        dialogFinance.showDialog(R.array.type_finance,"Pilih Tipe");
     }
 }

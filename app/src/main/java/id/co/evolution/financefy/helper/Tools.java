@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.model.ModelExchangeCurrency;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
 
 public class Tools {
@@ -162,12 +163,12 @@ public class Tools {
 
     public static double replaceCurrencyStringToDouble(String value) {
 
-        return Double.parseDouble(value.replaceAll("[Rp,.]", ""));
+        return Double.parseDouble(value.replaceAll("[Rp,.$]", ""));
     }
 
     public static long replaceCurrencyStringToLong(String value) {
 
-        return Long.parseLong(value.replaceAll("[Rp,.]", ""));
+        return Long.parseLong(value.replaceAll("[Rp,.$]", ""));
     }
 
     public static String getSpecialCharacterInMyString(String value) {
@@ -210,42 +211,65 @@ public class Tools {
 
 
     public static String convertCurrencyToValue(String value) {
-        return value.replaceAll("[Rp,.]", "");
+        return value.replaceAll("[Rp,.$]", "");
     }
 
-    public static String convertToCurrency(int currency) {
-        Locale localeID = new Locale("in", "ID");
-        String formatted = NumberFormat.getCurrencyInstance(localeID).format(((double) currency));
+    public static String convertToCurrency(int currency,Locale locale) {
+        String formatted = NumberFormat.getCurrencyInstance(locale).format(((double) currency));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             formatted = formatted.replaceAll(",00", "");
         }
         return formatted;
     }
-
-    public static String convertToCurrency(long currency) {
-        Locale localeID = new Locale("in", "ID");
-        String formatted = NumberFormat.getCurrencyInstance(localeID).format(currency);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    public static Locale getLocaleIDN(){
+        return new Locale("in", "ID");
+    }
+    public static Locale getLocaleUS(){
+        return Locale.US;
+    }
+    public static String convertToCurrency(long currency,Locale locale) {
+        String formatted = NumberFormat.getCurrencyInstance(locale).format(currency);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P&&locale.equals(getLocaleIDN())) {
             formatted = formatted.replaceAll(",00", "");
         }
+        if (formatted.endsWith(".00") && locale.equals(getLocaleUS())) {
+            int centsIndex = formatted.lastIndexOf(".00");
+            if (centsIndex != -1) {
+                formatted = formatted.substring(0, centsIndex);
+            }
+        }
+
         return formatted;
     }
 
-    public static String convertToCurrency(double currency) {
-        Locale localeID = new Locale("in", "ID");
-        String formatted = NumberFormat.getCurrencyInstance(localeID).format(currency);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    public static String convertToCurrency(double currency,Locale locale) {
+        String formatted = NumberFormat.getCurrencyInstance(locale).format(currency);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P&&locale.equals(getLocaleIDN())) {
             formatted = formatted.replaceAll(",00", "");
         }
+        if (formatted.endsWith(".00") && locale.equals(getLocaleUS())) {
+            int centsIndex = formatted.lastIndexOf(".00");
+            if (centsIndex != -1) {
+                formatted = formatted.substring(0, centsIndex);
+            }
+        }
+
         return formatted;
     }
 
-    public static String convertToCurrency(String currency) {
+    public static String convertToCurrency(String currency,Locale locale) {
+
         double parsed = Double.parseDouble(currency);
-        Locale localeID = new Locale("in", "ID");
-        String formatted = NumberFormat.getCurrencyInstance(localeID).format((parsed));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        String formatted = NumberFormat.getCurrencyInstance(locale).format((parsed));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P&&locale.equals(getLocaleIDN())) {
             formatted = formatted.replaceAll(",00", "");
+        }
+        if (formatted.endsWith(".00") && locale.equals(getLocaleUS())) {
+            int centsIndex = formatted.lastIndexOf(".00");
+            if (centsIndex != -1) {
+                formatted = formatted.substring(0, centsIndex);
+            }
         }
 
         return formatted;

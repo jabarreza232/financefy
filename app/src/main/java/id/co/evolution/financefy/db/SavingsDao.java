@@ -21,15 +21,15 @@ public interface SavingsDao {
     @Query("SELECT * FROM savings WHERE id_savings IN(:savingsIds)")
     List<ModelSavings> loadAllbyIds(int[] savingsIds);
 
-    @Query("SELECT * FROM savings WHERE date_target LIKE:date")
-    LiveData<List<ModelSavings>> findByDate(String date);
+    @Query("SELECT * FROM savings WHERE date_target LIKE:date AND type_currency IN(:type_currency)")
+    LiveData<List<ModelSavings>> findByDate(String date,String type_currency);
 
-    @Query("SELECT * FROM savings WHERE id_savings_user =:id_user")
-    LiveData<List<ModelSavings>> findByIdUser(int id_user);
+    @Query("SELECT * FROM savings WHERE id_savings_user =:id_user AND type_currency IN(:type_currency)")
+    LiveData<List<ModelSavings>> findByIdUser(int id_user,String type_currency);
 
 
-    @Query("SELECT * FROM savings WHERE id_savings =:id LIMIT 1")
-    LiveData<ModelSavings> findById(int id);
+    @Query("SELECT * FROM savings WHERE id_savings =:id AND type_currency IN(:type_currency) LIMIT 1")
+    LiveData<ModelSavings> findById(int id,String type_currency);
 
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

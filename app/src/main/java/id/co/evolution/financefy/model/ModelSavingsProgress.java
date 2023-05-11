@@ -28,6 +28,9 @@ public class ModelSavingsProgress implements Serializable {
     String date_progress_savings;
     @ColumnInfo(name = "month")
     String month;
+    @ColumnInfo(name = "type_currency")
+    String type_currency;
+
     @Ignore
     int totalValue;
     public ModelSavingsProgress(int id) {
@@ -35,6 +38,14 @@ public class ModelSavingsProgress implements Serializable {
     }
 
     public ModelSavingsProgress() {
+    }
+
+    public String getType_currency() {
+        return type_currency;
+    }
+
+    public void setType_currency(String type_currency) {
+        this.type_currency = type_currency;
     }
 
     public String getDate_progress_savings() {

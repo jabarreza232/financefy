@@ -45,9 +45,10 @@ public class SwitchThemeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        modelPrimaryColor= tinyDb.getObject("model_primary_color",ModelPrimaryColor.class);
-        Tools.setThemeActivity(getTheme(),modelPrimaryColor);
+        if(tinyDb.getObject("model_primary_color", ModelPrimaryColor.class)!=null) {
+            modelPrimaryColor= tinyDb.getObject("model_primary_color",ModelPrimaryColor.class);
+            Tools.setThemeActivity(getTheme(),modelPrimaryColor);
+        }
         binding = DataBindingUtil.setContentView(this, R.layout.activity_switch_theme);
 
 
@@ -69,6 +70,13 @@ public class SwitchThemeActivity extends AppCompatActivity {
         binding.rvPrimaryColor.setAdapter(adapterPrimaryColor);
 
         setSelectTheme();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent i = new Intent(this, MainActivity.class);
+        startActivity(i);
     }
 
     private void setSelectTheme(){

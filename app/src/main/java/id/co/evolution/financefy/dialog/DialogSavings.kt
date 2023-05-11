@@ -12,8 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import id.co.evolution.financefy.R
 import id.co.evolution.financefy.adapter.AdapterSavingsTarget
+import id.co.evolution.financefy.helper.TinyDb
 import id.co.evolution.financefy.helper.Tools
 import id.co.evolution.financefy.model.ModelSavings
+import java.util.*
 
 class DialogSavings(
     val context: Context,
@@ -27,10 +29,19 @@ class DialogSavings(
     private val btnAll: Button = findViewById(R.id.btn_all);
     private val placeEmpty: LinearLayout = findViewGroupById(R.id.place_empty)
     val value:TypedValue= TypedValue()
+     var locale: Locale
+     var tinyDb:TinyDb
 
     init {
         dialog.setContentView(dialogView)
         context.theme.resolveAttribute(android.R.attr.textColorPrimary,value,true)
+        tinyDb = TinyDb(context)
+        locale = if(tinyDb.getString("currency").equals("IDR",true)){
+            Tools.getLocaleIDN()
+        }else{
+            Tools.getLocaleUS()
+        }
+
     }
 
     fun showDialogSavings(mutableSavingsData: MutableList<ModelSavings>) {
@@ -46,7 +57,7 @@ class DialogSavings(
                 mutableSavingsData[position].title
             )
         }
-
+        adapter.setLocale(locale)
         var mutableListData: MutableList<ModelSavings> = mutableListOf()
 
         rvListSavingsTarget.layoutManager =

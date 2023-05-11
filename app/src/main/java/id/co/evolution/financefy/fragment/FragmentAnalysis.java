@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -130,6 +131,8 @@ public class FragmentAnalysis extends Fragment {
     MainActivity mainActivity;
     @Inject
     TinyDb tinyDb;
+    Locale locale;
+
     public enum TYPE_CHART {
         PIE_CHART,
         BAR_CHART
@@ -179,6 +182,7 @@ public class FragmentAnalysis extends Fragment {
         filterPeriod = getString(R.string.bulanan);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelUser = new ViewModelProvider(this).get(ViewModelUser.class);
+        locale =mainActivity.user.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         viewModelUser.init(userRepository);
         viewModelFinance.init(financeRepository);
@@ -216,7 +220,7 @@ public class FragmentAnalysis extends Fragment {
                 binding.btnNext.setEnabled(nextWeekEnabled);
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(), user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(), user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -244,7 +248,7 @@ public class FragmentAnalysis extends Fragment {
 
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(), user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(), user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -299,7 +303,7 @@ public class FragmentAnalysis extends Fragment {
             switch (which) {
                 case 0:
                     mPositionItem = position;
-                    mCallbackOnActivityResult.updateDataFinance(data, position,user.getId());
+                    mCallbackOnActivityResult.updateDataFinance(data, position,user);
                     dialog.dismiss();
                     break;
                 case 1:
@@ -391,7 +395,7 @@ public class FragmentAnalysis extends Fragment {
         nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
 
         if (filterPeriod.equalsIgnoreCase(getString(R.string.bulanan))) {
-            viewModelFinance.getFinanceByTypeAndMonth(type, month, user.getId()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+            viewModelFinance.getFinanceByTypeAndMonth(type, month, user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
                 @Override
                 public void onChanged(List<ModelFinance> modelFinances) {
                     if (modelFinances != null) loadData(modelFinances);
@@ -405,7 +409,7 @@ public class FragmentAnalysis extends Fragment {
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             }
             binding.btnNext.setEnabled(nextWeekEnabled);
-            viewModelFinance.getFinanceByTypeAndWeek(type, getListDateWeek(), user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
+            viewModelFinance.getFinanceByTypeAndWeek(type, getListDateWeek(), user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
                 if (modelFinances != null) loadData(modelFinances);
             });
         }
@@ -444,7 +448,7 @@ public class FragmentAnalysis extends Fragment {
             binding.btnNext.setEnabled(false);
         }
 
-        viewModelFinance.getFinanceByTypeAndMonth(filterType, month, user.getId()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+        viewModelFinance.getFinanceByTypeAndMonth(filterType, month, user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
             @Override
             public void onChanged(List<ModelFinance> modelFinances) {
                 if (modelFinances != null) loadData(modelFinances);
@@ -460,8 +464,10 @@ public class FragmentAnalysis extends Fragment {
         data = financeFilter.listAnalysis(data, filterType);
 
         adapter = new AdapterAnalysisFinance(getActivity(), data, this::showDialog);
+        adapter.setLocale(locale);
         binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.rvList.setAdapter(adapter);
+
         adapter.notifyDataSetChanged();
 
         binding.placeEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
@@ -478,9 +484,9 @@ public class FragmentAnalysis extends Fragment {
 
     private void loadDataHeader(List<ModelFinance> data) {
         long total = (financeFilter.totalIncome(data) - financeFilter.totalExpense(data));
-        binding.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data)));
-        binding.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data)));
-        binding.txtTotalAll.setText(convertToCurrency(total));
+        binding.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data),locale));
+        binding.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data),locale));
+        binding.txtTotalAll.setText(convertToCurrency(total,locale));
         binding.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.green));
     }
 
