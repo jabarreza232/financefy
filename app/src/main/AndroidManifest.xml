@@ -14,27 +14,31 @@
         android:theme="@style/AppTheme"
         tools:replace="android:icon">
         <activity
-            android:name=".activity.SwitchThemeActivity"
+            android:name=".activity.PinActivity"
             android:exported="false"
-            android:label="@string/switch_theme"
             android:configChanges="uiMode"
-            />
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activity.SwitchThemeActivity"
+            android:configChanges="uiMode"
+            android:exported="false"
+            android:label="@string/switch_theme" />
         <activity
             android:name=".activity.CreateSavingsTargetActivity"
+            android:configChanges="uiMode"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar"
-            android:configChanges="uiMode"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".activity.CreateSavingsProgressActivity"
+            android:configChanges="uiMode"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar"
-            android:configChanges="uiMode"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".activity.CreateFinanceActivity"
-            android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="uiMode"
+            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".activity.UpdateFinanceActivity"
@@ -43,13 +47,13 @@
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".activity.UpdateSavingsTargetActivity"
-            android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="uiMode"
+            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".activity.UpdateSavingsActivity"
-            android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="uiMode"
+            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="stateAlwaysHidden|adjustPan" />
         <activity
             android:name=".MainActivity"

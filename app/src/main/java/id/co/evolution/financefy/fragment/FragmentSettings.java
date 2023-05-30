@@ -2,19 +2,18 @@ package id.co.evolution.financefy.fragment;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
-import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+
+import java.io.File;
 
 import javax.inject.Inject;
 
@@ -23,9 +22,8 @@ import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.activity.SwitchThemeActivity;
 import id.co.evolution.financefy.databinding.FragmentSettingsBinding;
+import id.co.evolution.financefy.dialog.DialogSettingPin;
 import id.co.evolution.financefy.helper.TinyDb;
-import id.co.evolution.financefy.helper.Tools;
-import id.co.evolution.financefy.model.ModelPrimaryColor;
 
 @AndroidEntryPoint
 public class FragmentSettings extends Fragment {
@@ -57,12 +55,54 @@ public class FragmentSettings extends Fragment {
             startActivity(i);
             getActivity().finish();
         });
+        binding.txtDeleteCache.setOnClickListener(v->{
+            deleteCache(getActivity());
+        });
 
+        binding.txtPinSetting.setOnClickListener(v->{
+            DialogSettingPin dialogSettingPin = new DialogSettingPin(getContext(), getLayoutInflater(), new DialogSettingPin.DialogInterfaceCallback() {
+                @Override
+                public void onSubmit(String result) {
+                    tinyDb.putString("pin", result);
+                    tinyDb.putBoolean("isSettingPin", true);
+
+                }
+            });
+
+            dialogSettingPin.show();
+        });
         binding.txtMoney.setOnClickListener(v->{
             setCurrencySettings();
         });
 //        changeColorThemeSettings(mainActivity.modelPrimaryColor);
         return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        deleteCache(getActivity());
+    }
+
+    public static void deleteCache(Context context) {
+        try {
+            File dir = context.getCacheDir();
+            deleteDir(dir);
+        } catch (Exception e) { e.printStackTrace();}
+    }
+
+    public static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+
+        return dir.delete();
     }
 
     private void setCurrencySettings() {

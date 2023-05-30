@@ -199,6 +199,8 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
         user = mainActivity.user;
         modelSavings = mainActivity.modelSavings;
+
+        if(user!=null)
         locale =user.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         if (user != null) {

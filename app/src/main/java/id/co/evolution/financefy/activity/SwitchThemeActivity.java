@@ -76,6 +76,7 @@ public class SwitchThemeActivity extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         Intent i = new Intent(this, MainActivity.class);
+        i.putExtra("isInputPin",true);
         startActivity(i);
     }
 
@@ -98,6 +99,7 @@ public class SwitchThemeActivity extends AppCompatActivity {
 
         if (item.getItemId() == android.R.id.home) {
             Intent i = new Intent(this, MainActivity.class);
+            i.putExtra("isInputPin",true);
             startActivity(i);
         } else {
             saveSettings();

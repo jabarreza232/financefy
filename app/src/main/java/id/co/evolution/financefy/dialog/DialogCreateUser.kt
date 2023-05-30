@@ -2,10 +2,8 @@ package id.co.evolution.financefy.dialog
 
 import android.app.Dialog
 import android.content.Context
-import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.cardview.widget.CardView
@@ -18,7 +16,6 @@ import id.co.evolution.financefy.helper.TinyDb
 import id.co.evolution.financefy.helper.Tools
 import id.co.evolution.financefy.model.ModelSavings
 import id.co.evolution.financefy.model.ModelUser
-import java.text.NumberFormat
 import java.util.*
 
 class DialogCreateUser(
@@ -107,6 +104,11 @@ class DialogCreateUser(
         this.savings = savingsUpdate ?: ModelSavings()
         this.tinyDb = TinyDb(context)
         this.countSavings = countSavings
+        locale = if (user.type_currency.equals(
+                "IDR",
+                ignoreCase = true
+            )
+        ) Tools.getLocaleIDN() else Tools.getLocaleUS()
 
     }
 

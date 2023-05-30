@@ -38,6 +38,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.activity.CreateFinanceActivity;
 import id.co.evolution.financefy.activity.CreateSavingsProgressActivity;
 import id.co.evolution.financefy.activity.CreateSavingsTargetActivity;
+import id.co.evolution.financefy.activity.PinActivity;
 import id.co.evolution.financefy.databinding.ActivityMainBinding;
 import id.co.evolution.financefy.fragment.FragmentAccount;
 import id.co.evolution.financefy.fragment.FragmentAll;
@@ -86,9 +87,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         changeUINightMode();
         String type_currency = tinyDb.getString("currency");
-        if(type_currency==null||type_currency.isEmpty()){
-            tinyDb.putString("currency","IDR");
-            type_currency="IDR";
+        boolean isPinSetting = tinyDb.getBoolean("isSettingPin");
+        boolean isPinInput = getIntent().getBooleanExtra("isInputPin",false);
+
+        if(isPinSetting&& !isPinInput){
+            startActivity(new Intent(this, PinActivity.class));
         }
 
         if(tinyDb.getObject("model_primary_color", ModelPrimaryColor.class)!=null){
@@ -108,7 +111,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (user == null) {
             user = new ModelUser("Guest Account", "Pribadi", "Jurnal Keuangan");
             user.setUuid(UUID.randomUUID().toString());
-            user.setType_currency(type_currency);
+
+            if(type_currency==null||type_currency.isEmpty()){
+                tinyDb.putString("currency","IDR");
+                type_currency="IDR";
+                user.setType_currency(type_currency);
+            }
+
             new UserRepository.InputUpdateUser(user, "create", userRepository.userDao)
                     .execute();
 
