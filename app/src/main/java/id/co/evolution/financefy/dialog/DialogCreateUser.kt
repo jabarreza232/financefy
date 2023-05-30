@@ -95,7 +95,7 @@ class DialogCreateUser(
         fragmentManager: FragmentManager,
         countSavings:Int,
         userUpdate: ModelUser,
-        savingsUpdate: ModelSavings,
+        savingsUpdate: ModelSavings?,
         dialogCreateUserCallback: DialogCreateUserCallback
     ) : this(context, inflater) {
         this.dialogCreateUserCallback = dialogCreateUserCallback
@@ -135,12 +135,14 @@ class DialogCreateUser(
 
             if (user.category.equals(context.getString(R.string.menabung))) {
                 savings.let {
-                    etTitle.setText(it.title)
-                    txtDate.text = it.date_target
-                    etTarget.setText(Tools.convertToCurrency(it.targetValue,locale))
-                    date_target = it.date_target
-                    jumlah = Tools.convertToCurrency(it.targetValue,locale).replace("[Rp,.$]".toRegex(), "")
-                    proccess_value = Tools.convertToCurrency(it.processValue,locale).replace("[Rp,.$]".toRegex(), "")
+                    if (it.id>0){
+                        etTitle.setText(it.title)
+                        txtDate.text = it.date_target
+                        etTarget.setText(Tools.convertToCurrency(it.targetValue,locale))
+                        date_target = it.date_target
+                        jumlah = Tools.convertToCurrency(it.targetValue,locale).replace("[Rp,.$]".toRegex(), "")
+                        proccess_value = Tools.convertToCurrency(it.processValue,locale).replace("[Rp,.$]".toRegex(), "")
+                    }
                 }
             }
         }
@@ -311,13 +313,17 @@ class DialogCreateUser(
                         if(this.savings.id>0)
                             savings.id = this.savings.id
 
-
                         savings.id_savings_user = user.id
                         if(etTitle.text.toString().isNotEmpty()){
                             savings.title = etTitle.text.toString()
                             savings.date_target = date_target
                             if(proccess_value.isNotEmpty()) savings.processValue = Tools.replaceCurrencyStringToLong(proccess_value)
                             savings.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
+                            if(this.savings.type_currency==null)
+                                savings.type_currency = type_currency
+                            else
+                                savings.type_currency = this.savings.type_currency
+
                         }
                     }
 
@@ -346,6 +352,9 @@ class DialogCreateUser(
             }
 
             R.id.img_close -> {
+                if(countSavings==0)
+                    Toast.makeText(context, "Data Target Savings tidak boleh kosong !", Toast.LENGTH_SHORT).show()
+                else
                 dialog.dismiss()
             }
         }
@@ -427,6 +436,9 @@ class DialogCreateUser(
                 }else{
                     Tools.getLocaleUS()
                 }
+
+                if(savings.type_currency != type_currency&&!isAddAccount) setHideVisibilityPlaceSavings()
+                else setVisibilityPlaceSavings()
             }
         })
         dialogFinance.showDialog(R.array.type_currency,"Pilih Tipe Mata Uang")
@@ -459,6 +471,17 @@ class DialogCreateUser(
         txtHeaderTargetSavings.showHideView(isShow)
         viewLineHeaderSavings.showHideView(isShow)
     }
+
+    fun setHideVisibilityPlaceSavings() {
+        val isShow =false
+
+        placeTarget.showHideView(isShow)
+        tilTitle.showHideView(isShow)
+        placeDate.showHideView(isShow)
+        txtHeaderTargetSavings.showHideView(isShow)
+        viewLineHeaderSavings.showHideView(isShow)
+    }
+
     private infix fun View.showHideView(isShow: Boolean){
       visibility = if(isShow)View.VISIBLE else View.GONE
     }

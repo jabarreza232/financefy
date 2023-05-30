@@ -3,11 +3,9 @@
 
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
         android:id="@+id/place_form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/img_back"
         android:background="@drawable/shape_form">
 
         <ImageView
@@ -244,12 +242,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/ubuntu_b"
-                    android:padding="16dp"
+                    android:padding="10dp"
                     android:text="Submit"
                     android:textAlignment="center"
                     android:textColor="@android:color/white" />
             </androidx.cardview.widget.CardView>
+
         </LinearLayout>
+
     </RelativeLayout>
 
 </layout>

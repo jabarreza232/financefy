@@ -116,7 +116,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         today.get(Calendar.YEAR);
         prevNextYear = Calendar.getInstance();
         date_ship_millis = today.getTimeInMillis();
-        locale =mainActivity.user.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+        locale = mainActivity.user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
         isAddSavings = false;
         return binding.getRoot();
     }
@@ -144,7 +144,6 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         refreshDataUser(null, null);
 
         refreshDataUserByCategory();
-
 
 
         binding.spinChooseAccount.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -219,53 +218,49 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
+    ModelSavings modelSavings = null;
     private void showDialogAddAccount(boolean isAddAccount) {
         String type = isAddAccount ? "create" : "update";
 
 
         dialogCreateUser = new DialogCreateUser(getContext(), getLayoutInflater(), getFragmentManager(), count_savings, mainActivity.user, mainActivity.modelSavings, (modelUser, modelSavings) -> {
             modelUser.setUuid(UUID.randomUUID().toString());
-            new UserRepository.InputUpdateUser(modelUser, type, userRepository.userDao)
-                    .execute();
+            this.modelSavings = modelSavings;
+            new UserRepository.InputUpdateUser(modelUser, type, userRepository.userDao, () -> {
+                isAddSavings = isAddAccount;
+                if (!isAddAccount) mainActivity.user = modelUser;
+                FragmentAccount.this.modelSavings = modelUser.getCategory().equalsIgnoreCase(getString(R.string.menabung)) ? modelSavings : new ModelSavings();
+                mainActivity.modelSavings = modelSavings;
+                tinyDb.putObject("savings", modelSavings);
+                tinyDb.putString("currency", modelUser.getType_currency());
 
-            isAddSavings = isAddAccount;
-            if (!isAddAccount) mainActivity.user = modelUser;
-            modelSavings = modelUser.getCategory().equalsIgnoreCase(getString(R.string.menabung)) ? modelSavings : new ModelSavings();
-            mainActivity.modelSavings = modelSavings;
-            tinyDb.putObject("savings", modelSavings);
-            tinyDb.putString("currency",modelUser.getType_currency());
+                refreshDataUser(modelUser, modelSavings);
+            }).execute();
 
-            refreshDataUser(modelUser, modelSavings);
         });
 
         dialogCreateUser.showDialogCreateUser(isAddAccount);
     }
 
     private void refreshDataUser(ModelUser modelUser, ModelSavings modelSavings) {
+
         viewModelUser.getAllUser().observe(getViewLifecycleOwner(), modelUsers -> {
+            for (ModelUser user1 : modelUsers){
+                if (modelUser != null&&user1.getUuid().equalsIgnoreCase(modelUser.getUuid())) {
+                    id_savings_user = user1.getId();
+                    Log.e("TAG", "showDialogAddAccount: " + new Gson().toJson(modelUser) + " : " + new Gson().toJson(modelSavings));
+                    if (modelSavings != null && modelSavings.getTitle() != null) {
+                        modelSavings.setId_savings_user(id_savings_user);
+                        isAddSavings = count_savings == 0;
+                        String type = isAddSavings ? "create" : "update";
 
-            for (ModelUser modelUser1 : modelUsers) {
-                if (modelUser != null) {
-                    if (modelUser1.getUuid().equals(modelUser.getUuid())) {
-
-                        id_savings_user = modelUser1.getId();
-                        Log.e("TAG", "showDialogAddAccount: " + new Gson().toJson(modelUser1) + " : " + new Gson().toJson(modelSavings));
-                        if (modelSavings != null && modelSavings.getTitle() != null) {
-                            modelSavings.setId_savings_user(id_savings_user);
-                            isAddSavings = count_savings == 0;
-                            String type = isAddSavings ? "create" : "update";
-
-                            new SavingsRepository.InputUpdateSavings(modelSavings, type, savingsRepository.savingsDao).execute();
+                        new SavingsRepository.InputUpdateSavings(modelSavings, type, savingsRepository.savingsDao, () -> {
                             isAddSavings = false;
-                            mainActivity.modelSavings = new ModelSavings();
-
-                        }
+                            refreshDataUserByCategory();
+                        }).execute();
                     }
                 }
             }
-
-            refreshDataUserByCategory();
 
             List<String> dataName = new ArrayList<>();
             for (ModelUser user1 : modelUsers) dataName.add(user1.getName());
@@ -280,27 +275,22 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             }
 
             if (mainActivity.user != null) setDataUser(mainActivity.user);
+
         });
 
-        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), savings -> {
-            //TODO Hanya Sebagai pengecekan user apakah target menabung ada atau tidak
-            // untuk kebutuhan visibility form category menabung.
-            count_savings = savings.size();
-        });
-
-        if(modelUser!=null)
-        locale =modelUser.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+        if (modelUser != null)
+            locale = modelUser.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
 
     }
 
 
     private void refreshDataFinance() {
 
-        viewModelFinance.getFinanceByUserId(mainActivity.user.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelFinance -> {
+        viewModelFinance.getFinanceByUserId(mainActivity.user.getId(), mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelFinance -> {
             dataFinance = modelFinance;
 
-            binding.layoutAccountFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(dataFinance),locale));
-            binding.layoutAccountFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(dataFinance),locale));
+            binding.layoutAccountFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(dataFinance), locale));
+            binding.layoutAccountFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(dataFinance), locale));
         });
 
 //
@@ -321,8 +311,9 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
     private void refreshDataSavings() {
 
-        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings -> {
+        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(), mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings -> {
             dataSavings = modelSavings;
+            count_savings = dataSavings.size();
 
             if (dataSavings.size() > 0) {
                 setDataSavings(mainActivity.modelSavings != null ? mainActivity.modelSavings : modelSavings.get(0));
@@ -364,7 +355,13 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
                     dialogSavings.showDialogSavings(dataSavings);
                 });
             }
+            if (dialogCreateUser != null) {
+                if (!dialogCreateUser.getDialog().isShowing() && count_savings == 0) {
+                    showDialogAddAccount(false);
+                }
+            }
         });
+
 
     }
 
@@ -375,8 +372,8 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
         tinyDb.putObject("savings", modelSavings);
         binding.layoutAccountSavings.txtChooseSavings.setText(modelSavings.getTitle());
-        binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue(),locale));
-        binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue(),locale));
+        binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue(), locale));
+        binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue(), locale));
         binding.layoutAccountSavings.txtPercentageSavings.setText(txtPercentage);
         binding.layoutAccountSavings.progressBarTargetSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutAccountSavings.progressBarTargetSavings.setMax(100);
@@ -391,11 +388,14 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         boolean visibleAccountSavings = user.getCategory().equalsIgnoreCase(getString(R.string.menabung));
         binding.layoutAccountSavings.placeAccountSavings.setVisibility(visibleAccountSavings ? View.VISIBLE : View.GONE);
         binding.layoutAccountFinanceJournal.placeAccountFinanceJournal.setVisibility(!visibleAccountSavings ? View.VISIBLE : View.GONE);
-        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), savings -> {
+        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(), mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), savings -> {
             //TODO Hanya Sebagai pengecekan user apakah target menabung ada atau tidak
             // untuk kebutuhan visibility form category menabung.
             count_savings = savings.size();
         });
+
+        locale = user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
+
     }
 
     @Override

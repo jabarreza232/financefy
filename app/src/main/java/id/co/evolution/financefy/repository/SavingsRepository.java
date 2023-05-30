@@ -26,27 +26,35 @@ public class SavingsRepository {
         return savingsDao.getAll();
     }
 
-    public LiveData<ModelSavings> getSavingsById(int id,String type_currency) {
-        return savingsDao.findById(id,type_currency);
+    public LiveData<ModelSavings> getSavingsById(int id, String type_currency) {
+        return savingsDao.findById(id, type_currency);
     }
 
-    public LiveData<List<ModelSavings>> getSavingsByDate(String date,String type_currency) {
-        return savingsDao.findByDate(date,type_currency);
+    public LiveData<List<ModelSavings>> getSavingsByDate(String date, String type_currency) {
+        return savingsDao.findByDate(date, type_currency);
     }
 
-    public LiveData<List<ModelSavings>> getSavingsByIdUser(int id_user,String type_currency) {
-        return savingsDao.findByIdUser(id_user,type_currency);
+    public LiveData<List<ModelSavings>> getSavingsByIdUser(int id_user, String type_currency) {
+        return savingsDao.findByIdUser(id_user, type_currency);
     }
 
     public static class InputUpdateSavings extends AsyncTask<Void, Void, Void> {
         ModelSavings modelSaving;
         String type;
         SavingsDao savingsDao;
+        MethodCallback methodCallback;
 
         public InputUpdateSavings(ModelSavings modelSaving, String type, SavingsDao savingsDao) {
             this.modelSaving = modelSaving;
             this.type = type;
             this.savingsDao = savingsDao;
+        }
+
+        public InputUpdateSavings(ModelSavings modelSaving, String type, SavingsDao savingsDao, MethodCallback methodCallback) {
+            this.modelSaving = modelSaving;
+            this.type = type;
+            this.savingsDao = savingsDao;
+            this.methodCallback = methodCallback;
         }
 
         @Override
@@ -62,6 +70,12 @@ public class SavingsRepository {
         @Override
         protected void onPostExecute(Void unused) {
             super.onPostExecute(unused);
+            if(methodCallback!=null)
+            methodCallback.onPostExecute();
+        }
+
+        public interface MethodCallback {
+            void onPostExecute();
         }
     }
 
@@ -73,9 +87,10 @@ public class SavingsRepository {
         public RemoveSavings(List<ModelSavings> dataSavings, SavingsDao savingsDao) {
             this.savingsDao = savingsDao;
         }
-        public RemoveSavings(SavingsDao savingsDao,int id_user) {
+
+        public RemoveSavings(SavingsDao savingsDao, int id_user) {
             this.savingsDao = savingsDao;
-            this.id_user= id_user;
+            this.id_user = id_user;
         }
 
         public RemoveSavings(ModelSavings modelSavings, SavingsDao savingsDao) {
@@ -85,7 +100,7 @@ public class SavingsRepository {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            if (id_user>0) {
+            if (id_user > 0) {
                 savingsDao.deleteSavingsByIdUser(id_user);
             } else {
                 savingsDao.delete(modelSavings);
