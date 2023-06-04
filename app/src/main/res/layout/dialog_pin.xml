@@ -15,7 +15,7 @@
             android:padding="10dp"
             android:text="Atur PIN"
             android:textAlignment="center"
-            android:textColor="@color/blackTextColor"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="17sp" />
 
         <TextView
@@ -25,7 +25,7 @@
             android:paddingBottom="10dp"
             android:text="Silahkan atur PIN anda"
             android:textAlignment="center"
-            android:textColor="@color/blackTextColor"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="15sp" />
 
         <View

@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         modelSavings = tinyDb.getObject("savings", ModelSavings.class);
 
         if (user == null) {
-            user = new ModelUser("Guest Account", "Pribadi", "Jurnal Keuangan");
+            user = new ModelUser("Guest Account", "Pribadi", getString(R.string.jurnal_keuangan));
             user.setUuid(UUID.randomUUID().toString());
 
             if(type_currency==null||type_currency.isEmpty()){

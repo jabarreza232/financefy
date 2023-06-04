@@ -67,6 +67,13 @@ public class Tools {
             }
         }
     }
+    public static void setBackgroundTintView(View view,int color){
+        if(modelPrimaryColor!=null){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                view.setBackgroundTintList(ContextCompat.getColorStateList(view.getContext(),color));
+            }
+        }
+    }
     public static String getFormattedMonthSimple(Long dateTime) {
         SimpleDateFormat newFormat = new SimpleDateFormat("MM-yyyy");
         return newFormat.format(new Date(dateTime));

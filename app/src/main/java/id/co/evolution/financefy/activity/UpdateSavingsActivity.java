@@ -89,6 +89,7 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
         viewModelSaving = new ViewModelProvider(this).get(ViewModelSavings.class);
         viewModelSavingsProgress.init(savingsProgressRepository);
         viewModelSaving.init(savingsRepository);
+        locale =tinyDb.getString("currency").equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         binding.txtHeader.setText("Input data");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
