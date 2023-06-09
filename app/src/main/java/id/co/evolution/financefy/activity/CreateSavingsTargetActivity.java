@@ -69,7 +69,6 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
         modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
         Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
-        locale =tinyDb.getString("currency").equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -90,6 +89,8 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
         month = getFormattedMonthSimple(date_ship_milis);
         modelSavings =(ModelSavings) getIntent().getSerializableExtra("savings");
         modelUser = (ModelUser) getIntent().getSerializableExtra("user");
+        locale =modelUser.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+
         binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

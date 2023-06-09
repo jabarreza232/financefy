@@ -43,10 +43,14 @@ import id.co.evolution.financefy.databinding.FragmentAccountBinding;
 import id.co.evolution.financefy.dialog.DialogCreateUser;
 import id.co.evolution.financefy.dialog.DialogSavings;
 import id.co.evolution.financefy.helper.FinanceFilter;
+import id.co.evolution.financefy.helper.HelperNotification;
+import id.co.evolution.financefy.helper.SavingsFilter;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelNotification;
 import id.co.evolution.financefy.model.ModelSavings;
+import id.co.evolution.financefy.model.ModelSavingsProgress;
 import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.repository.SavingsProgressRepository;
@@ -54,6 +58,7 @@ import id.co.evolution.financefy.repository.SavingsRepository;
 import id.co.evolution.financefy.repository.UserRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 import id.co.evolution.financefy.viewmodel.ViewModelSavings;
+import id.co.evolution.financefy.viewmodel.ViewModelSavingsProgress;
 import id.co.evolution.financefy.viewmodel.ViewModelUser;
 
 @AndroidEntryPoint
@@ -79,7 +84,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     ViewModelUser viewModelUser;
     ViewModelSavings viewModelSavings;
     ViewModelFinance viewModelFinance;
-
+    public ViewModelSavingsProgress viewModelSavingsProgress;
     @Inject
     TinyDb tinyDb;
 
@@ -92,7 +97,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     MainActivity mainActivity;
     CallbackOnActivityResult mCallbackOnActivityResult;
     Locale locale;
-
+    HelperNotification helperNotification;
     //TODO NOTE SAVINGS : Menabung, FINANCE : JURNAL KEUANGAN
 
     public FragmentAccount() {
@@ -135,7 +140,10 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         viewModelUser = new ViewModelProvider(this).get(ViewModelUser.class);
         viewModelSavings = new ViewModelProvider(this).get(ViewModelSavings.class);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
+        viewModelSavingsProgress = new ViewModelProvider(this).get(ViewModelSavingsProgress.class);
+        helperNotification=new HelperNotification(getContext());
 
+        viewModelSavingsProgress.init(savingsProgressRepository);
         viewModelUser.init(userRepository);
         viewModelFinance.init(financeRepository);
         viewModelSavings.init(savingsRepository);
@@ -199,7 +207,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 //                    binding.rvList.getAdapter().notifyDataSetChanged();
 
                     new UserRepository.RemoveUser(mainActivity.user, userRepository.userDao).execute();
-
+                    if(mainActivity.modelSavings.getId()>0)
                     new SavingsProgressRepository.RemoveSavings(savingsProgressRepository.savingsDao, mainActivity.modelSavings.getId()).execute();
 
                     new SavingsRepository.RemoveSavings(savingsRepository.savingsDao, mainActivity.user.getId()).execute();
@@ -255,7 +263,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
                         viewModelSavings.findAllSavingsByIdUser(user1.getId(), user1.getType_currency()).observe(getViewLifecycleOwner(), savings -> {
                             count_savings = savings.size();
                             isAddSavings = count_savings == 0;
-                            String type = isAddSavings&&modelSavings.getId_savings_user()==0 ? "create" : "update";
+                            String type = isAddSavings ? "create" : "update";
                             if(modelSavings.getId_savings_user()==0)
                                 modelSavings.setId_savings_user(user1.getId());
 
@@ -279,6 +287,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
                 if (dataUser.get(i).getId() == mainActivity.user.getId()) {
                     binding.spinChooseAccount.setSelection(i);
                     refreshDataUserByCategory();
+
                 }
             }
 
@@ -398,7 +407,27 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         });
 
         locale = user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
+        tinyDb.putString("currency",user.getType_currency());
 
+        viewModelFinance.getFinanceByUserId(user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+            dataFinance = modelFinances;
+            boolean isChecked = tinyDb.getBoolean("isCheckedFinance");
+            String description = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinance), locale) + "\n" +
+                    "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinance), locale);
+            ModelNotification modelNotification =new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), description);
+
+            helperNotification.reminderSet(isChecked,modelNotification,getString(R.string.jurnal_keuangan),200);
+
+        });
+
+        if(mainActivity.modelSavings==null)
+            mainActivity.modelSavings = new ModelSavings();
+
+        viewModelSavingsProgress.findAllSavingsByIdSavings(mainActivity.modelSavings.getId(), mainActivity.modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
+            boolean isChecked = tinyDb.getBoolean("isCheckedSavings");
+            ModelNotification modelNotification =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSavings), locale));
+            helperNotification.reminderSet(isChecked,modelNotification,getString(R.string.menabung),100);
+        });
     }
 
     @Override

@@ -294,18 +294,18 @@ public class TinyDb {
     }
 
 
-//    public ArrayList<Object> getListObject(String key, Class<?> mClass){
-//    	Gson gson = new Gson();
-//
-//    	ArrayList<String> objStrings = getListString(key);
-//    	ArrayList<Object> objects =  new ArrayList<Object>();
-//
-//    	for(String jObjString : objStrings){
-//    		Object value  = gson.fromJson(jObjString,  mClass);
-//    		objects.add(value);
-//    	}
-//    	return objects;
-//    }
+    public ArrayList<Object> getListObject(String key, Class<?> mClass){
+    	Gson gson = new Gson();
+
+    	ArrayList<String> objStrings = getListString(key);
+    	ArrayList<Object> objects =  new ArrayList<Object>();
+
+    	for(String jObjString : objStrings){
+    		Object value  = gson.fromJson(jObjString,  mClass);
+    		objects.add(value);
+    	}
+    	return objects;
+    }
 
 
     public <T> T getObject(String key, Class<T> classOfT){

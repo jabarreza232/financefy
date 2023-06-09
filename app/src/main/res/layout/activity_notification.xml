@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.NotificationActivity"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="#D7808080">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="@font/ubuntu_b"
+            android:text="@string/description_notification"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            android:textSize="15sp" />
+
+    </FrameLayout>
+    <RelativeLayout
+        android:background="@drawable/shape_line_gray"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+       >
+
+        <TextView
+            android:id="@+id/txt_notification_finance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/switch_notification_finance"
+            android:drawablePadding="5dp"
+            android:drawableTint="?android:textColorPrimary"
+            android:padding="10dp"
+            android:text="Pengeluaran dan pemasukan"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="15sp" />
+        <Switch
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/switch_notification_finance"
+            android:layout_alignParentEnd="true"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="3dp"
+        app:cardCornerRadius="5dp"
+        android:background="@drawable/shape_line_gray"
+        app:cardElevation="3dp">
+
+        <TextView
+            android:id="@+id/txt_notification_savings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toStartOf="@id/switch_notification_savings"
+            android:drawablePadding="5dp"
+            android:drawableTint="?android:textColorPrimary"
+            android:padding="10dp"
+            android:text="Progress menabung"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="15sp" />
+
+        <Switch
+            android:id="@+id/switch_notification_savings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerInParent="true"
+            tools:ignore="UseSwitchCompatOrMaterialXml" />
+    </RelativeLayout>
+
+
+
+
+</LinearLayout>
+</layout>

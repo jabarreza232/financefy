@@ -89,13 +89,14 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
         viewModelSaving = new ViewModelProvider(this).get(ViewModelSavings.class);
         viewModelSavingsProgress.init(savingsProgressRepository);
         viewModelSaving.init(savingsRepository);
-        locale =tinyDb.getString("currency").equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         binding.txtHeader.setText("Input data");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
         modelSavings =(ModelSavings) getIntent().getSerializableExtra("savings");
+        locale =modelSavings.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+
         position = getIntent().getIntExtra("position", 0);
         viewModelSavingsProgress.findSavingsById(getIntent().getIntExtra("id", 0),modelSavings.getType_currency()).observe(this, modelSavingsProgress -> {
             this.modelSavingsProgress = modelSavingsProgress;

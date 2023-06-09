@@ -207,7 +207,7 @@
                         android:paddingTop="16dp"
                         android:paddingBottom="16dp"
                         android:paddingEnd="48dp"
-                        android:text="Agustus 16, 2023"
+                        android:text="Date"
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <ImageView

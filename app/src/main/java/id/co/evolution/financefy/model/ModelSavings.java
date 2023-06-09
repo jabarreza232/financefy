@@ -36,6 +36,8 @@ public class ModelSavings implements Serializable {
     }
 
     public ModelSavings() {
+        id= 0;
+        type_currency="IDR";
     }
 
     public ModelSavings(String title, long targetValue, long processValue, int id_savings_user, String date_target) {

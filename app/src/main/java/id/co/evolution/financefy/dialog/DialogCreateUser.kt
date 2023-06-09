@@ -395,6 +395,8 @@ class DialogCreateUser(
                 category = result
                 setUpCategory()
                 if (category.isNotEmpty()) txtCategory.text = category
+
+
             }
         })
 
@@ -424,6 +426,19 @@ class DialogCreateUser(
                 txtCategory.text = category
 
                 txtType.text = type
+
+                if(category.equals(
+                        context.getString(R.string.menabung),
+                        ignoreCase = true
+                    )) {
+                    if(type_currency.isNotEmpty())
+                    txtTypeCurrencyTarget.text = type_currency
+
+                    if(jumlah.isNotEmpty()){
+                        jumlah = Tools.convertToCurrency(jumlah.replace("[Rp,.$]".toRegex(), ""),locale)
+                        etTarget.setText(jumlah)
+                    }
+                }
             }
         })
         dialogFinance.showDialog(R.array.type_user,"Pilih Tipe")
@@ -444,7 +459,9 @@ class DialogCreateUser(
                     context.getString(R.string.menabung),
                     ignoreCase = true
                 )) {
-                    txtTypeCurrencyTarget.text = type_currency
+                    if(type_currency.isNotEmpty())
+                        txtTypeCurrencyTarget.text = type_currency
+
                     if(jumlah.isNotEmpty()){
                         jumlah = Tools.convertToCurrency(jumlah.replace("[Rp,.$]".toRegex(), ""),locale)
                         etTarget.setText(jumlah)
@@ -470,6 +487,7 @@ class DialogCreateUser(
         else {
             if(savings.id>0||countSavings==0) setVisibilityPlaceSavings()
         }
+
     }
 
     fun setVisibilityPlaceSavings() {

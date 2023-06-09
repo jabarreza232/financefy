@@ -74,7 +74,8 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
         modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
         Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
-        locale =tinyDb.getString("currency").equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+
+
 
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -97,6 +98,7 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
         month = getFormattedMonthSimple(date_ship_milis);
         modelSavings =(ModelSavings) getIntent().getSerializableExtra("savings");
 
+        locale =modelSavings.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId(),modelSavings.getType_currency()).observe(this, modelSavings -> {
             listSavings = modelSavings;

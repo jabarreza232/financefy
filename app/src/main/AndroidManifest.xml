@@ -4,6 +4,8 @@
     package="id.co.evolution.financefy">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:name=".App"
@@ -14,10 +16,25 @@
         android:theme="@style/AppTheme"
         tools:replace="android:icon">
         <activity
-            android:name=".activity.PinActivity"
+            android:name=".activity.NotificationActivity"
             android:exported="false"
+            android:label="Notifikasi"
+            />
+
+        <receiver
+            android:name=".helper.ReminderBroadcast"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name=".activity.PinActivity"
             android:configChanges="uiMode"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activity.SwitchThemeActivity"
             android:configChanges="uiMode"

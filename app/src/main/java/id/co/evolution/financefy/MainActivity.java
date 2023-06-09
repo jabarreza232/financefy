@@ -9,8 +9,16 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,7 +37,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -45,9 +55,14 @@ import id.co.evolution.financefy.fragment.FragmentAll;
 import id.co.evolution.financefy.fragment.FragmentAnalysis;
 import id.co.evolution.financefy.fragment.FragmentAnalysisSavings;
 import id.co.evolution.financefy.fragment.FragmentSettings;
+import id.co.evolution.financefy.helper.FinanceFilter;
+import id.co.evolution.financefy.helper.HelperNotification;
+import id.co.evolution.financefy.helper.ReminderBroadcast;
+import id.co.evolution.financefy.helper.SavingsFilter;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelNotification;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelUser;
@@ -72,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     SavingsRepository savingsRepository;
     @Inject
     UserRepository userRepository;
-
+    Locale locale;
     public ModelUser user;
     public ModelSavings modelSavings = new ModelSavings();
 
@@ -80,7 +95,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TinyDb tinyDb;
     public boolean isFabOpen = false;
     public boolean isUserDailyFinance;
-    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
+    public ModelPrimaryColor modelPrimaryColor = Tools.modelPrimaryColor;
+    public HelperNotification helperNotification;
+    public boolean isCheckedNotifSavings,isCheckedNotifFinance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,15 +105,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         changeUINightMode();
         String type_currency = tinyDb.getString("currency");
         boolean isPinSetting = tinyDb.getBoolean("isSettingPin");
-        boolean isPinInput = getIntent().getBooleanExtra("isInputPin",false);
+        boolean isPinInput = getIntent().getBooleanExtra("isInputPin", false);
 
-        if(isPinSetting&& !isPinInput){
+        if (isPinSetting && !isPinInput) {
             startActivity(new Intent(this, PinActivity.class));
         }
 
-        if(tinyDb.getObject("model_primary_color", ModelPrimaryColor.class)!=null){
-            modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
-            Tools.setThemeActivity(getTheme(),modelPrimaryColor);
+        if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+            modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+            Tools.setThemeActivity(getTheme(), modelPrimaryColor);
         }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
@@ -107,14 +124,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         viewModelSavings.init(savingsRepository);
         user = tinyDb.getObject("user", ModelUser.class);
         modelSavings = tinyDb.getObject("savings", ModelSavings.class);
+        helperNotification=new HelperNotification(this);
+        if(user!=null)
+            locale =user.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+
+         isCheckedNotifSavings = tinyDb.getBoolean("isCheckedSavings");
+         isCheckedNotifFinance = tinyDb.getBoolean("isCheckedFinance");
+
 
         if (user == null) {
             user = new ModelUser("Guest Account", "Pribadi", getString(R.string.jurnal_keuangan));
             user.setUuid(UUID.randomUUID().toString());
 
-            if(type_currency==null||type_currency.isEmpty()){
-                tinyDb.putString("currency","IDR");
-                type_currency="IDR";
+            if (type_currency == null || type_currency.isEmpty()) {
+                tinyDb.putString("currency", "IDR");
+                type_currency = "IDR";
                 user.setType_currency(type_currency);
             }
 
@@ -123,16 +147,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             tinyDb.putObject("user", user);
         }
-
+        createNotificationChannel();
         if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
             showHideFabSavings(false);
 
-            viewModelFinance.getFinanceByUserId(user.getId(),user.getType_currency()).observe(this, modelFinances -> {
+            viewModelFinance.getFinanceByUserId(user.getId(), user.getType_currency()).observe(this, modelFinances -> {
                 dataFinance = modelFinances;
                 setUpFragment();
             });
         } else {
-            viewModelSavings.findAllSavingsByIdUser(user.getId(),user.getType_currency()).observe(this, dataSavings -> {
+            viewModelSavings.findAllSavingsByIdUser(user.getId(), user.getType_currency()).observe(this, dataSavings -> {
                 if (dataSavings.size() == 0) {
                     modelSavings = new ModelSavings("Beli HP", 50_000_000, 10_000, user.getId(), "March 03, 2022");
                     tinyDb.putObject("savings", modelSavings);
@@ -155,35 +179,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    private void createNotificationChannel() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Financefy Reminder Channel";
+            String description = "Channel for Financefy Reminder";
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel notificationChannel = new NotificationChannel(""+user.getId(), name, importance);
+            notificationChannel.setDescription(description);
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
 
     }
 
-    private void changeUINightMode(){
+    private void changeUINightMode() {
         String nightMode = tinyDb.getString("night_mode");
-        if(TextUtils.equals(nightMode,"mode_night_yes")){
+        if (TextUtils.equals(nightMode, "mode_night_yes")) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        }else{
+        } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         }
     }
 
-    private void changeColorBottomNavigation(ModelPrimaryColor modelPrimaryColor){
-        int[][] states = new int[][] {
-                new int[] { android.R.attr.state_checked}, // state_checked
-                new int[] { }  //
+    private void changeColorBottomNavigation(ModelPrimaryColor modelPrimaryColor) {
+        int[][] states = new int[][]{
+                new int[]{android.R.attr.state_checked}, // state_checked
+                new int[]{}  //
         };
 
-        int[] colors = new int[] {
-                ContextCompat.getColor(this,modelPrimaryColor.getColorPrimary()),
-                ContextCompat.getColor(this,R.color.colorGrey50)};
+        int[] colors = new int[]{
+                ContextCompat.getColor(this, modelPrimaryColor.getColorPrimary()),
+                ContextCompat.getColor(this, R.color.colorGrey50)};
         ColorStateList dynamicColorList = new ColorStateList(states, colors);
 
         binding.layout.bnMain.setItemIconTintList(dynamicColorList);
         binding.layout.bnMain.setItemTextColor(dynamicColorList);
     }
+
     private void setUpFragment() {
         changeFragment(new FragmentAll());
         binding.layout.bnMain.setOnItemSelectedListener(item -> {
@@ -192,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             binding.layout.fabAdd.hide();
             showHideFabSavings(false);
             if (isFabOpen) startAnimationFabSavings();
-            isUserDailyFinance=user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan));
+            isUserDailyFinance = user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan));
 
             switch (item.getTitle().toString().toLowerCase()) {
                 case "records":
@@ -201,8 +240,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     binding.layout.fabAdd.show();
                     break;
                 case "analysis":
-                    if(isUserDailyFinance)
-                    fragment = new FragmentAnalysis();
+                    if (isUserDailyFinance)
+                        fragment = new FragmentAnalysis();
                     else fragment = new FragmentAnalysisSavings();
 
                     changeFragment(fragment);
@@ -228,6 +267,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void changeFragment(Fragment fragment) {
+
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.fragment_frame, fragment, fragment.getClass().getSimpleName()).addToBackStack(null).commit();
     }
@@ -289,16 +329,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (!isFabOpen) {
                 isFabOpen = true;
                 animatorSet.playTogether(animatorFabOpen, animatorFabSavingsTarget, animatorFabSavingsProgress);
-                isShowFabAddSavings(animatorFabSavingsProgress,binding.layout.fabAddSavingsProgress);
-                isShowFabAddSavings(animatorFabSavingsTarget,binding.layout.fabAddSavingsTarget);
+                isShowFabAddSavings(animatorFabSavingsProgress, binding.layout.fabAddSavingsProgress);
+                isShowFabAddSavings(animatorFabSavingsTarget, binding.layout.fabAddSavingsTarget);
             } else {
                 isFabOpen = false;
                 animatorSet.playTogether(animatorFabSavingsProgressClose, animatorFabSavingsTargetClose, animatorFabClose);
             }
             animatorSet.start();
 
-            isHideFabAddSavings(animatorFabSavingsProgressClose,binding.layout.fabAddSavingsProgress);
-            isHideFabAddSavings(animatorFabSavingsTargetClose,binding.layout.fabAddSavingsTarget);
+            isHideFabAddSavings(animatorFabSavingsProgressClose, binding.layout.fabAddSavingsProgress);
+            isHideFabAddSavings(animatorFabSavingsTargetClose, binding.layout.fabAddSavingsTarget);
 
             animatorSet = new AnimatorSet();
 
@@ -306,7 +346,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void isHideFabAddSavings(ObjectAnimator objectAnimator, ExtendedFloatingActionButton fabSavings){
+    private void isHideFabAddSavings(ObjectAnimator objectAnimator, ExtendedFloatingActionButton fabSavings) {
         objectAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -316,7 +356,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
 
     }
-    private void isShowFabAddSavings(ObjectAnimator objectAnimator, ExtendedFloatingActionButton fabSavings){
+
+    private void isShowFabAddSavings(ObjectAnimator objectAnimator, ExtendedFloatingActionButton fabSavings) {
         objectAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {

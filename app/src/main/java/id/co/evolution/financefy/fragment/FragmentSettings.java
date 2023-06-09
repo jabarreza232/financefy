@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.activity.NotificationActivity;
 import id.co.evolution.financefy.activity.SwitchThemeActivity;
 import id.co.evolution.financefy.databinding.FragmentSettingsBinding;
 import id.co.evolution.financefy.dialog.DialogSettingPin;
@@ -59,13 +60,17 @@ public class FragmentSettings extends Fragment {
             deleteCache(getActivity());
         });
 
+        binding.txtNotification.setOnClickListener(v->{
+            Intent i = new Intent(getContext(), NotificationActivity.class);
+            startActivity(i);
+        });
+
         binding.txtPinSetting.setOnClickListener(v->{
             DialogSettingPin dialogSettingPin = new DialogSettingPin(getContext(), getLayoutInflater(), new DialogSettingPin.DialogInterfaceCallback() {
                 @Override
                 public void onSubmit(String result) {
                     tinyDb.putString("pin", result);
                     tinyDb.putBoolean("isSettingPin", true);
-
                 }
             });
 

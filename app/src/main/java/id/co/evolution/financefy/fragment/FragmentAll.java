@@ -68,6 +68,7 @@ import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNestedFinance;
 import id.co.evolution.financefy.model.ModelNestedSavings;
+import id.co.evolution.financefy.model.ModelNotification;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
 import id.co.evolution.financefy.model.ModelUser;
@@ -640,6 +641,13 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     @SuppressLint("NotifyDataSetChanged")
     private void loadDataFinance(List<ModelFinance> data) {
         financeData = new ArrayList<>(data);
+        mainActivity.dataFinance = data;
+        String description = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(financeData), locale) + "\n" +
+                "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(financeData), locale);
+        ModelNotification modelNotification =new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), description);
+
+        mainActivity.helperNotification.reminderSet(mainActivity.isCheckedNotifFinance,modelNotification,getString(R.string.jurnal_keuangan),200);
+
         loadDataHeader(data);
         if (filterNominal != null)
             data = financeFilter.filterNominal(filterNominal, data);
@@ -659,6 +667,10 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
     private void loadDataSavings(List<ModelSavingsProgress> data) {
         savingsData = new ArrayList<>(data);
+        ModelNotification modelNotification =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(savingsData), locale));
+        mainActivity.helperNotification.reminderSet(mainActivity.isCheckedNotifSavings,modelNotification,getString(R.string.menabung),100);
+        modelSavings.setProcessValue(new SavingsFilter().totalValueByType(savingsData));
+        viewModelSavings.inputUpdateSavings("update",modelSavings);
         loadTotalSavingsTarget();
 
         if (filterNominal != null)
@@ -822,7 +834,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     private void loadTotalSavingsTarget() {
         viewModelSavings.findSavingsById(mainActivity.modelSavings.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings1 -> {
             if (modelSavings1 != null) {
-                mainActivity.modelSavings.setProcessValue(modelSavings1.getProcessValue());
+                modelSavings.setProcessValue(modelSavings1.getProcessValue());
                 setSavingsTarget();
                 loadDataHeaderSavings();
             }
