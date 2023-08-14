@@ -24,26 +24,26 @@ public class SavingsProgressRepository {
         return savingsDao.getAll();
     }
 
-    public LiveData<ModelSavingsProgress> getSavingsById(int id) {
-        return savingsDao.findById(id);
+    public LiveData<ModelSavingsProgress> getSavingsById(int id,String type_currency) {
+        return savingsDao.findById(id,type_currency);
     }
-    public LiveData<Integer> getTotalProcessValueByIdSavings(int id) {
-        return savingsDao.findTotalProcessValueByIdSavings(id);
-    }
-
-    public LiveData<List<ModelSavingsProgress>> getSavingsByDate(String date) {
-        return savingsDao.findByDate(date);
+    public LiveData<Integer> getTotalProcessValueByIdSavings(int id,String type_currency) {
+        return savingsDao.findTotalProcessValueByIdSavings(id,type_currency);
     }
 
-    public LiveData<List<ModelSavingsProgress>> getSavingsByWeek(List<String> date, int id_savings) {
-        return savingsDao.loadAllByWeek(date, id_savings);
+    public LiveData<List<ModelSavingsProgress>> getSavingsByDate(String date,String type_currency) {
+        return savingsDao.findByDate(date,type_currency);
     }
 
-    public LiveData<List<ModelSavingsProgress>> getSavingsByMonth(String month, int id_savings) {
-        return savingsDao.loadAllByMonth(month, id_savings);
+    public LiveData<List<ModelSavingsProgress>> getSavingsByWeek(List<String> date, int id_savings,String type_currency) {
+        return savingsDao.loadAllByWeek(date, id_savings,type_currency);
     }
-    public LiveData<List<ModelSavingsProgress>> getSavingsByIdSavings(int id_savings) {
-        return savingsDao.findByIdSavings(id_savings);
+
+    public LiveData<List<ModelSavingsProgress>> getSavingsByMonth(String month, int id_savings,String type_currency) {
+        return savingsDao.loadAllByMonth(month, id_savings,type_currency);
+    }
+    public LiveData<List<ModelSavingsProgress>> getSavingsByIdSavings(int id_savings,String type_currency) {
+        return savingsDao.findByIdSavings(id_savings,type_currency);
     }
 
     public static class InputUpdateSavings extends AsyncTask<Void, Void, Void> {

@@ -28,6 +28,11 @@
         <item>@string/pribadi</item>
         <item>@string/usaha</item>
     </array>
+
+    <array name="type_currency">
+        <item>@string/idr</item>
+        <item>@string/usd</item>
+    </array>
     <array name="type_finance">
         <item>@string/pemasukan</item>
         <item>@string/pengeluaran</item>
@@ -47,10 +52,15 @@
     <string name="pribadi">Pribadi</string>
     <string name="usaha">Usaha</string>
 
+
+    <string name="idr">IDR</string>
+    <string name="usd">USD</string>
+
     <string name="menabung">Menabung</string>
-    <string name="jurnal_keuangan">Jurnal Keuangan</string>
+    <string name="jurnal_keuangan">Jurnal Uang</string>
 
     <string name="semuanya">Semuanya</string>
+    <string name="description_notification">Note: Notifikasi akan diperbarui setiap hari nya</string>
     <string name="pemasukan">Pemasukan</string>
     <string name="pengeluaran">Pengeluaran</string>
     <string name="bulanan">Bulanan</string>
@@ -60,5 +70,6 @@
     <string name="year">Tahun</string>
     <string name="day">Hari</string>
     <string name="in_progress">Proses</string>
+    <string name="switch_theme">Ganti Tema</string>
 
 </resources>

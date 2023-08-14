@@ -3,11 +3,9 @@
 
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-
         android:id="@+id/place_form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/img_back"
         android:background="@drawable/shape_form">
 
         <ImageView
@@ -18,7 +16,8 @@
             android:layout_marginTop="10dp"
             android:background="?selectableItemBackgroundBorderless"
             android:padding="16dp"
-            android:src="@drawable/ic_close" />
+            android:src="@drawable/ic_close"
+            app:tint="?attr/colorOnSurface" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -33,7 +32,7 @@
                 android:fontFamily="@font/lato_bold"
                 android:padding="10dp"
                 android:text="Input User"
-                android:textColor="@color/blackTextColor"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="19sp" />
 
             <View
@@ -73,7 +72,7 @@
                     android:layout_height="wrap_content"
                     android:padding="16dp"
                     android:text="Type"
-                    android:textColor="@color/blackTextColor" />
+                    android:textColor="?android:attr/textColorPrimary" />
 
                 <ImageView
                     android:layout_width="wrap_content"
@@ -81,36 +80,74 @@
                     android:layout_alignParentRight="true"
                     android:padding="16dp"
                     android:src="@drawable/ic_arrow_drop_down"
-                    app:tint="@color/blackTextColor" />
+                    app:tint="?attr/colorOnSurface" />
 
 
             </RelativeLayout>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:weightSum="2">
+    <RelativeLayout
+        android:layout_weight="1"
+        android:id="@+id/place_category"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="10dp"
+        android:background="@drawable/shape_date">
 
-            <RelativeLayout
-                android:id="@+id/place_category"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/shape_date">
+        <TextView
+            android:id="@+id/txt_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Category"
+            android:textColor="?android:attr/textColorPrimary" />
 
-                <TextView
-                    android:id="@+id/txt_category"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="Category"
-                    android:textColor="@color/blackTextColor" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:padding="16dp"
-                    android:src="@drawable/ic_arrow_drop_down"
-                    app:tint="@color/blackTextColor" />
+        <ImageView
+            android:id="@+id/img_dropdown_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:padding="16dp"
+            android:src="@drawable/ic_arrow_drop_down"
+            app:tint="?attr/colorOnSurface" />
 
 
-            </RelativeLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_weight="1"
+        android:id="@+id/place_type_currency"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/shape_date">
+
+        <TextView
+            android:id="@+id/txt_type_currency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:text="Type Currency"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <ImageView
+            android:id="@+id/img_dropdown_type_currency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:padding="16dp"
+            android:src="@drawable/ic_arrow_drop_down"
+            app:tint="?attr/colorOnSurface" />
+
+
+    </RelativeLayout>
+
+</LinearLayout>
+
             <TextView
                 android:id="@+id/txt_header_target_savings"
                 android:layout_width="match_parent"
@@ -118,7 +155,7 @@
                 android:fontFamily="@font/lato_bold"
                 android:padding="10dp"
                 android:text="Input Target Savings"
-                android:textColor="@color/blackTextColor"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="19sp"
                 android:visibility="gone"/>
 
@@ -145,34 +182,76 @@
                     android:inputType="text" />
 
             </com.google.android.material.textfield.TextInputLayout>
-
-            <RelativeLayout
-                android:id="@+id/place_date"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/shape_date"
-                android:visibility="gone">
-
-                <TextView
-                    android:id="@+id/txt_date"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                >
+                <RelativeLayout
+                    android:layout_marginEnd="10dp"
+                    android:layout_weight="1"
+                    android:id="@+id/place_date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="Date"
-                    android:textColor="@color/blackTextColor" />
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/shape_date"
+                    android:visibility="gone"
+                    >
 
-                <ImageView
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:id="@+id/txt_date"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="16dp"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:paddingEnd="48dp"
+                        android:text="Date"
+                        android:textColor="?android:attr/textColorPrimary" />
+
+                    <ImageView
+                        android:id="@+id/img_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:padding="16dp"
+                        android:src="@drawable/ic_date_range"
+                        app:tint="?attr/colorOnSurface" />
+
+
+                </RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/place_type_currency_target_savings"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:visibility="gone"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:padding="16dp"
-                    android:src="@drawable/ic_date_range"
-                    app:tint="@color/blackTextColor" />
+                    android:layout_marginBottom="10dp"
+                    android:clickable="false"
+                    android:background="@drawable/shape_date">
+
+                    <TextView
+                        android:id="@+id/txt_type_currency_target"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:padding="16dp"
+                        android:text="Type Currency"
+                        android:textColor="@color/colorGrey50" />
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:padding="16dp"
+                        android:src="@drawable/ic_arrow_drop_down"
+                        app:tint="?attr/colorOnSurface" />
 
 
-            </RelativeLayout>
+                </RelativeLayout>
 
+            </LinearLayout>
             <RelativeLayout
                 android:id="@+id/place_target_value"
                 android:layout_width="match_parent"
@@ -217,12 +296,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/ubuntu_b"
-                    android:padding="16dp"
+                    android:padding="10dp"
                     android:text="Submit"
                     android:textAlignment="center"
                     android:textColor="@android:color/white" />
             </androidx.cardview.widget.CardView>
+
         </LinearLayout>
+
     </RelativeLayout>
 
 </layout>

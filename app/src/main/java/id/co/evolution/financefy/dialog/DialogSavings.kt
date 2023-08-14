@@ -2,6 +2,7 @@ package id.co.evolution.financefy.dialog
 
 import android.app.Dialog
 import android.content.Context
+import android.util.TypedValue
 import android.view.*
 import android.widget.Button
 import android.widget.LinearLayout
@@ -11,8 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import id.co.evolution.financefy.R
 import id.co.evolution.financefy.adapter.AdapterSavingsTarget
+import id.co.evolution.financefy.helper.TinyDb
 import id.co.evolution.financefy.helper.Tools
 import id.co.evolution.financefy.model.ModelSavings
+import java.util.*
 
 class DialogSavings(
     val context: Context,
@@ -25,9 +28,20 @@ class DialogSavings(
     private val btnAchieved: Button = findViewById(R.id.btn_achieved);
     private val btnAll: Button = findViewById(R.id.btn_all);
     private val placeEmpty: LinearLayout = findViewGroupById(R.id.place_empty)
+    val value:TypedValue= TypedValue()
+     var locale: Locale
+     var tinyDb:TinyDb
 
     init {
         dialog.setContentView(dialogView)
+        context.theme.resolveAttribute(android.R.attr.textColorPrimary,value,true)
+        tinyDb = TinyDb(context)
+        locale = if(tinyDb.getString("currency").equals("IDR",true)){
+            Tools.getLocaleIDN()
+        }else{
+            Tools.getLocaleUS()
+        }
+
     }
 
     fun showDialogSavings(mutableSavingsData: MutableList<ModelSavings>) {
@@ -43,7 +57,7 @@ class DialogSavings(
                 mutableSavingsData[position].title
             )
         }
-
+        adapter.setLocale(locale)
         var mutableListData: MutableList<ModelSavings> = mutableListOf()
 
         rvListSavingsTarget.layoutManager =
@@ -57,7 +71,7 @@ class DialogSavings(
                 R.drawable.shape_line_black,
                 R.drawable.shape_line_black
             )
-            setTextColorButton(R.color.white, R.color.blackTextColor, R.color.blackTextColor)
+            setTextColorButton(R.color.white, value.resourceId, value.resourceId)
 
             mutableSavingsData.forEach {
                 if (!it.getPercentage(context).contains(context.getString(R.string.achieved)))
@@ -74,7 +88,7 @@ class DialogSavings(
                 R.drawable.button_blue_background,
                 R.drawable.shape_line_black
             )
-            setTextColorButton(R.color.blackTextColor, R.color.white, R.color.blackTextColor)
+            setTextColorButton(value.resourceId, R.color.white, value.resourceId)
 
             mutableSavingsData.forEach {
                 if (it.getPercentage(context).contains(context.getString(R.string.achieved)))
@@ -90,7 +104,7 @@ class DialogSavings(
                 R.drawable.shape_line_black,
                 R.drawable.button_blue_background
             )
-            setTextColorButton(R.color.blackTextColor, R.color.blackTextColor, R.color.white)
+            setTextColorButton(value.resourceId, value.resourceId, R.color.white)
             adapter.bindData(mutableSavingsData)
             setUpPlaceEmpty(adapter)
         }

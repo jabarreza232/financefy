@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ListSavingsTargetBinding;
@@ -23,7 +24,7 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
     List<ModelSavings> data;
     MethodCallback methodCallback;
     Calendar today;
-
+    Locale locale;
 
 
     public AdapterSavingsTarget(List<ModelSavings> data, MethodCallback methodCallback) {
@@ -32,6 +33,10 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
         today = Calendar.getInstance();
         today.get(Calendar.YEAR);
         today.get(Calendar.MONTH);
+    }
+
+    public void setLocale(Locale locale) {
+        this.locale = locale;
     }
 
     public void bindData(List<ModelSavings>data){
@@ -57,7 +62,7 @@ public class AdapterSavingsTarget extends RecyclerView.Adapter<AdapterSavingsTar
         long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
         holder.binding.txtJudul.setText(modelSavings.getTitle());
         holder.binding.imgRemove.setVisibility(data.size() > 1 ? View.VISIBLE : View.GONE);
-        holder.binding.txtProgress.setText(Tools.convertToCurrency(modelSavings.getProcessValue()) + " s/d " + Tools.convertToCurrency(modelSavings.getTargetValue()));
+        holder.binding.txtProgress.setText(Tools.convertToCurrency(modelSavings.getProcessValue(),locale) + " s/d " + Tools.convertToCurrency(modelSavings.getTargetValue(),locale));
         holder.binding.progressSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         holder.binding.progressSavings.setMax(100);
         holder.binding.txtPercentage.setText(modelSavings.getPercentage(holder.itemView.getContext()) );

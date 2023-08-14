@@ -34,6 +34,7 @@ import id.co.evolution.financefy.adapter.AdapterCalculator;
 import id.co.evolution.financefy.databinding.DialogCalculatorBinding;
 import id.co.evolution.financefy.dummy.DummyCalculator;
 import id.co.evolution.financefy.helper.HelperCalculator;
+import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 
 public class DialogCalculator {
@@ -44,7 +45,7 @@ public class DialogCalculator {
     DialogInterfaceCallback dialogInterfaceCallback;
     String result = "0";
     DialogCalculatorBinding binding;
-
+    Locale locale;
 
     public DialogCalculator(Context context, LayoutInflater layoutInflater, DialogInterfaceCallback dialogInterfaceCallback) {
         this.context = context;
@@ -67,6 +68,8 @@ public class DialogCalculator {
         binding = DataBindingUtil.bind(dialogView);
         if(!result.equals("0"))
         binding.etAmount.setText(result);
+        TinyDb tinyDb = new TinyDb(context);
+        locale =tinyDb.getString("currency").equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         AdapterCalculator adapterCalculator = new AdapterCalculator(context, DummyCalculator.getDataCalculator(), (data, position) -> {
             List<String> dataList = (List<String>) data;
@@ -260,15 +263,10 @@ public class DialogCalculator {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().equals(result)) {
                     binding.etAmount.removeTextChangedListener(this);
-                    String cleanString = s.toString().replaceAll("[Rp,.]", "");
+                    String cleanString = s.toString().replaceAll("[Rp,.$]", "");
                     if (!cleanString.isEmpty()) {
                         double parsed = Double.parseDouble(cleanString);
-                        Locale localeID = new Locale("in", "ID");
-                        String formatted = NumberFormat.getCurrencyInstance(localeID).format((parsed));
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            formatted = formatted.replaceAll(",00", "");
-                        }
-                        formatted = Tools.convertCurrencyToValue(formatted);
+                        String formatted = Tools.convertToCurrency(parsed,locale);
                         result = formatted;
                         binding.etAmount.setText(formatted);
                         binding.etAmount.setSelection(formatted.length());

@@ -3,6 +3,7 @@ package id.co.evolution.financefy.fragment;
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS_TARGET;
 import static id.co.evolution.financefy.helper.Tools.calculatePercentage;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
+import static id.co.evolution.financefy.helper.Tools.modelPrimaryColor;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -29,6 +30,7 @@ import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -41,10 +43,14 @@ import id.co.evolution.financefy.databinding.FragmentAccountBinding;
 import id.co.evolution.financefy.dialog.DialogCreateUser;
 import id.co.evolution.financefy.dialog.DialogSavings;
 import id.co.evolution.financefy.helper.FinanceFilter;
+import id.co.evolution.financefy.helper.HelperNotification;
+import id.co.evolution.financefy.helper.SavingsFilter;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelNotification;
 import id.co.evolution.financefy.model.ModelSavings;
+import id.co.evolution.financefy.model.ModelSavingsProgress;
 import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.repository.SavingsProgressRepository;
@@ -52,6 +58,7 @@ import id.co.evolution.financefy.repository.SavingsRepository;
 import id.co.evolution.financefy.repository.UserRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 import id.co.evolution.financefy.viewmodel.ViewModelSavings;
+import id.co.evolution.financefy.viewmodel.ViewModelSavingsProgress;
 import id.co.evolution.financefy.viewmodel.ViewModelUser;
 
 @AndroidEntryPoint
@@ -77,19 +84,20 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     ViewModelUser viewModelUser;
     ViewModelSavings viewModelSavings;
     ViewModelFinance viewModelFinance;
-
+    public ViewModelSavingsProgress viewModelSavingsProgress;
     @Inject
     TinyDb tinyDb;
 
     boolean isAddSavings;
-    int count_savings;
+    int count_savings,count_users;
 
     DialogSavings dialogSavings;
     int id_savings_user = 0;
     long date_ship_millis;
     MainActivity mainActivity;
     CallbackOnActivityResult mCallbackOnActivityResult;
-
+    Locale locale;
+    HelperNotification helperNotification;
     //TODO NOTE SAVINGS : Menabung, FINANCE : JURNAL KEUANGAN
 
     public FragmentAccount() {
@@ -114,6 +122,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         today.get(Calendar.YEAR);
         prevNextYear = Calendar.getInstance();
         date_ship_millis = today.getTimeInMillis();
+        locale = mainActivity.user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
         isAddSavings = false;
         return binding.getRoot();
     }
@@ -131,17 +140,18 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         viewModelUser = new ViewModelProvider(this).get(ViewModelUser.class);
         viewModelSavings = new ViewModelProvider(this).get(ViewModelSavings.class);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
+        viewModelSavingsProgress = new ViewModelProvider(this).get(ViewModelSavingsProgress.class);
+        helperNotification=new HelperNotification(getContext());
 
+        viewModelSavingsProgress.init(savingsProgressRepository);
         viewModelUser.init(userRepository);
         viewModelFinance.init(financeRepository);
         viewModelSavings.init(savingsRepository);
-
 
         //get the spinner from the xml.
         refreshDataUser(null, null);
 
         refreshDataUserByCategory();
-
 
 
         binding.spinChooseAccount.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -180,7 +190,8 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     private void showDialogChoose() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Pilih Opsi");
-        final String[] tipe = {"Ubah Akun", "Hapus Akun"};
+
+        final String[] tipe = count_users>1? new String[]{"Ubah Akun", "Hapus Akun"} : new String[]{"Ubah Akun"};
 
 
         builder.setItems(tipe, (dialog, which) -> {
@@ -196,7 +207,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 //                    binding.rvList.getAdapter().notifyDataSetChanged();
 
                     new UserRepository.RemoveUser(mainActivity.user, userRepository.userDao).execute();
-
+                    if(mainActivity.modelSavings.getId()>0)
                     new SavingsProgressRepository.RemoveSavings(savingsProgressRepository.savingsDao, mainActivity.modelSavings.getId()).execute();
 
                     new SavingsRepository.RemoveSavings(savingsRepository.savingsDao, mainActivity.user.getId()).execute();
@@ -216,52 +227,55 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         AlertDialog dialog = builder.create();
         dialog.show();
     }
-
+    ModelSavings modelSavings = null;
     private void showDialogAddAccount(boolean isAddAccount) {
         String type = isAddAccount ? "create" : "update";
 
 
         dialogCreateUser = new DialogCreateUser(getContext(), getLayoutInflater(), getFragmentManager(), count_savings, mainActivity.user, mainActivity.modelSavings, (modelUser, modelSavings) -> {
             modelUser.setUuid(UUID.randomUUID().toString());
-            new UserRepository.InputUpdateUser(modelUser, type, userRepository.userDao)
-                    .execute();
+            this.modelSavings = modelSavings;
+            new UserRepository.InputUpdateUser(modelUser, type, userRepository.userDao, () -> {
+                isAddSavings = isAddAccount;
+                if (!isAddAccount) mainActivity.user = modelUser;
+                FragmentAccount.this.modelSavings = modelUser.getCategory().equalsIgnoreCase(getString(R.string.menabung)) ? modelSavings : new ModelSavings();
+                mainActivity.modelSavings = modelSavings;
+                tinyDb.putObject("savings", modelSavings);
+                tinyDb.putString("currency", modelUser.getType_currency());
 
-            isAddSavings = isAddAccount;
-            if (!isAddAccount) mainActivity.user = modelUser;
-            modelSavings = modelUser.getCategory().equalsIgnoreCase(getString(R.string.menabung)) ? modelSavings : new ModelSavings();
-            mainActivity.modelSavings = modelSavings;
-            tinyDb.putObject("savings", modelSavings);
+                refreshDataUser(modelUser, modelSavings);
+            }).execute();
 
-            refreshDataUser(modelUser, modelSavings);
         });
 
-        dialogCreateUser.showDialogCreateUser(isAddAccount);
+        dialogCreateUser.showDialogCreateUser(isAddAccount, mainActivity.modelPrimaryColor);
     }
 
     private void refreshDataUser(ModelUser modelUser, ModelSavings modelSavings) {
+
         viewModelUser.getAllUser().observe(getViewLifecycleOwner(), modelUsers -> {
+            count_users = modelUsers.size();
+            for (ModelUser user1 : modelUsers){
+                if (modelUser != null&&modelUser.getUuid().equalsIgnoreCase(user1.getUuid())) {
+                    Log.e("TAG", "showDialogAddAccount: " + new Gson().toJson(modelUser) + " : " + new Gson().toJson(modelSavings));
+                    if (modelSavings != null && modelSavings.getTitle()!=null) {
 
-            for (ModelUser modelUser1 : modelUsers) {
-                if (modelUser != null) {
-                    if (modelUser1.getUuid().equals(modelUser.getUuid())) {
-
-                        id_savings_user = modelUser1.getId();
-                        Log.e("TAG", "showDialogAddAccount: " + new Gson().toJson(modelUser1) + " : " + new Gson().toJson(modelSavings));
-                        if (modelSavings != null && modelSavings.getTitle() != null) {
-                            modelSavings.setId_savings_user(id_savings_user);
+                        viewModelSavings.findAllSavingsByIdUser(user1.getId(), user1.getType_currency()).observe(getViewLifecycleOwner(), savings -> {
+                            count_savings = savings.size();
                             isAddSavings = count_savings == 0;
                             String type = isAddSavings ? "create" : "update";
+                            if(modelSavings.getId_savings_user()==0)
+                                modelSavings.setId_savings_user(user1.getId());
 
-                            new SavingsRepository.InputUpdateSavings(modelSavings, type, savingsRepository.savingsDao).execute();
-                            isAddSavings = false;
-                            mainActivity.modelSavings = new ModelSavings();
+                            new SavingsRepository.InputUpdateSavings(modelSavings, type, savingsRepository.savingsDao, () -> {
+                                isAddSavings = false;
+                                refreshDataUserByCategory();
+                            }).execute();
+                        });
 
-                        }
                     }
                 }
             }
-
-            refreshDataUserByCategory();
 
             List<String> dataName = new ArrayList<>();
             for (ModelUser user1 : modelUsers) dataName.add(user1.getName());
@@ -272,27 +286,29 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             for (int i = 0; i < dataUser.size(); i++) {
                 if (dataUser.get(i).getId() == mainActivity.user.getId()) {
                     binding.spinChooseAccount.setSelection(i);
+                    refreshDataUserByCategory();
+
                 }
             }
 
+
             if (mainActivity.user != null) setDataUser(mainActivity.user);
+
         });
 
-        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(), savings -> {
-            //TODO Hanya Sebagai pengecekan user apakah target menabung ada atau tidak
-            // untuk kebutuhan visibility form category menabung.
-            count_savings = savings.size();
-        });
+        if (modelUser != null)
+            locale = modelUser.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
+
     }
 
 
     private void refreshDataFinance() {
 
-        viewModelFinance.getFinanceByUserId(mainActivity.user.getId()).observe(getViewLifecycleOwner(), modelFinance -> {
+        viewModelFinance.getFinanceByUserId(mainActivity.user.getId(), mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelFinance -> {
             dataFinance = modelFinance;
 
-            binding.layoutAccountFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(dataFinance)));
-            binding.layoutAccountFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(dataFinance)));
+            binding.layoutAccountFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(dataFinance), locale));
+            binding.layoutAccountFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(dataFinance), locale));
         });
 
 //
@@ -313,7 +329,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
     private void refreshDataSavings() {
 
-        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(), modelSavings -> {
+        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(), mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings -> {
             dataSavings = modelSavings;
 
             if (dataSavings.size() > 0) {
@@ -358,6 +374,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             }
         });
 
+
     }
 
     private void setDataSavings(ModelSavings modelSavings) {
@@ -367,8 +384,8 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
         tinyDb.putObject("savings", modelSavings);
         binding.layoutAccountSavings.txtChooseSavings.setText(modelSavings.getTitle());
-        binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue()));
-        binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue()));
+        binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue(), locale));
+        binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue(), locale));
         binding.layoutAccountSavings.txtPercentageSavings.setText(txtPercentage);
         binding.layoutAccountSavings.progressBarTargetSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutAccountSavings.progressBarTargetSavings.setMax(100);
@@ -383,10 +400,33 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         boolean visibleAccountSavings = user.getCategory().equalsIgnoreCase(getString(R.string.menabung));
         binding.layoutAccountSavings.placeAccountSavings.setVisibility(visibleAccountSavings ? View.VISIBLE : View.GONE);
         binding.layoutAccountFinanceJournal.placeAccountFinanceJournal.setVisibility(!visibleAccountSavings ? View.VISIBLE : View.GONE);
-        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(), savings -> {
+        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(), mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), savings -> {
             //TODO Hanya Sebagai pengecekan user apakah target menabung ada atau tidak
             // untuk kebutuhan visibility form category menabung.
             count_savings = savings.size();
+        });
+
+        locale = user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
+        tinyDb.putString("currency",user.getType_currency());
+
+        viewModelFinance.getFinanceByUserId(user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+            dataFinance = modelFinances;
+            boolean isChecked = tinyDb.getBoolean("isCheckedFinance");
+            String description = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinance), locale) + "\n" +
+                    "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinance), locale);
+            ModelNotification modelNotification =new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), description);
+
+            helperNotification.reminderSet(isChecked,modelNotification,getString(R.string.jurnal_keuangan),200);
+
+        });
+
+        if(mainActivity.modelSavings==null)
+            mainActivity.modelSavings = new ModelSavings();
+
+        viewModelSavingsProgress.findAllSavingsByIdSavings(mainActivity.modelSavings.getId(), mainActivity.modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
+            boolean isChecked = tinyDb.getBoolean("isCheckedSavings");
+            ModelNotification modelNotification =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSavings), locale));
+            helperNotification.reminderSet(isChecked,modelNotification,getString(R.string.menabung),100);
         });
     }
 

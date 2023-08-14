@@ -22,32 +22,32 @@ public interface FinanceDao {
     @Query("SELECT * FROM finance WHERE id_finance IN(:financeIds)")
     List<ModelFinance> loadAllbyIds(int[] financeIds);
 
-    @Query("SELECT * FROM finance WHERE date IN(:date) AND id_finance_user IN(:id_user)")
-    LiveData<List<ModelFinance>> loadAllbyWeek(List<String> date,int id_user);
+    @Query("SELECT * FROM finance WHERE date IN(:date) AND id_finance_user IN(:id_user)AND type_currency IN(:type_currency)")
+    LiveData<List<ModelFinance>> loadAllbyWeek(List<String> date,int id_user,String type_currency);
 
-    @Query("SELECT * FROM finance WHERE month IN(:month) AND id_finance_user IN(:id_user)")
-    LiveData<List<ModelFinance>> loadAllbyMonth(String month, int id_user);
+    @Query("SELECT * FROM finance WHERE month IN(:month) AND id_finance_user IN(:id_user)AND type_currency IN(:type_currency)")
+    LiveData<List<ModelFinance>> loadAllbyMonth(String month, int id_user,String type_currency);
 
-    @Query("SELECT * FROM finance WHERE month IN(:year) AND id_finance_user IN(:id_user)")
-    LiveData<List<ModelFinance>> loadAllByYear(String year, int id_user);
+    @Query("SELECT * FROM finance WHERE month IN(:year) AND id_finance_user IN(:id_user)AND type_currency IN(:type_currency)")
+    LiveData<List<ModelFinance>> loadAllByYear(String year, int id_user,String type_currency);
 
-    @Query("SELECT * FROM finance WHERE type LIKE:type")
-    LiveData<List<ModelFinance>> findByType(String type);
+    @Query("SELECT * FROM finance WHERE type LIKE:type AND type_currency IN(:type_currency)")
+    LiveData<List<ModelFinance>> findByType(String type,String type_currency);
 
 
-    @Query("SELECT * FROM finance WHERE type LIKE:type AND month IN(:month)AND id_finance_user IN(:id_user)")
-    LiveData<List<ModelFinance>> findByTypeAndMonth(String type, String month,int id_user);
+    @Query("SELECT * FROM finance WHERE type LIKE:type AND month IN(:month)AND id_finance_user IN(:id_user)AND type_currency IN(:type_currency)")
+    LiveData<List<ModelFinance>> findByTypeAndMonth(String type, String month,int id_user,String type_currency);
 
-    @Query("SELECT * FROM finance WHERE type LIKE:type AND date IN(:date)AND id_finance_user IN(:id_user)")
-    LiveData<List<ModelFinance>> findByTypeAndWeek(String type, List<String> date,int id_user);
+    @Query("SELECT * FROM finance WHERE type LIKE:type AND date IN(:date)AND id_finance_user IN(:id_user)AND type_currency IN(:type_currency)")
+    LiveData<List<ModelFinance>> findByTypeAndWeek(String type, List<String> date,int id_user,String type_currency);
 
-    @Query("SELECT * FROM finance WHERE id_finance =:id LIMIT 1")
-    LiveData<ModelFinance> findById(int id);
+    @Query("SELECT * FROM finance WHERE id_finance =:id AND type_currency IN(:type_currency) LIMIT 1")
+    LiveData<ModelFinance> findById(int id,String type_currency);
 
 
     @Transaction
-    @Query("SELECT * FROM finance WHERE id_finance_user =:id ")
-    LiveData<List<ModelFinance>> findFinanceByUserId(int id);
+    @Query("SELECT * FROM finance WHERE id_finance_user =:id AND type_currency IN(:type_currency)")
+    LiveData<List<ModelFinance>> findFinanceByUserId(int id,String type_currency);
 
     @Insert
     void insertAll(ModelFinance... finances);
@@ -55,8 +55,8 @@ public interface FinanceDao {
     @Update
     void update(ModelFinance finance);
 
-    @Query("UPDATE finance SET count=:amount WHERE id_finance =:id_finance AND id_finance_user=:id_user")
-    void updateByIdUser(String amount, int id_finance, int id_user);
+    @Query("UPDATE finance SET amount=:amount WHERE id_finance =:id_finance AND id_finance_user=:id_user")
+    void updateByIdUser(double amount, int id_finance, int id_user);
 
     @Delete
     void delete(ModelFinance finance);

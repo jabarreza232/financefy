@@ -38,7 +38,8 @@
                         android:layout_below="@id/place_description"
                         android:layout_alignParentEnd="true"
                         android:padding="5dp"
-                        android:src="@drawable/ic_edit" />
+                        android:src="@drawable/ic_edit"
+                        app:tint="?attr/colorOnSurface"/>
 
                     <LinearLayout
                         android:id="@+id/place_description"
@@ -60,7 +61,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="5dp"
                             android:fontFamily="@font/lato_bold"
-                            android:textColor="@android:color/black"
+                            android:textColor="?android:textColorPrimary"
                             android:textSize="15sp"
                             tools:text="Dapat Uang jajan" />
 
@@ -71,7 +72,7 @@
                             android:layout_marginTop="5dp"
                             android:ellipsize="end"
                             android:fontFamily="@font/ubuntu_r"
-                            android:textColor="@android:color/black"
+                            android:textColor="?android:textColorPrimary"
                             android:textSize="13sp"
                             tools:text="Buat Sehari hari" />
 
@@ -88,7 +89,7 @@
                                 android:layout_gravity="start"
                                 android:layout_weight="1"
                                 android:fontFamily="@font/ubuntu_r"
-                                android:textColor="@android:color/black"
+                                android:textColor="?android:textColorPrimary"
                                 android:textSize="13sp"
                                 tools:text="Rp.15000" />
 

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.callback.MethodCallback;
@@ -25,6 +26,7 @@ public class AdapterNestedSavings extends RecyclerView.Adapter<AdapterNestedSavi
     List<ModelSavingsProgress> data;
     MethodCallback methodCallback;
     int total_value;
+    Locale locale;
 
     public AdapterNestedSavings(int total_value, List<ModelSavingsProgress> data, MethodCallback methodCallback) {
         this.total_value = total_value;
@@ -32,6 +34,9 @@ public class AdapterNestedSavings extends RecyclerView.Adapter<AdapterNestedSavi
         this.methodCallback = methodCallback;
     }
 
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
 
     @NonNull
     @Override
@@ -51,8 +56,7 @@ public class AdapterNestedSavings extends RecyclerView.Adapter<AdapterNestedSavi
         holder.binding.txtJudul.setText(data.get(i).getTitle());
         holder.binding.keterangan.setVisibility(!data.get(i).getDescription().isEmpty() ? View.VISIBLE : View.GONE);
         holder.binding.keterangan.setText(data.get(i).getDescription());
-        holder.binding.jumlah.setText(Tools.convertToCurrency(data.get(i).getProcessValue()));
-
+        holder.binding.jumlah.setText(Tools.convertToCurrency(data.get(i).getProcessValue(),locale));
 
         holder.binding.txtPercentage.setText(data.get(i).getPercentage(total_value)+"%");
         Log.e("TAG", "onBindViewHolder: "+total_value);

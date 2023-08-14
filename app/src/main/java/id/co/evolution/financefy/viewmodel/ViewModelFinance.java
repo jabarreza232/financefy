@@ -26,40 +26,40 @@ public class ViewModelFinance extends ViewModel {
     }
 
 
-    public LiveData<List<ModelFinance>> getFinanceByMonth(String month, int id_user) {
-        return financeRepository.getFinanceByMonth(month, id_user);
-    } public LiveData<List<ModelFinance>> getFinanceByYear(String year, int id_user) {
-        return financeRepository.getFinanceByYear(year, id_user);
+    public LiveData<List<ModelFinance>> getFinanceByMonth(String month, int id_user, String type_currency) {
+        return financeRepository.getFinanceByMonth(month, id_user,type_currency);
+    } public LiveData<List<ModelFinance>> getFinanceByYear(String year, int id_user, String type_currency) {
+        return financeRepository.getFinanceByYear(year, id_user,type_currency);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date, int id_user) {
-        return financeRepository.getFinanceByWeek(date, id_user);
+    public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date, int id_user, String type_currency) {
+        return financeRepository.getFinanceByWeek(date, id_user,type_currency);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByType(String type) {
-        return financeRepository.getFinanceByType(type);
+    public LiveData<List<ModelFinance>> getFinanceByType(String type, String type_currency) {
+        return financeRepository.getFinanceByType(type, type_currency);
     }
 
-    public LiveData<ModelFinance> getFinanceById(int id) {
-        return financeRepository.getModelFinanceById(id);
+    public LiveData<ModelFinance> getFinanceById(int id, String type_currency) {
+        return financeRepository.getModelFinanceById(id, type_currency);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByUserId(int id) {
-        return financeRepository.getFinanceByUserId(id);
+    public LiveData<List<ModelFinance>> getFinanceByUserId(int id, String type_currency) {
+        return financeRepository.getFinanceByUserId(id, type_currency);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(String type, String month, int id_user) {
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(String type, String month, int id_user, String type_currency) {
         if (type.equalsIgnoreCase(Tools.TYPE_FILTER.SEMUANYA.toString()))
-            return financeRepository.getFinanceByMonth(month, id_user);
+            return financeRepository.getFinanceByMonth(month, id_user, type_currency);
         else
-            return financeRepository.getFinanceByTypeAndMonth(type, month, id_user);
+            return financeRepository.getFinanceByTypeAndMonth(type, month, id_user, type_currency);
     }
 
-    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(String type, List<String> date, int id_user) {
+    public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(String type, List<String> date, int id_user, String type_currency) {
         if (type.equalsIgnoreCase(Tools.TYPE_FILTER.SEMUANYA.toString()))
-            return financeRepository.getFinanceByWeek(date, id_user);
+            return financeRepository.getFinanceByWeek(date, id_user, type_currency);
         else
-        return financeRepository.getFinanceByTypeAndWeek(type, date, id_user);
+        return financeRepository.getFinanceByTypeAndWeek(type, date, id_user, type_currency);
     }
 
     public void inputUpdateFinance(String type, ModelFinance modelFinance) {

@@ -253,7 +253,7 @@ public class TinyDb {
      * @param key SharedPreferences key
      * @return String value at 'key' or "" (empty String) if key not found
      */
-    private String getString(String key) {
+    public String getString(String key) {
         return preferences.getString(key, "");
     }
 
@@ -294,18 +294,18 @@ public class TinyDb {
     }
 
 
-//    public ArrayList<Object> getListObject(String key, Class<?> mClass){
-//    	Gson gson = new Gson();
-//
-//    	ArrayList<String> objStrings = getListString(key);
-//    	ArrayList<Object> objects =  new ArrayList<Object>();
-//
-//    	for(String jObjString : objStrings){
-//    		Object value  = gson.fromJson(jObjString,  mClass);
-//    		objects.add(value);
-//    	}
-//    	return objects;
-//    }
+    public ArrayList<Object> getListObject(String key, Class<?> mClass){
+    	Gson gson = new Gson();
+
+    	ArrayList<String> objStrings = getListString(key);
+    	ArrayList<Object> objects =  new ArrayList<Object>();
+
+    	for(String jObjString : objStrings){
+    		Object value  = gson.fromJson(jObjString,  mClass);
+    		objects.add(value);
+    	}
+    	return objects;
+    }
 
 
     public <T> T getObject(String key, Class<T> classOfT){
@@ -394,7 +394,7 @@ public class TinyDb {
      * @param key   SharedPreferences key
      * @param value String value to be added
      */
-    private void putString(String key, String value) {
+    public void putString(String key, String value) {
         checkForNullKey(key);
         checkForNullValue(value);
         preferences.edit().putString(key, value).apply();

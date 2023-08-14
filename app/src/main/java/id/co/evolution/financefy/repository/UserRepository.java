@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -38,11 +39,18 @@ public class UserRepository {
         ModelUser modelUser;
         String type;
         UserDao userDao;
-
+        MethodCallback methodCallback;
         public InputUpdateUser(ModelUser modelUser, String type, UserDao userDao) {
             this.modelUser = modelUser;
             this.type = type;
             this.userDao = userDao;
+        }
+
+        public InputUpdateUser(ModelUser modelUser, String type, UserDao userDao,MethodCallback methodCallback) {
+            this.modelUser = modelUser;
+            this.type = type;
+            this.userDao = userDao;
+            this.methodCallback = methodCallback;
         }
 
         @Override
@@ -58,6 +66,11 @@ public class UserRepository {
         @Override
         protected void onPostExecute(LiveData<List<ModelUser>> unused) {
             super.onPostExecute(unused);
+            if (methodCallback!=null)
+            methodCallback.onPostExecute();
+        }
+        public interface MethodCallback{
+            void onPostExecute();
         }
     }
 

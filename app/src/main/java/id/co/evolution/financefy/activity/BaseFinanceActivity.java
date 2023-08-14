@@ -11,10 +11,15 @@ import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.util.Calendar;
 
+import javax.inject.Inject;
+
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.dialog.DialogFinance;
+import id.co.evolution.financefy.helper.TinyDb;
+import id.co.evolution.financefy.helper.Tools;
+import id.co.evolution.financefy.model.ModelPrimaryColor;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
 public class BaseFinanceActivity extends AppCompatActivity {
@@ -28,7 +33,14 @@ public class BaseFinanceActivity extends AppCompatActivity {
     public Calendar cur_calendar = Calendar.getInstance();
     public ViewModelFinance viewModelFinance;
     public DialogCalculator dialogCalculator;
+    @Inject
+    TinyDb tinyDb;
+    public ModelPrimaryColor modelPrimaryColor= Tools.modelPrimaryColor;
+
+
     public void showDatePickerDialog() {
+        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+
         DatePickerDialog datePickerDialog = DatePickerDialog.newInstance((view, year, monthOfYear, dayOfMonth) -> {
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.YEAR, year);
@@ -44,7 +56,7 @@ public class BaseFinanceActivity extends AppCompatActivity {
 
         datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR), cur_calendar.get(Calendar.YEAR));
         datePickerDialog.setMaxDate(cur_calendar);
-        datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
+        datePickerDialog.setAccentColor(getResources().getColor(modelPrimaryColor.getColorPrimary()));
         datePickerDialog.show(getSupportFragmentManager(), "PickerDialog");
     }
 
@@ -56,7 +68,7 @@ public class BaseFinanceActivity extends AppCompatActivity {
                 binding.txtKategori.setText(category);
             }
         });
-        dialogFinance.showDialogCategory(arrayCategoryFromResource);
+        dialogFinance.showDialog(arrayCategoryFromResource,"Pilih Kategori");
     }
 
     public void showDialogType() {
@@ -69,6 +81,6 @@ public class BaseFinanceActivity extends AppCompatActivity {
             category = arrayCategory[0];
             binding.txtType.setText(type);
         });
-        dialogFinance.showDialogType(R.array.type_finance);
+        dialogFinance.showDialog(R.array.type_finance,"Pilih Tipe");
     }
 }

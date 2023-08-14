@@ -8,7 +8,6 @@
     android:id="@+id/linearlayout_finance_journal"
     android:layout_marginEnd="10dp"
     android:layout_marginBottom="10dp"
-    android:visibility="gone"
     android:orientation="horizontal"
     android:weightSum="3"
     xmlns:android="http://schemas.android.com/apk/res/android">
@@ -26,7 +25,7 @@
             android:fontFamily="@font/ubuntu_b"
             android:text="PEMASUKAN"
             android:textAlignment="center"
-            android:textColor="@color/blackTextColor"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="13sp" />
 
         <TextView
@@ -35,7 +34,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/ubuntu_r"
             android:text="Rp.0"
-            android:background="@color/white"
+            android:background="?attr/colorSurface"
             android:textAlignment="center"
             android:textColor="@color/green"
             android:textSize="13sp" />
@@ -55,7 +54,7 @@
             android:fontFamily="@font/ubuntu_b"
             android:text="PENGELUARAN"
             android:textAlignment="center"
-            android:textColor="@color/blackTextColor"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="13sp" />
 
         <TextView
@@ -64,7 +63,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/ubuntu_r"
             android:text="Rp.0"
-            android:background="@color/white"
+            android:background="?attr/colorSurface"
             android:textAlignment="center"
             android:textColor="@color/red"
             android:textSize="13sp" />
@@ -85,7 +84,7 @@
             android:fontFamily="@font/ubuntu_b"
             android:text="TOTAL"
             android:textAlignment="center"
-            android:textColor="@color/blackTextColor"
+            android:textColor="?android:attr/textColorPrimary"
             android:textSize="13sp" />
 
         <TextView
@@ -94,7 +93,7 @@
             android:layout_height="wrap_content"
             android:fontFamily="@font/ubuntu_r"
             android:text="Rp.0"
-            android:background="@color/white"
+            android:background="?attr/colorSurface"
             android:textAlignment="center"
             android:textColor="@color/green"
             android:textSize="13sp" />

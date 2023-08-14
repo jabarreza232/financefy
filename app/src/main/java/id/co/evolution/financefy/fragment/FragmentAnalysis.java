@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -56,6 +57,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -96,6 +98,7 @@ public class FragmentAnalysis extends Fragment {
     FinanceFilter financeFilter;
     String filterType, filterPeriod;
     String month;
+    TypedValue value = new TypedValue();
     @Inject
     LocalizedWeekHelper localizedWeekHelper;
     int prevNextWeek = 0;
@@ -128,6 +131,8 @@ public class FragmentAnalysis extends Fragment {
     MainActivity mainActivity;
     @Inject
     TinyDb tinyDb;
+    Locale locale;
+
     public enum TYPE_CHART {
         PIE_CHART,
         BAR_CHART
@@ -156,6 +161,8 @@ public class FragmentAnalysis extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_analysis, container, false);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
         user = mainActivity.user;
+        Tools.setBackgroundColorView(binding.llAppBar,mainActivity.modelPrimaryColor);
+        getActivity().getTheme().resolveAttribute(android.R.attr.textColorPrimary, value, true);
 
         Log.e("cek_list_week: ", localizedWeekHelper.getFirstDay(-7).substring(0, (localizedWeekHelper.getFirstDay(-7).length() - 3)));
         setHasOptionsMenu(true);
@@ -175,6 +182,7 @@ public class FragmentAnalysis extends Fragment {
         filterPeriod = getString(R.string.bulanan);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelUser = new ViewModelProvider(this).get(ViewModelUser.class);
+        locale =mainActivity.user.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         viewModelUser.init(userRepository);
         viewModelFinance.init(financeRepository);
@@ -190,7 +198,7 @@ public class FragmentAnalysis extends Fragment {
 
         binding.placeMonth.setOnClickListener(v -> showDialogMonthPicker());
 
-        binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
+        binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.colorGrey50)));
         binding.btnNext.setEnabled(false);
 
         binding.btnPrev.setOnClickListener(v -> {
@@ -205,14 +213,14 @@ public class FragmentAnalysis extends Fragment {
 
                 nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.white)));
                 else
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.colorGrey50)));
 
                 binding.btnNext.setEnabled(nextWeekEnabled);
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(), user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(), user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -240,7 +248,7 @@ public class FragmentAnalysis extends Fragment {
 
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(), user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
+                viewModelFinance.getFinanceByTypeAndWeek(filterType, getListDateWeek(), user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
                     if (modelFinances != null) {
                         loadData(modelFinances);
                     }
@@ -295,7 +303,7 @@ public class FragmentAnalysis extends Fragment {
             switch (which) {
                 case 0:
                     mPositionItem = position;
-                    mCallbackOnActivityResult.updateDataFinance(data, position,user.getId());
+                    mCallbackOnActivityResult.updateDataFinance(data, position,user);
                     dialog.dismiss();
                     break;
                 case 1:
@@ -387,7 +395,7 @@ public class FragmentAnalysis extends Fragment {
         nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
 
         if (filterPeriod.equalsIgnoreCase(getString(R.string.bulanan))) {
-            viewModelFinance.getFinanceByTypeAndMonth(type, month, user.getId()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+            viewModelFinance.getFinanceByTypeAndMonth(type, month, user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
                 @Override
                 public void onChanged(List<ModelFinance> modelFinances) {
                     if (modelFinances != null) loadData(modelFinances);
@@ -401,7 +409,7 @@ public class FragmentAnalysis extends Fragment {
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             }
             binding.btnNext.setEnabled(nextWeekEnabled);
-            viewModelFinance.getFinanceByTypeAndWeek(type, getListDateWeek(), user.getId()).observe(getViewLifecycleOwner(), modelFinances -> {
+            viewModelFinance.getFinanceByTypeAndWeek(type, getListDateWeek(), user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
                 if (modelFinances != null) loadData(modelFinances);
             });
         }
@@ -440,7 +448,7 @@ public class FragmentAnalysis extends Fragment {
             binding.btnNext.setEnabled(false);
         }
 
-        viewModelFinance.getFinanceByTypeAndMonth(filterType, month, user.getId()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+        viewModelFinance.getFinanceByTypeAndMonth(filterType, month, user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
             @Override
             public void onChanged(List<ModelFinance> modelFinances) {
                 if (modelFinances != null) loadData(modelFinances);
@@ -456,8 +464,10 @@ public class FragmentAnalysis extends Fragment {
         data = financeFilter.listAnalysis(data, filterType);
 
         adapter = new AdapterAnalysisFinance(getActivity(), data, this::showDialog);
+        adapter.setLocale(locale);
         binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.rvList.setAdapter(adapter);
+
         adapter.notifyDataSetChanged();
 
         binding.placeEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
@@ -474,9 +484,9 @@ public class FragmentAnalysis extends Fragment {
 
     private void loadDataHeader(List<ModelFinance> data) {
         long total = (financeFilter.totalIncome(data) - financeFilter.totalExpense(data));
-        binding.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data)));
-        binding.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data)));
-        binding.txtTotalAll.setText(convertToCurrency(total));
+        binding.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data),locale));
+        binding.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data),locale));
+        binding.txtTotalAll.setText(convertToCurrency(total,locale));
         binding.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.green));
     }
 
@@ -523,6 +533,7 @@ public class FragmentAnalysis extends Fragment {
             return dataSet;
         }
 
+        @SuppressLint("ResourceType")
         @Override
         protected void onPostExecute(PieDataSet pieDataSet) {
             super.onPostExecute(pieDataSet);
@@ -542,13 +553,15 @@ public class FragmentAnalysis extends Fragment {
             l.setYEntrySpace(0f);
             l.setYOffset(0f);
             l.setTextSize(13);
+            l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
 
             l.setCustom(legendEntries);
             binding.pieChartAnalysis.animateXY(2000, 2000);
             binding.pieChartAnalysis.getDescription().setEnabled(false);
             binding.pieChartAnalysis.setCenterText(filterType);
             binding.pieChartAnalysis.setCenterTextSize(17);
-            binding.pieChartAnalysis.setCenterTextColor(ContextCompat.getColor(getContext(), R.color.blackTextColor));
+            binding.pieChartAnalysis.setNoDataTextColor(Color.BLACK);
+            binding.pieChartAnalysis.setCenterTextColor(Color.BLACK);
             binding.pieChartAnalysis.setCenterTextTypeface(Typeface.DEFAULT_BOLD);
             binding.pieChartAnalysis.setPaddingRelative(10, 10, 10, 10);
 
@@ -581,7 +594,6 @@ public class FragmentAnalysis extends Fragment {
         float groupSpace = 0.08f;
         float barSpace = 0.02f; // x3 DataSet
         float barWidth = 0.28f; // x3 DataSet
-
 
         List<ModelFinance> data;
         List<String> listDate;
@@ -724,6 +736,7 @@ public class FragmentAnalysis extends Fragment {
             return barDataSets;
         }
 
+        @SuppressLint("ResourceType")
         @Override
         protected void onPostExecute(List<IBarDataSet> barDataSets) {
 
@@ -755,6 +768,7 @@ public class FragmentAnalysis extends Fragment {
             l.setXEntrySpace(4f);
             l.setWordWrapEnabled(true);
             l.setYOffset(6f);
+            l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
 
 
             XAxis xAxis = binding.barChartAnalysis.getXAxis();
@@ -765,6 +779,7 @@ public class FragmentAnalysis extends Fragment {
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
 
             xAxis.setLabelCount(listDate.size());
+            xAxis.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
             xAxis.setValueFormatter(new ValueFormatter() {
                 @Override
                 public String getFormattedValue(float value) {
@@ -810,6 +825,7 @@ public class FragmentAnalysis extends Fragment {
 
             leftAxis.setDrawGridLines(false);
             leftAxis.setSpaceTop(35f);
+            leftAxis.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
             leftAxis.setAxisMinimum(0f); // this replaces setStartAtZero(true)
             binding.barChartAnalysis.getAxisRight().setEnabled(false);
             binding.barChartAnalysis.invalidate();

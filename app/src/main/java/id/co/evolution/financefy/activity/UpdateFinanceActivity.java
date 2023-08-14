@@ -47,8 +47,11 @@ import id.co.evolution.financefy.db.FinanceDB;
 import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.dialog.DialogFinance;
+import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelPrimaryColor;
+import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFactory;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
@@ -58,16 +61,26 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
 
 
     ModelFinance modelFinance;
+    ModelUser modelUser;
     int position,id_user;
+    @Inject
+    TinyDb tinyDb;
+    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
 
     @Inject
     FinanceRepository financeRepository;
+    Locale locale;
 
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
+
+        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+        Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
+        Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
+
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow();
@@ -77,8 +90,10 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
         position = getIntent().getIntExtra("position", 0);
-        id_user = getIntent().getIntExtra("id_user", 0);
-        viewModelFinance.getFinanceById(getIntent().getIntExtra("id", 0)).observe(this, modelFinance -> {
+        modelUser = (ModelUser) getIntent().getSerializableExtra("user");
+        locale =modelUser.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+
+        viewModelFinance.getFinanceById(getIntent().getIntExtra("id",0), modelUser.getType_currency()).observe(this, modelFinance -> {
             this.modelFinance = modelFinance;
             loadData();
         });
@@ -94,17 +109,13 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().equals(jumlah)) {
                     binding.etAmount.removeTextChangedListener(this);
-                    String cleanString = s.toString().replaceAll("[Rp,.]", "");
+                    String cleanString = s.toString().replaceAll("[Rp,.$]", "");
                     if (!cleanString.isEmpty()) {
                         double parsed = Double.parseDouble(cleanString);
-                        Locale localeID = new Locale("in", "ID");
-                        String formatted = NumberFormat.getCurrencyInstance(localeID).format((parsed));
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            formatted = formatted.replaceAll(",00", "");
-                        }
-                        jumlah = formatted;
-                        binding.etAmount.setText(formatted);
-                        binding.etAmount.setSelection(formatted.length());
+
+                        jumlah = Tools.convertToCurrency(parsed,locale);
+                        binding.etAmount.setText(Tools.convertToCurrency(parsed,locale));
+                        binding.etAmount.setSelection(Tools.convertToCurrency(parsed,locale).length());
                     }
 
                     binding.etAmount.addTextChangedListener(this);
@@ -132,7 +143,7 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
 
         type = modelFinance.getTipe();
         category = modelFinance.getKategori();
-        jumlah = modelFinance.getJumlah();
+        jumlah = modelFinance.getJumlahDesc(locale);
         date = modelFinance.getDate();
         month = modelFinance.getMonth();
 
@@ -158,7 +169,7 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
                 break;
             case R.id.btn_calculator:
                 dialogCalculator = new DialogCalculator(this, getLayoutInflater(), Tools.convertCurrencyToValue(jumlah), result -> {
-                    jumlah = Tools.convertToCurrency(result);
+                    jumlah = Tools.convertToCurrency(result,locale);
                     binding.etAmount.setText(jumlah);
                 });
                 dialogCalculator.show();
@@ -187,12 +198,13 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
                                 ModelFinance model = new ModelFinance();
                                 model.setId(modelFinance.getId());
                                 model.setDate(date);
-                                model.setJumlah(jumlah);
+                                model.setJumlah(Tools.replaceCurrencyStringToDouble(jumlah));
                                 model.setTipe(type);
+                                model.setType_currency(modelUser.getType_currency());
                                 model.setKategori(category);
                                 model.setKeterangan(binding.etDescription.getText().toString().trim());
                                 model.setMonth(month);
-                                model.setId_finance_user(id_user);
+                                model.setId_finance_user(modelUser.getId());
                                 viewModelFinance.inputUpdateFinance("Update", model);
                                 Intent intent = new Intent();
                                 intent.putExtra("finance", model);

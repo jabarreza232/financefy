@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.vipulasri.timelineview.TimelineView;
 
 import java.util.List;
+import java.util.Locale;
 
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.callback.MethodCallback;
@@ -26,6 +27,7 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
     Context context;
     List<ModelFinance> data;
     MethodCallback methodCallback;
+    Locale locale;
 
     public AdapterNestedFinance(Context context, List<ModelFinance> data, MethodCallback methodCallback) {
         this.context = context;
@@ -33,6 +35,9 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
         this.methodCallback = methodCallback;
     }
 
+    public void setLocale(Locale locale) {
+        this.locale = locale;
+    }
 
     @NonNull
     @Override
@@ -53,7 +58,7 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
         holder.binding.txtJudul.setText(data.get(i).getKategori());
         holder.binding.keterangan.setVisibility(!data.get(i).getKeterangan().isEmpty() ? View.VISIBLE : View.GONE);
         holder.binding.keterangan.setText(data.get(i).getKeterangan());
-        holder.binding.jumlah.setText(data.get(i).getJumlah());
+        holder.binding.jumlah.setText(data.get(i).getJumlahDesc(locale));
 
         if (data.get(i).getTipe().equalsIgnoreCase("pengeluaran")) {
             holder.binding.jumlah.setTextColor(ContextCompat.getColor(context, R.color.red));

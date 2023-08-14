@@ -5,19 +5,20 @@ import android.content.Context
 import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
 import id.co.evolution.financefy.R
+import id.co.evolution.financefy.helper.TinyDb
 import id.co.evolution.financefy.helper.Tools
+import id.co.evolution.financefy.model.ModelPrimaryColor
 import id.co.evolution.financefy.model.ModelSavings
 import id.co.evolution.financefy.model.ModelUser
-import java.text.NumberFormat
 import java.util.*
 
 class DialogCreateUser(
@@ -32,6 +33,7 @@ class DialogCreateUser(
     lateinit var dialogCreateUserCallback: DialogCreateUserCallback
     var jumlah = ""
     var type = ""
+    var type_currency = ""
     var category = ""
     var date_target = ""
     var proccess_value = ""
@@ -53,7 +55,10 @@ class DialogCreateUser(
     private var tilTitle: TextInputLayout
     private var placeTarget: RelativeLayout
     private var placeDate: RelativeLayout
+    private var placeTypeCurrencyTarget: RelativeLayout
     private var txtType: TextView
+    private var txtTypeCurrency: TextView
+    private var txtTypeCurrencyTarget: TextView
     private var txtDate: TextView
     private var txtHeaderTargetSavings: TextView
     private var viewLineHeaderSavings: View
@@ -62,6 +67,11 @@ class DialogCreateUser(
     private var btnSubmit: CardView
     private var btnCalculator: Button
     private var btnClose: ImageView
+    private var imgDropDownTypeCurrency: ImageView
+    private var imgDropDownCategory: ImageView
+    private lateinit var tinyDb:TinyDb
+    lateinit var locale:Locale
+
 
     init {
         dialog.setContentView(dialogView)
@@ -73,8 +83,11 @@ class DialogCreateUser(
         tilTitle = findViewById(R.id.til_title)
         etTitle = findViewById(R.id.et_title)
         placeTarget = findViewById(R.id.place_target_value)
+        placeTypeCurrencyTarget = findViewById(R.id.place_type_currency_target_savings)
         placeDate = findViewById(R.id.place_date)
         txtType = findViewById(R.id.txt_type)
+        txtTypeCurrency = findViewById(R.id.txt_type_currency)
+        txtTypeCurrencyTarget = findViewById(R.id.txt_type_currency_target)
         txtCategory = findViewById(R.id.txt_category)
         txtHeaderTargetSavings = findViewById(R.id.txt_header_target_savings)
         viewLineHeaderSavings = findViewById(R.id.view_line_target_savings)
@@ -82,6 +95,8 @@ class DialogCreateUser(
         btnSubmit = findViewById(R.id.cv_submit)
         btnClose = findViewById(R.id.img_close)
         btnCalculator = findViewById(R.id.btn_calculator)
+        imgDropDownTypeCurrency = findViewById(R.id.img_dropdown_type_currency)
+        imgDropDownCategory = findViewById(R.id.img_dropdown_category)
     }
 
 
@@ -91,46 +106,62 @@ class DialogCreateUser(
         fragmentManager: FragmentManager,
         countSavings:Int,
         userUpdate: ModelUser,
-        savingsUpdate: ModelSavings,
+        savingsUpdate: ModelSavings?,
         dialogCreateUserCallback: DialogCreateUserCallback
     ) : this(context, inflater) {
         this.dialogCreateUserCallback = dialogCreateUserCallback
         this.fragmentManager = fragmentManager
         this.user = userUpdate
         this.savings = savingsUpdate ?: ModelSavings()
-
+        this.tinyDb = TinyDb(context)
         this.countSavings = countSavings
+        locale = if (user.type_currency.equals(
+                "IDR",
+                ignoreCase = true
+            )
+        ) Tools.getLocaleIDN() else Tools.getLocaleUS()
+
     }
 
-    fun showDialogCreateUser(isAddAccount: Boolean) {
+    fun showDialogCreateUser(isAddAccount: Boolean,modelPrimaryColor:ModelPrimaryColor) {
         this.isAddAccount = isAddAccount
         val textHeader = if (isAddAccount) "Input User" else "Update User"
         val textHeaderSavings = if (isAddAccount||countSavings==0) "Input Target Savings" else "Update Target Savings"
         txtHeader.text = textHeader
 
         txtHeaderTargetSavings.text = textHeaderSavings
+        Tools.setBackgroundTintView(btnCalculator, modelPrimaryColor)
 
         if (!isAddAccount) {
+            txtTypeCurrency.isEnabled = false
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+
             user.let {
                 etName.setText(it.name)
                 category = it.category
                 type = it.type
+                type_currency = it.type_currency
                 setUpCategory()
                 txtType.text = it.type
+                txtTypeCurrency.text = it.type_currency
                 txtCategory.text = it.category
             }
 
 
             if (user.category.equals(context.getString(R.string.menabung))) {
-
                 savings.let {
-                    etTitle.setText(it.title)
-                    txtDate.text = it.date_target
-                    etTarget.setText(Tools.convertToCurrency(it.targetValue))
-                    date_target = it.date_target
-                    jumlah = Tools.convertToCurrency(it.targetValue).replace("[Rp,.]".toRegex(), "")
-                    proccess_value = Tools.convertToCurrency(it.processValue).replace("[Rp,.]".toRegex(), "")
+                    if (it.id>0){
+                        etTitle.setText(it.title)
+                        txtDate.text = it.date_target
+                        txtTypeCurrencyTarget.text = it.type_currency
+                        etTarget.setText(Tools.convertToCurrency(it.targetValue,locale))
+                        date_target = it.date_target
+                        jumlah = Tools.convertToCurrency(it.targetValue,locale).replace("[Rp,.$]".toRegex(), "")
+                        proccess_value = Tools.convertToCurrency(it.processValue,locale).replace("[Rp,.$]".toRegex(), "")
+
+                    }
                 }
+            }
             }
         }
 
@@ -142,21 +173,15 @@ class DialogCreateUser(
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (s.toString() != jumlah) {
                     etTarget.removeTextChangedListener(this)
-                    val cleanString = s.toString().replace("[Rp,.]".toRegex(), "")
+                    val cleanString = s.toString().replace("[Rp,.$]".toRegex(), "")
                     if (cleanString.isNotEmpty()) {
                         val parsed = cleanString.toDouble()
-                        val localeID = Locale("in", "ID")
-                        var formatted = NumberFormat.getCurrencyInstance(localeID).format(parsed)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            formatted = formatted.replace(",00".toRegex(), "")
-                        }
-                        jumlah = formatted
-                        etTarget.setText(formatted)
-                        etTarget.setSelection(formatted.length)
+                        jumlah = Tools.convertToCurrency(parsed,locale)
+                        etTarget.setText(Tools.convertToCurrency(parsed,locale))
+                        etTarget.setSelection(Tools.convertToCurrency(parsed,locale).length)
                     }
                     etTarget.addTextChangedListener(this)
                 }
-
             }
 
             override fun afterTextChanged(p0: Editable?) {
@@ -165,6 +190,7 @@ class DialogCreateUser(
         }
 
         txtType onClick this
+        txtTypeCurrency onClick this
         txtCategory onClick this
         placeDate onClick this
         btnSubmit onClick this
@@ -222,6 +248,13 @@ class DialogCreateUser(
                     Toast.makeText(context, "Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show()
                 }
             }
+            R.id.txt_type_currency -> {
+                if (category.isNotEmpty()) {
+                    showDialogTypeCurrency()
+                } else {
+                    Toast.makeText(context, "Pilih kategori terlebih dahulu", Toast.LENGTH_SHORT).show()
+                }
+            }
             R.id.cv_submit -> {
                 val messageError: String
                 val user = ModelUser()
@@ -229,7 +262,7 @@ class DialogCreateUser(
 
                 try {
                     if (etName.text.toString().isEmpty()) {
-                        messageError = "Silahkan input target menabung terlebih dahulu"
+                        messageError = "Silahkan input nama terlebih dahulu"
                         tilName.error = messageError
                         throw Exception(messageError)
                     } else {
@@ -237,12 +270,13 @@ class DialogCreateUser(
                     }
 
                     if (type.isEmpty()) {
-                        Toast.makeText(
-                            context,
-                            "Silahkan Pilih tipe terlebih dahulu",
-                            Toast.LENGTH_SHORT
-                        )
-                            .show()
+                        messageError = "Silahkan Pilih tipe terlebih dahulu"
+                        throw Exception(messageError)
+                    }
+
+                    if (type_currency.isEmpty()) {
+                        messageError = "Silahkan Pilih tipe mata uang terlebih dahulu"
+                        throw Exception(messageError)
                     }
 
 
@@ -279,6 +313,7 @@ class DialogCreateUser(
                             savings.date_target = date_target
                             savings.processValue = 0
                             savings.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
+                            savings.type_currency = type_currency
                         }
                     }
 
@@ -288,13 +323,13 @@ class DialogCreateUser(
                         if(this.savings.id>0)
                             savings.id = this.savings.id
 
-
                         savings.id_savings_user = user.id
                         if(etTitle.text.toString().isNotEmpty()){
                             savings.title = etTitle.text.toString()
                             savings.date_target = date_target
                             if(proccess_value.isNotEmpty()) savings.processValue = Tools.replaceCurrencyStringToLong(proccess_value)
                             savings.targetValue = Tools.replaceCurrencyStringToLong(jumlah)
+                            savings.type_currency = type_currency
                         }
                     }
 
@@ -303,6 +338,7 @@ class DialogCreateUser(
                     user.name = etName.text.toString()
                     user.type = type
                     user.category = category
+                    user.type_currency = type_currency
 
 
                     dialogCreateUserCallback.onSubmit(user, savings)
@@ -315,7 +351,7 @@ class DialogCreateUser(
             }
             R.id.btn_calculator -> {
                 dialogCalculator = DialogCalculator(context, inflater) { result: String? ->
-                    jumlah = Tools.convertToCurrency(result)
+                    jumlah = Tools.convertToCurrency(result,locale)
                     etTarget.setText(jumlah)
                 }
                 dialogCalculator.show()
@@ -335,7 +371,7 @@ class DialogCreateUser(
                 calendar[Calendar.MONTH] = monthOfYear
                 calendar[Calendar.DAY_OF_MONTH] = dayOfMonth
                 val date_ship_milis = calendar.timeInMillis
-                txtDate.setText(Tools.getFormattedDateSimple(date_ship_milis))
+                txtDate.text = Tools.getFormattedDateSimple(date_ship_milis)
                 date_target = Tools.getFormattedDateSimple(date_ship_milis)
             }
         datePickerDialog.minDate = cur_calendar
@@ -347,7 +383,7 @@ class DialogCreateUser(
     private fun showDialogCalculator() {
         dialogCalculator =
             DialogCalculator(context, inflater) { result: String? ->
-                jumlah = Tools.convertToCurrency(result)
+                jumlah = Tools.convertToCurrency(result,locale)
                 etTarget.setText(jumlah)
             }
         dialogCalculator.show()
@@ -359,10 +395,12 @@ class DialogCreateUser(
                 category = result
                 setUpCategory()
                 if (category.isNotEmpty()) txtCategory.text = category
+
+
             }
         })
 
-        dialogFinance.showDialogCategory(arrayCategoryFromResource)
+        dialogFinance.showDialog(arrayCategoryFromResource,"Pilih Kategori")
     }
 
     private fun showDialogType() {
@@ -388,9 +426,51 @@ class DialogCreateUser(
                 txtCategory.text = category
 
                 txtType.text = type
+
+                if(category.equals(
+                        context.getString(R.string.menabung),
+                        ignoreCase = true
+                    )) {
+                    if(type_currency.isNotEmpty())
+                    txtTypeCurrencyTarget.text = type_currency
+
+                    if(jumlah.isNotEmpty()){
+                        jumlah = Tools.convertToCurrency(jumlah.replace("[Rp,.$]".toRegex(), ""),locale)
+                        etTarget.setText(jumlah)
+                    }
+                }
             }
         })
-        dialogFinance.showDialogType(R.array.type_user)
+        dialogFinance.showDialog(R.array.type_user,"Pilih Tipe")
+    }
+    private fun showDialogTypeCurrency() {
+        val dialogFinance = DialogFinance(context, object : DialogFinance.DialogFinanceCallback {
+            override fun onSubmit(index: Int, result: String) {
+                type_currency = result
+                txtTypeCurrency.text = type_currency
+
+                locale = if(type_currency.equals("IDR",true)){
+                    Tools.getLocaleIDN()
+                }else{
+                    Tools.getLocaleUS()
+                }
+
+                if(category.equals(
+                    context.getString(R.string.menabung),
+                    ignoreCase = true
+                )) {
+                    if(type_currency.isNotEmpty())
+                        txtTypeCurrencyTarget.text = type_currency
+
+                    if(jumlah.isNotEmpty()){
+                        jumlah = Tools.convertToCurrency(jumlah.replace("[Rp,.$]".toRegex(), ""),locale)
+                        etTarget.setText(jumlah)
+                    }
+                }
+
+            }
+        })
+        dialogFinance.showDialog(R.array.type_currency,"Pilih Tipe Mata Uang")
     }
 
     private fun setUpCategory() {
@@ -399,6 +479,7 @@ class DialogCreateUser(
             context.getString(R.string.pribadi),
             ignoreCase = true
         )
+
         arrayCategoryFromResource = R.array.category_user
         arrayCategory = context.resources.getStringArray(arrayCategoryFromResource)
 
@@ -406,6 +487,7 @@ class DialogCreateUser(
         else {
             if(savings.id>0||countSavings==0) setVisibilityPlaceSavings()
         }
+
     }
 
     fun setVisibilityPlaceSavings() {
@@ -418,8 +500,20 @@ class DialogCreateUser(
         tilTitle.showHideView(isShow)
         placeDate.showHideView(isShow)
         txtHeaderTargetSavings.showHideView(isShow)
+        placeTypeCurrencyTarget.showHideView(isShow)
         viewLineHeaderSavings.showHideView(isShow)
     }
+    fun setHideVisibilityPlaceSavings() {
+        val isShow =false
+
+        placeTarget.showHideView(isShow)
+        tilTitle.showHideView(isShow)
+        placeDate.showHideView(isShow)
+        txtHeaderTargetSavings.showHideView(isShow)
+        placeTypeCurrencyTarget.showHideView(isShow)
+        viewLineHeaderSavings.showHideView(isShow)
+    }
+
     private infix fun View.showHideView(isShow: Boolean){
       visibility = if(isShow)View.VISIBLE else View.GONE
     }

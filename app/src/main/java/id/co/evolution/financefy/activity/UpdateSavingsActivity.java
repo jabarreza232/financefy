@@ -32,7 +32,9 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateSavingsProgressBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
+import id.co.evolution.financefy.model.ModelPrimaryColor;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
 import id.co.evolution.financefy.repository.SavingsProgressRepository;
@@ -52,17 +54,27 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
     DialogCalculator dialogCalculator;
 
     @Inject
+    TinyDb tinyDb;
+    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
+
+    @Inject
     SavingsProgressRepository savingsProgressRepository;
     @Inject
     SavingsRepository savingsRepository;
     ModelSavings modelSavings;
     ModelSavingsProgress modelSavingsProgress;
     int position;
+    Locale locale;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_progress);
+
+        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+        Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
+        Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
+
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow();
@@ -83,8 +95,10 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
         modelSavings =(ModelSavings) getIntent().getSerializableExtra("savings");
+        locale =modelSavings.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+
         position = getIntent().getIntExtra("position", 0);
-        viewModelSavingsProgress.findSavingsById(getIntent().getIntExtra("id", 0)).observe(this, modelSavingsProgress -> {
+        viewModelSavingsProgress.findSavingsById(getIntent().getIntExtra("id", 0),modelSavings.getType_currency()).observe(this, modelSavingsProgress -> {
             this.modelSavingsProgress = modelSavingsProgress;
             loadData();
         });
@@ -100,14 +114,11 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!s.toString().equals(jumlah)) {
                     binding.etAmount.removeTextChangedListener(this);
-                    String cleanString = s.toString().replaceAll("[Rp,.]", "");
+                    String cleanString = s.toString().replaceAll("[Rp,.$]", "");
                     if (!cleanString.isEmpty()) {
                         double parsed = Double.parseDouble(cleanString);
-                        Locale localeID = new Locale("in", "ID");
-                        String formatted = NumberFormat.getCurrencyInstance(localeID).format((parsed));
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            formatted = formatted.replaceAll(",00", "");
-                        }
+                        String formatted = Tools.convertToCurrency(parsed,locale);
+
                         jumlah = formatted;
                         binding.etAmount.setText(formatted);
                         binding.etAmount.setSelection(formatted.length());
@@ -136,7 +147,7 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
         cur_calendar.get(Calendar.DAY_OF_MONTH);
 
 
-        jumlah = Tools.convertToCurrency(modelSavingsProgress.getProcessValue());
+        jumlah = Tools.convertToCurrency(modelSavingsProgress.getProcessValue(),locale);
         date = modelSavingsProgress.getDate_progress_savings();
         month = modelSavingsProgress.getMonth();
 
@@ -163,7 +174,7 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
 
         datePickerDialog.setYearRange(cur_calendar.get(Calendar.YEAR), cur_calendar.get(Calendar.YEAR));
         datePickerDialog.setMaxDate(cur_calendar);
-        datePickerDialog.setAccentColor(getResources().getColor(R.color.colorPrimary));
+        datePickerDialog.setAccentColor(getResources().getColor(modelPrimaryColor.getColorPrimary()));
         datePickerDialog.show(getSupportFragmentManager(), "PickerDialog");
     }
 
@@ -184,7 +195,7 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
             case R.id.btn_calculator:
                 dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
                     jumlah = result;
-                    binding.etAmount.setText(Tools.convertToCurrency(result));
+                    binding.etAmount.setText(Tools.convertToCurrency(result,locale));
                 });
                 dialogCalculator.show();
                 break;
@@ -216,6 +227,7 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
                                 model.setDescription(binding.etDescription.getText().toString().trim());
                                 model.setTitle(binding.etTitle.getText().toString().trim());
                                 model.setId_savings(modelSavings.getId());
+                                model.setType_currency(tinyDb.getString("currency"));
                                 onSubmit(model);
                                 Intent intent = new Intent();
                                 intent.putExtra("savings_progress",model);
@@ -233,7 +245,7 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
     private void onSubmit(ModelSavingsProgress model) {
         viewModelSavingsProgress.inputUpdateSavings("Update", model);
 
-        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(this, modelSavingsProgresses -> {
+        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId(),modelSavings.getType_currency()).observe(this, modelSavingsProgresses -> {
             long processValue=0;
             for (ModelSavingsProgress modelSavingsProgress:modelSavingsProgresses)
                 processValue+= modelSavingsProgress.getProcessValue();

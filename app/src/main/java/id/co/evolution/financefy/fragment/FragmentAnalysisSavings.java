@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,6 +62,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import javax.inject.Inject;
@@ -131,12 +133,13 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
     ViewModelSavingsProgress viewModelSavingsProgress;
     @Inject
     SavingsFilter savingsFilter;
+    Locale locale;
 
     TYPE_RECOMMENDATION_SAVINGS typeRecommendationSavings;
     CallbackOnActivityResult mCallbackOnActivityResult;
 
     long date_ship_millis;
-
+    TypedValue value = new TypedValue();
     MainActivity mainActivity;
     @Inject
     TinyDb tinyDb;
@@ -168,7 +171,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                 }
 
                 setSavingsTarget();
-                viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId(),modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                     if (dataSavingsProgress != null) {
                         loadDataSavings(dataSavingsProgress);
                     }
@@ -200,10 +203,13 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_analysis_savings, container, false);
+        Tools.setBackgroundColorView(binding.llAppBar,mainActivity.modelPrimaryColor);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
         user = mainActivity.user;
         modelSavings = mainActivity.modelSavings;
         typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
+        getActivity().getTheme().resolveAttribute(android.R.attr.textColorPrimary, value, true);
+        locale =mainActivity.user.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
 
         Log.e("cek_list_week: ", localizedWeekHelper.getFirstDay(-7).substring(0, (localizedWeekHelper.getFirstDay(-7).length() - 3)));
         setHasOptionsMenu(true);
@@ -303,7 +309,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                 binding.btnNext.setEnabled(nextWeekEnabled);
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelSavingsProgress.getSavingsByWeek(getListDateWeek(), modelSavings.getId()).observe(getViewLifecycleOwner(), modelSavingsProgresses -> {
+                viewModelSavingsProgress.getSavingsByWeek(getListDateWeek(), modelSavings.getId(),modelSavings.getType_currency()).observe(getViewLifecycleOwner(), modelSavingsProgresses -> {
                     if (modelSavingsProgresses != null) loadDataSavings(modelSavingsProgresses);
                 });
             }
@@ -329,7 +335,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
 
                 binding.txtMonth.setText(Tools.convertDateFormatWeekText(localizedWeekHelper.getFirstDay(prevNextWeek - 7)) + " - " + Tools.convertDateFormatWeekText(localizedWeekHelper.getLastDay(prevNextWeek)));
                 binding.txtMonth.setEnabled(false);
-                viewModelSavingsProgress.getSavingsByWeek(getListDateWeek(), modelSavings.getId()).observe(getViewLifecycleOwner(), modelSavingsProgresses -> {
+                viewModelSavingsProgress.getSavingsByWeek(getListDateWeek(), modelSavings.getId(),modelSavings.getType_currency()).observe(getViewLifecycleOwner(), modelSavingsProgresses -> {
                     if (modelSavingsProgresses != null) loadDataSavings(modelSavingsProgresses);
                 });
             }
@@ -456,7 +462,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             }
             binding.btnNext.setEnabled(nextWeekEnabled);
-            viewModelSavingsProgress.getSavingsByWeek(getListDateWeek(), modelSavings.getId()).observe(getViewLifecycleOwner(), modelSavingsProgresses -> {
+            viewModelSavingsProgress.getSavingsByWeek(getListDateWeek(), modelSavings.getId(),modelSavings.getType_currency()).observe(getViewLifecycleOwner(), modelSavingsProgresses -> {
 //                if (modelSavingsProgresses != null) loadDataSavings(modelSavingsProgresses);
             });
         }
@@ -496,14 +502,14 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         }
 
         //BY SAVINGS
-        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId()).observe(getViewLifecycleOwner(), dataSavings -> {
+        viewModelSavings.findAllSavingsByIdUser(mainActivity.user.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
             if (dataSavings != null) {
                 savingsTargetData = new ArrayList<>(dataSavings);
             }
         });
 
         if (modelSavings != null) {
-            viewModelSavingsProgress.getSavingsByMonth(Tools.getFormattedMonthSimple(date_ship_milis), modelSavings.getId()).observe(getViewLifecycleOwner(), modelSavings -> {
+            viewModelSavingsProgress.getSavingsByMonth(Tools.getFormattedMonthSimple(date_ship_milis), modelSavings.getId(),modelSavings.getType_currency()).observe(getViewLifecycleOwner(), modelSavings -> {
                 if (modelSavings != null) loadDataSavings(modelSavings);
             });
         }
@@ -520,6 +526,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         data = savingsFilter.listAnalysis(data);
         if(filterNominal!=null) data = savingsFilter.filterNominal(filterNominal,data);
         adapter = new AdapterAnalysisSavings(getActivity(), data);
+        adapter.setLocale(locale);
         adapter.setTotalValue(modelSavings.getTargetValue());
         binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.rvList.setAdapter(adapter);
@@ -537,7 +544,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         }
     }
     private void loadTotalSavingsTarget() {
-        viewModelSavings.findSavingsById(mainActivity.modelSavings.getId()).observe(getViewLifecycleOwner(), modelSavings1 -> {
+        viewModelSavings.findSavingsById(mainActivity.modelSavings.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings1 -> {
             if (modelSavings1 != null) {
                 mainActivity.modelSavings.setProcessValue(modelSavings1.getProcessValue());
                 setSavingsTarget();
@@ -547,7 +554,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
     }
 
     private void setTextRecommendationSavings(String type, long recommendationSavings) {
-        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi " + type + ": ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings), "green")));
+        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi " + type + ": ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings,locale), "green")));
     }
     private void loadDataHeader() {
         long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
@@ -556,7 +563,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         String txtPercentage = percentage >= 100 ? getString(R.string.achieved) : percentage+"%";
 
         binding.layoutSavingsProgress.txtTitle.setText(modelSavings.getTitle());
-        binding.layoutSavingsProgress.txtProgress.setText(convertToCurrency(modelSavings.getProcessValue()) + " s/d " + convertToCurrency(modelSavings.getTargetValue()));
+        binding.layoutSavingsProgress.txtProgress.setText(convertToCurrency(modelSavings.getProcessValue(),locale) + " s/d " + convertToCurrency(modelSavings.getTargetValue(),locale));
         binding.layoutSavingsProgress.progressSavings.setProgress((int) calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutSavingsProgress.progressSavings.setMax(100);
         binding.layoutSavingsProgress.txtPercentage.setText(txtPercentage);
@@ -578,7 +585,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                 switch (type) {
                     case CLICKED:
                         setSavingsTarget();
-                        viewModelSavingsProgress.getSavingsByMonth(month, savingsTargetData.get(index).getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                        viewModelSavingsProgress.getSavingsByMonth(month, savingsTargetData.get(index).getId(),modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                             if (dataSavingsProgress != null) {
                                 loadDataSavings(dataSavingsProgress);
                             }
@@ -594,7 +601,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                                     if (index - 1 < 0) {
                                         modelSavings = savingsTargetData.get(index + 1);
                                         setSavingsTarget();
-                                        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                                        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId(),modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                                             if (dataSavingsProgress != null) {
                                                 loadDataSavings(dataSavingsProgress);
                                             }
@@ -602,7 +609,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                                     } else {
                                         modelSavings = savingsTargetData.get(index - 1);
                                         setSavingsTarget();
-                                        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
+                                        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId(),modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavingsProgress -> {
                                             if (dataSavingsProgress != null) {
                                                 loadDataSavings(dataSavingsProgress);
                                             }
@@ -688,6 +695,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             l.setYEntrySpace(0f);
             l.setYOffset(0f);
             l.setTextSize(13);
+            l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
 
             l.setCustom(legendEntries);
             binding.pieChartAnalysis.animateXY(2000, 2000);
@@ -791,6 +799,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             l.setXEntrySpace(4f);
             l.setWordWrapEnabled(true);
             l.setYOffset(6f);
+            l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
 
             binding.barChartAnalysis.getLegend().setEnabled(false);
 
@@ -802,6 +811,8 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             xAxis.setDrawGridLines(true);
             xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
             xAxis.setLabelCount(listDate.size());
+            xAxis.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
+
             xAxis.setValueFormatter(new ValueFormatter() {
                 @Override
                 public String getFormattedValue(float value) {
@@ -843,6 +854,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             leftAxis.setDrawGridLines(false);
             leftAxis.setSpaceTop(35f);
             leftAxis.setXOffset(5f);
+            leftAxis.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
             leftAxis.setAxisMinimum(0f); // this replaces setStartAtZero(true)
             binding.barChartAnalysis.getAxisRight().setEnabled(false);
             binding.barChartAnalysis.invalidate();

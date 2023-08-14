@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="?attr/colorSurface"
     android:id="@+id/place_account_finance_journal">
 
     <RelativeLayout
@@ -88,7 +89,7 @@
                 android:fontFamily="@font/lato_bold"
                 android:padding="10dp"
                 android:text="Total Pengeluaran"
-                android:textColor="@color/blackTextColor"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="15sp" />
 
             <View
@@ -128,7 +129,7 @@
                     android:fontFamily="@font/lato_bold"
                     android:padding="10dp"
                     android:text="Total Pemasukan"
-                    android:textColor="@color/blackTextColor"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:textSize="15sp" />
 
                 <View

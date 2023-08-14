@@ -156,7 +156,7 @@ public class FinanceFilter {
                     date = finance.getDate();
                 }
             }
-            modelFinance.setJumlah(Tools.convertToCurrency(totalValue));
+            modelFinance.setJumlah(totalValue);
             modelFinance.setTotalValue(totalValueByType(data, type));
             modelFinance.setTipe(type);
             modelFinance.setDate(date);

@@ -23,6 +23,7 @@ import id.co.evolution.financefy.activity.UpdateSavingsTargetActivity;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
+import id.co.evolution.financefy.model.ModelUser;
 
 public class CallbackOnActivityResult implements DefaultLifecycleObserver {
     private final ActivityResultRegistry mRegistry;
@@ -47,11 +48,11 @@ public class CallbackOnActivityResult implements DefaultLifecycleObserver {
                 });
     }
 
-    public void updateDataFinance(List<ModelFinance> data, int position,int id_user) {
+    public void updateDataFinance(List<ModelFinance> data, int position, ModelUser modelUser) {
         Intent i = new Intent(mContext, UpdateFinanceActivity.class);
         i.putExtra("id", data.get(position).getId());
         i.putExtra("position",position);
-        i.putExtra("id_user",id_user);
+        i.putExtra("user",modelUser);
         mStartForResult.launch(i);
     }
 

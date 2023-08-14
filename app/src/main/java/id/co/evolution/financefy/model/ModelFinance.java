@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
 import java.util.Comparator;
+import java.util.Locale;
 
 import id.co.evolution.financefy.helper.Tools;
 
@@ -15,8 +16,8 @@ public class ModelFinance implements Serializable {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id_finance")
     int id;
-    @ColumnInfo(name = "count")
-    String jumlah;
+    @ColumnInfo(name = "amount")
+    double jumlah;
     @ColumnInfo(name = "category")
     String kategori;
     @ColumnInfo(name = "description")
@@ -29,6 +30,8 @@ public class ModelFinance implements Serializable {
     String month;
     @ColumnInfo(name = "id_finance_user")
     int id_finance_user;
+    @ColumnInfo(name = "type_currency")
+    String type_currency;
     @Ignore
     long totalValue;
 
@@ -48,6 +51,14 @@ public class ModelFinance implements Serializable {
         return id;
     }
 
+    public String getType_currency() {
+        return type_currency;
+    }
+
+    public void setType_currency(String type_currency) {
+        this.type_currency = type_currency;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -60,15 +71,19 @@ public class ModelFinance implements Serializable {
         this.month = month;
     }
 
-    public String getJumlah() {
+    public double getJumlah() {
         return jumlah;
     }
 
-    public double getJumlahValue() {
-        return Tools.replaceCurrencyStringToDouble(jumlah);
+    public String getJumlahDesc(Locale locale) {
+        return Tools.convertToCurrency(jumlah,locale);
     }
 
-    public void setJumlah(String jumlah) {
+    public double getJumlahValue() {
+        return jumlah;
+    }
+
+    public void setJumlah(double jumlah) {
         this.jumlah = jumlah;
     }
 
@@ -126,15 +141,15 @@ public class ModelFinance implements Serializable {
 
 
     public static Comparator<ModelFinance> shortedNominalMinToMax = (jc1, jc2) -> {
-        String min = jc1.getJumlah().replaceAll("[Rp,.]", "");
-        String max = jc2.getJumlah().replaceAll("[Rp,.]", "");
-        return ((int) (Long.parseLong(min) - Long.parseLong(max)));
+        double min = jc1.getJumlah();
+        double max = jc2.getJumlah();
+        return ((int) ((long) min - (long) max));
     };
 
     public static Comparator<ModelFinance> shortedNominalMaxToMin = (jc1, jc2) -> {
-        String min = jc1.getJumlah().replaceAll("[Rp,.]", "");
-        String max = jc2.getJumlah().replaceAll("[Rp,.]", "");
-        return ((int) (Long.parseLong(max) - Long.parseLong(min)));
+        double min = jc1.getJumlah();
+        double max = jc2.getJumlah();
+        return ((int) ((long) max - (long) min));
     };
     public static Comparator<ModelFinance> shortedPeriodLatestToLongest = (jc1, jc2) -> {
         int result = Tools.getDateFromDateFormat(jc2.getDefaultDate(), "year") - Tools.getDateFromDateFormat(jc1.getDefaultDate(), "year");

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:background="?attr/colorSurface"
+    tools:context=".activity.SwitchThemeActivity">
+
+
+    <TextView
+        android:id="@+id/txt_select_theme"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="@font/roboto_bold"
+        android:text="Select Theme"
+        android:textColor="?android:attr/textColorPrimary" />
+
+    <RadioGroup
+        android:id="@+id/rg_theme"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/rb_theme_light"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:checked="true"
+            android:text="Light" />
+
+        <RadioButton
+            android:id="@+id/rb_theme_dark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Dark" />
+
+
+    </RadioGroup>
+
+    <TextView
+        android:id="@+id/txt_select_primary_color"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:fontFamily="@font/roboto_bold"
+        android:text="Primary Color"
+        android:textColor="?android:attr/textColorPrimary" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_primary_color"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp" />
+
+    <!--    <androidx.cardview.widget.CardView-->
+    <!--        android:layout_width="60dp"-->
+    <!--        android:layout_height="60dp"-->
+    <!--        android:elevation="8dp"-->
+    <!--        android:divider="@android:color/transparent"-->
+    <!--        android:dividerHeight="0.0px"-->
+    <!--        android:clipToPadding="false"-->
+    <!--        android:clipChildren="false"-->
+    <!--        app:cardElevation="10dp"-->
+    <!--        app:cardPreventCornerOverlap="false"-->
+    <!--        />-->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorGrey50">
+
+        <View
+            android:id="@+id/v_primary_dark"
+            android:layout_width="match_parent"
+            android:layout_height="38px"
+            android:background="@color/colorPrimaryDark" />
+
+        <View
+            android:id="@+id/v_primary"
+            android:layout_width="match_parent"
+            android:layout_height="?actionBarSize"
+            android:layout_below="@id/v_primary_dark"
+            android:background="@color/colorPrimary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/v_primary_dark"
+            android:layout_margin="16dp"
+            android:fontFamily="@font/roboto_bold"
+            android:text="@string/app_name"
+            android:textColor="@color/white"
+            android:textSize="17sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="Content"
+            android:textColor="@color/white"
+            android:textSize="21sp" />
+
+    </RelativeLayout>
+
+</LinearLayout>
+</layout>

@@ -11,21 +11,8 @@ open class DialogFinance(val context: Context, private val dialogFinanceCallback
     private lateinit var arrayCategory: Array<String>
 
 
-    fun showDialogCategory(resourceCategoryArray: Int) {
-        arrayCategory = context.resources.getStringArray(resourceCategoryArray)
-        builder.setTitle("Pilih Kategori")
-        builder.setItems(arrayCategory) { dialog, which ->
-            run {
-                dialog.dismiss()
-                dialogFinanceCallback.onSubmit(which,arrayCategory[which])
-            }
-        }
-        val alertDialog: AlertDialog = builder.create()
-        alertDialog.show()
-    }
-
-    fun showDialogType(resourceTypeArray:Int) {
-        builder.setTitle("Pilih Tipe")
+    fun showDialog(resourceTypeArray:Int,title:String) {
+        builder.setTitle(title)
         val arrayType = context.resources.getStringArray(resourceTypeArray)
         builder.setItems(arrayType) { dialog, which ->
             run {

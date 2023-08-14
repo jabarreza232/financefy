@@ -6,12 +6,13 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 import id.co.evolution.financefy.helper.Tools;
 
 @Entity(tableName = "user")
-public class ModelUser {
+public class ModelUser implements Serializable {
     @ColumnInfo(name = "id_user")
     @PrimaryKey(autoGenerate = true)
     int id;
@@ -23,6 +24,9 @@ public class ModelUser {
     String category;
     @ColumnInfo(name = "uuid")
     String uuid;
+    @ColumnInfo(name = "type_currency")
+    String type_currency;
+
 
 
     public ModelUser() {
@@ -32,8 +36,9 @@ public class ModelUser {
         this.name = name;
         this.type = type;
         this.category = category;
-
+        this.type_currency = "IDR";
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -88,5 +93,11 @@ public class ModelUser {
         this.category = category;
     }
 
+    public String getType_currency() {
+        return type_currency;
+    }
 
+    public void setType_currency(String type_currency) {
+        this.type_currency = type_currency;
+    }
 }

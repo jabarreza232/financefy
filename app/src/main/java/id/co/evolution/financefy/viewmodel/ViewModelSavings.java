@@ -24,15 +24,15 @@ public class ViewModelSavings extends ViewModel {
         return savingsRepository.getAllSavings();
     }
 
-    public LiveData<ModelSavings> findSavingsById(int id) {
-        return savingsRepository.getSavingsById(id);
+    public LiveData<ModelSavings> findSavingsById(int id,String type_currency) {
+        return savingsRepository.getSavingsById(id,type_currency);
     }
 
 
-    public LiveData<List<ModelSavings>> findAllSavingsByDate(String date) {
-        return savingsRepository.getSavingsByDate(date);
+    public LiveData<List<ModelSavings>> findAllSavingsByDate(String date,String type_currency) {
+        return savingsRepository.getSavingsByDate(date,type_currency);
     }
-    public LiveData<List<ModelSavings>> findAllSavingsByIdUser(int id_user) {
-        return savingsRepository.getSavingsByIdUser(id_user);
+    public LiveData<List<ModelSavings>> findAllSavingsByIdUser(int id_user,String type_currency) {
+        return savingsRepository.getSavingsByIdUser(id_user,type_currency);
     }
 }

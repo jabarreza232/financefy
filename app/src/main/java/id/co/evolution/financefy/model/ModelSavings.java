@@ -27,12 +27,17 @@ public class ModelSavings implements Serializable {
     int id_savings_user;
     @ColumnInfo(name = "date_target")
     String date_target;
+    @ColumnInfo(name = "type_currency")
+    String type_currency;
+
 
     public ModelSavings(int id) {
         this.id = id;
     }
 
     public ModelSavings() {
+        id= 0;
+        type_currency="IDR";
     }
 
     public ModelSavings(String title, long targetValue, long processValue, int id_savings_user, String date_target) {
@@ -41,6 +46,14 @@ public class ModelSavings implements Serializable {
         this.processValue = processValue;
         this.id_savings_user = id_savings_user;
         this.date_target = date_target;
+    }
+
+    public String getType_currency() {
+        return type_currency;
+    }
+
+    public void setType_currency(String type_currency) {
+        this.type_currency = type_currency;
     }
 
     public int getId() {

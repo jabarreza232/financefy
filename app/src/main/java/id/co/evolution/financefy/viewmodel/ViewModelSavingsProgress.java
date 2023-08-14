@@ -28,26 +28,26 @@ public class ViewModelSavingsProgress extends ViewModel {
         return savingsRepository.getAllSavings();
     }
 
-    public LiveData<ModelSavingsProgress> findSavingsById(int id) {
-        return savingsRepository.getSavingsById(id);
+    public LiveData<ModelSavingsProgress> findSavingsById(int id,String type_currency) {
+        return savingsRepository.getSavingsById(id,type_currency);
     }
 
-    public LiveData<Integer> findTotalProcessValueByIdSavings(int id) {
-        return savingsRepository.getTotalProcessValueByIdSavings(id);
+    public LiveData<Integer> findTotalProcessValueByIdSavings(int id,String type_currency) {
+        return savingsRepository.getTotalProcessValueByIdSavings(id,type_currency);
     }
 
-    public LiveData<List<ModelSavingsProgress>> getSavingsByMonth(String month, int id_savings) {
-        return savingsRepository.getSavingsByMonth(month, id_savings);
+    public LiveData<List<ModelSavingsProgress>> getSavingsByMonth(String month, int id_savings,String type_currency) {
+        return savingsRepository.getSavingsByMonth(month, id_savings,type_currency);
     }
 
-    public LiveData<List<ModelSavingsProgress>> getSavingsByWeek(List<String> date, int id_savings) {
-        return savingsRepository.getSavingsByWeek(date, id_savings);
+    public LiveData<List<ModelSavingsProgress>> getSavingsByWeek(List<String> date, int id_savings,String type_currency) {
+        return savingsRepository.getSavingsByWeek(date, id_savings,type_currency);
     }
 
-    public LiveData<List<ModelSavingsProgress>> findAllSavingsByDate(String date) {
-        return savingsRepository.getSavingsByDate(date);
+    public LiveData<List<ModelSavingsProgress>> findAllSavingsByDate(String date,String type_currency) {
+        return savingsRepository.getSavingsByDate(date,type_currency);
     }
-    public LiveData<List<ModelSavingsProgress>> findAllSavingsByIdSavings(int id_savings) {
-        return savingsRepository.getSavingsByIdSavings(id_savings);
+    public LiveData<List<ModelSavingsProgress>> findAllSavingsByIdSavings(int id_savings,String type_currency) {
+        return savingsRepository.getSavingsByIdSavings(id_savings,type_currency);
     }
 }

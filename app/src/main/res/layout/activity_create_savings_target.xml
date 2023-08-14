@@ -2,6 +2,7 @@
 <layout xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/rl_background"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -49,7 +50,7 @@
                     android:fontFamily="@font/lato_bold"
                     android:padding="10dp"
                     android:text="Input Savings"
-                    android:textColor="@color/blackTextColor"
+                    android:textColor="?android:attr/textColorPrimary"
                     android:textSize="19sp" />
 
                 <View
@@ -72,7 +73,7 @@
                         android:layout_height="wrap_content"
                         android:padding="16dp"
                         android:text="Date"
-                        android:textColor="@color/blackTextColor" />
+                        android:textColor="?android:attr/textColorPrimary" />
 
                     <ImageView
                         android:layout_width="wrap_content"
@@ -80,7 +81,7 @@
                         android:layout_alignParentRight="true"
                         android:padding="16dp"
                         android:src="@drawable/ic_date_range"
-                        app:tint="@color/blackTextColor" />
+                        app:tint="?android:attr/textColorPrimary" />
 
 
                 </RelativeLayout>
@@ -91,13 +92,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Title"
-                    app:errorEnabled="true">
+                    app:errorEnabled="true"
+                    app:boxStrokeColor="?android:attr/textColorPrimary"
+                    app:hintTextColor="?android:attr/textColorPrimary">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/et_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="top|start"
+                        android:textColor="?android:attr/textColorPrimary"
                         android:inputType="text" />
 
                 </com.google.android.material.textfield.TextInputLayout>
@@ -114,12 +118,15 @@
                         android:layout_height="wrap_content"
                         android:layout_toStartOf="@id/btn_calculator"
                         android:hint="Amount of money"
+                        app:boxStrokeColor="?android:attr/textColorPrimary"
+                        app:hintTextColor="?android:attr/textColorPrimary"
                         app:errorEnabled="true">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_amount"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:textColor="?android:attr/textColorPrimary"
                             android:inputType="numberDecimal" />
 
                     </com.google.android.material.textfield.TextInputLayout>
