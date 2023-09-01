@@ -69,7 +69,7 @@ public class SavingsRepository {
 
         @Override
         protected void onPostExecute(Void unused) {
-            super.onPostExecute(unused);
+
             if(methodCallback!=null)
             methodCallback.onPostExecute();
         }

@@ -396,7 +396,8 @@ class DialogCreateUser(
                 setUpCategory()
                 if (category.isNotEmpty()) txtCategory.text = category
 
-
+                if(type_currency.isNotEmpty())
+                    txtTypeCurrencyTarget.text = type_currency
             }
         })
 

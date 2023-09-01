@@ -232,7 +232,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         String type = isAddAccount ? "create" : "update";
 
 
-        dialogCreateUser = new DialogCreateUser(getContext(), getLayoutInflater(), getFragmentManager(), count_savings, mainActivity.user, mainActivity.modelSavings, (modelUser, modelSavings) -> {
+        dialogCreateUser = new DialogCreateUser(getActivity(), getLayoutInflater(), getParentFragmentManager(), count_savings, mainActivity.user, mainActivity.modelSavings, (modelUser, modelSavings) -> {
             modelUser.setUuid(UUID.randomUUID().toString());
             this.modelSavings = modelSavings;
             new UserRepository.InputUpdateUser(modelUser, type, userRepository.userDao, () -> {
@@ -268,9 +268,10 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
                                 modelSavings.setId_savings_user(user1.getId());
 
                             new SavingsRepository.InputUpdateSavings(modelSavings, type, savingsRepository.savingsDao, () -> {
-                                isAddSavings = false;
-                                refreshDataUserByCategory();
+
                             }).execute();
+                            isAddSavings = false;
+                            refreshDataUserByCategory();
                         });
 
                     }
