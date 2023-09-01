@@ -18,8 +18,11 @@
         <activity
             android:name=".activity.NotificationActivity"
             android:exported="false"
-            android:label="Notifikasi"
-            />
+            android:label="Notifikasi" />
+        <activity
+            android:name=".activity.AboutActivity"
+            android:exported="false"
+            android:label="Tentang" />
 
         <receiver
             android:name=".helper.ReminderBroadcast"

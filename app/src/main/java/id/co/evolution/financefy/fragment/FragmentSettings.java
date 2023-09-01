@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.activity.AboutActivity;
 import id.co.evolution.financefy.activity.NotificationActivity;
 import id.co.evolution.financefy.activity.SwitchThemeActivity;
 import id.co.evolution.financefy.databinding.FragmentSettingsBinding;
@@ -79,6 +80,11 @@ public class FragmentSettings extends Fragment {
         binding.txtMoney.setOnClickListener(v->{
             setCurrencySettings();
         });
+        binding.txtInfo.setOnClickListener(v->{
+            Intent i = new Intent(getContext(), AboutActivity.class);
+            startActivity(i);
+        });
+
 //        changeColorThemeSettings(mainActivity.modelPrimaryColor);
         return binding.getRoot();
     }
