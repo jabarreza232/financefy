@@ -23,7 +23,7 @@ public class AboutActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding= DataBindingUtil.setContentView(this,R.layout.activity_about);
 
-        binding.txtAppVersion.setText(BuildConfig.VERSION_NAME);
+//        binding.txtAppVersion.setText(Build.VERSION.VERSION_NAME);
         binding.txtSystemVersion.setText(Build.VERSION.RELEASE);
         binding.txtDeviceModel.setText(Build.MODEL);
 
