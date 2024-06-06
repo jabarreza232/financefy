@@ -73,6 +73,7 @@ import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.adapter.AdapterAnalysisSavings;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAnalysisSavingsBinding;
+import id.co.evolution.financefy.dialog.DialogConfirm;
 import id.co.evolution.financefy.dialog.DialogFilterFinance;
 import id.co.evolution.financefy.dialog.DialogFilterSavings;
 import id.co.evolution.financefy.dialog.DialogMonthPicker;
@@ -592,11 +593,10 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                         });
                         break;
                     case REMOVED:
-                        new SweetAlertDialog(getContext(), SweetAlertDialog.WARNING_TYPE)
-                                .setTitleText("Hapus")
-                                .setContentText("Apakah anda yakin ingin hapus tabungan '" + modelSavings.getTitle() + "'?")
-                                .setConfirmText("Ya")
-                                .setConfirmClickListener(sweetAlertDialog -> {
+                        DialogConfirm dialogConfirm = new DialogConfirm(getContext(), getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                            @Override
+                            public void onSubmit(@NonNull String result) {
+                                if(result.equalsIgnoreCase("yes")){
                                     new SavingsRepository.RemoveSavings(modelSavings, savingsRepository.savingsDao).execute();
                                     if (index - 1 < 0) {
                                         modelSavings = savingsTargetData.get(index + 1);
@@ -617,10 +617,10 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                                     }
 
                                     savingsTargetData.remove(index);
-                                    sweetAlertDialog.dismiss();
-                                })
-                                .setCancelText("Tidak")
-                                .show();
+                                }
+                            }
+                        });
+                        dialogConfirm.showDialogConfirm("Hapus","Apakah anda yakin ingin hapus tabungan '" + modelSavings.getTitle() + "'?");
                         break;
                     case EDIT:
                         mCallbackOnActivityResult.updateDataSavingsTarget(savingsTargetData, index, modelSavings);

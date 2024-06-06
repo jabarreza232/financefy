@@ -2,6 +2,7 @@ package id.co.evolution.financefy.activity;
 
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_FINANCE;
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS_TARGET;
 
 import android.annotation.SuppressLint;
 import android.content.DialogInterface;
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
@@ -46,11 +48,13 @@ import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
 import id.co.evolution.financefy.db.FinanceDB;
 import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.dialog.DialogConfirm;
 import id.co.evolution.financefy.dialog.DialogFinance;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
+import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.viewmodel.ViewModelFactory;
@@ -190,11 +194,10 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
                 }
 
                 if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty()) {
-                    new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                            .setTitleText("Update")
-                            .setContentText("Apakah anda yakin ingin update data ?")
-                            .setConfirmText("Ya")
-                            .setConfirmClickListener(sweetAlertDialog -> {
+                    DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                        @Override
+                        public void onSubmit(@NonNull String result) {
+                            if(result.equalsIgnoreCase("yes")){
                                 ModelFinance model = new ModelFinance();
                                 model.setId(modelFinance.getId());
                                 model.setDate(date);
@@ -211,9 +214,11 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
                                 intent.putExtra("position", position);
                                 setResult(REQUEST_CODE_FINANCE, intent);
                                 finish();
-                            })
-                            .setCancelText("Tidak")
-                            .show();
+                            }
+                        }
+                    });
+                    dialogConfirm.showDialogConfirm("Update","Apakah anda yakin ingin update data ?");
+
                 }
                 break;
         }

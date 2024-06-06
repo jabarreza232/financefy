@@ -1,19 +1,18 @@
 package id.co.evolution.financefy.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
-
-import java.io.File;
 
 import javax.inject.Inject;
 
@@ -29,6 +28,8 @@ import id.co.evolution.financefy.helper.TinyDb;
 
 @AndroidEntryPoint
 public class FragmentSettings extends Fragment {
+    private static final int PERMISSION_REQUEST_CODE = 100;
+
     MainActivity mainActivity;
     @Inject
     TinyDb tinyDb;
@@ -46,6 +47,7 @@ public class FragmentSettings extends Fragment {
 
     FragmentSettingsBinding binding;
 
+    @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -57,21 +59,30 @@ public class FragmentSettings extends Fragment {
             startActivity(i);
             getActivity().finish();
         });
-        binding.txtDeleteCache.setOnClickListener(v->{
-            deleteCache(getActivity());
-        });
+
+
+//        binding.txtDeleteCache.setText("Hapus Cache ("+formatSize(Tools.getCacheSize(getContext()))+")");
+//        binding.txtDeleteCache.setOnClickListener(v->{
+//            if (checkPermission()) {
+//                Tools.clearCache(getContext());
+//                binding.txtDeleteCache.setText("Hapus Cache ("+formatSize(Tools.getCacheSize(getContext()))+")");
+//            } else {
+//                requestPermission();
+//            }
+//        });
 
         binding.txtNotification.setOnClickListener(v->{
             Intent i = new Intent(getContext(), NotificationActivity.class);
             startActivity(i);
         });
-
+        changeStatusPin();
         binding.txtPinSetting.setOnClickListener(v->{
             DialogSettingPin dialogSettingPin = new DialogSettingPin(getContext(), getLayoutInflater(), new DialogSettingPin.DialogInterfaceCallback() {
                 @Override
                 public void onSubmit(String result) {
                     tinyDb.putString("pin", result);
                     tinyDb.putBoolean("isSettingPin", true);
+                    changeStatusPin();
                 }
             });
 
@@ -88,32 +99,19 @@ public class FragmentSettings extends Fragment {
 //        changeColorThemeSettings(mainActivity.modelPrimaryColor);
         return binding.getRoot();
     }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
-        deleteCache(getActivity());
     }
-
-    public static void deleteCache(Context context) {
-        try {
-            File dir = context.getCacheDir();
-            deleteDir(dir);
-        } catch (Exception e) { e.printStackTrace();}
-    }
-
-    public static boolean deleteDir(File dir) {
-        if (dir != null && dir.isDirectory()) {
-            String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                boolean success = deleteDir(new File(dir, children[i]));
-                if (!success) {
-                    return false;
-                }
-            }
+    private void changeStatusPin(){
+        if(tinyDb.getBoolean("isSettingPin")){
+            binding.txtStatusPin.setText("Aktif");
+            binding.txtStatusPin.setTextColor(ContextCompat.getColor(getContext(),R.color.green));
+        }else{
+            binding.txtStatusPin.setText("Tidak Aktif");
+            binding.txtStatusPin.setTextColor(ContextCompat.getColor(getContext(),R.color.red));
         }
 
-        return dir.delete();
     }
 
     private void setCurrencySettings() {

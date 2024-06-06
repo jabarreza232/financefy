@@ -56,6 +56,7 @@ import id.co.evolution.financefy.adapter.AdapterFinance;
 import id.co.evolution.financefy.adapter.AdapterSavings;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAllBinding;
+import id.co.evolution.financefy.dialog.DialogConfirm;
 import id.co.evolution.financefy.dialog.DialogFilterFinance;
 import id.co.evolution.financefy.dialog.DialogFilterSavings;
 import id.co.evolution.financefy.dialog.DialogMonthPicker;
@@ -734,11 +735,10 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                         });
                         break;
                     case REMOVED:
-                        new SweetAlertDialog(getContext(), SweetAlertDialog.WARNING_TYPE)
-                                .setTitleText("Hapus")
-                                .setContentText("Apakah anda yakin ingin hapus tabungan '" + modelSavings.getTitle() + "'?")
-                                .setConfirmText("Ya")
-                                .setConfirmClickListener(sweetAlertDialog -> {
+                        DialogConfirm dialogConfirm = new DialogConfirm(getContext(), getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                            @Override
+                            public void onSubmit(@NonNull String result) {
+                                if(result.equalsIgnoreCase("yes")){
                                     new SavingsRepository.RemoveSavings(modelSavings, savingsRepository.savingsDao).execute();
 
 
@@ -761,6 +761,16 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                                     }
 
                                     savingsTargetData.remove(index);
+                                }
+                            }
+                        });
+                        dialogConfirm.showDialogConfirm("Hapus","Apakah anda yakin ingin hapus tabungan '" + modelSavings.getTitle() + "'?");
+
+                        new SweetAlertDialog(getContext(), SweetAlertDialog.WARNING_TYPE)
+                                .setTitleText("Hapus")
+                                .setContentText("Apakah anda yakin ingin hapus tabungan '" + modelSavings.getTitle() + "'?")
+                                .setConfirmText("Ya")
+                                .setConfirmClickListener(sweetAlertDialog -> {
                                     sweetAlertDialog.dismiss();
                                 })
                                 .setCancelText("Tidak")

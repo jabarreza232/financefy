@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
@@ -32,6 +33,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateSavingsProgressBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.dialog.DialogConfirm;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
@@ -213,12 +215,10 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
                 }
 
                 if (!binding.etAmount.getText().toString().isEmpty()) {
-
-                    new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                            .setTitleText("Submit")
-                            .setContentText("Apakah anda yakin ingin update data ?")
-                            .setConfirmText("Ya")
-                            .setConfirmClickListener(sweetAlertDialog -> {
+                    DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                        @Override
+                        public void onSubmit(@NonNull String result) {
+                            if(result.equalsIgnoreCase("yes")){
                                 ModelSavingsProgress model = new ModelSavingsProgress();
                                 model.setId(getIntent().getIntExtra("id", 0));
                                 model.setDate_progress_savings(date);
@@ -228,15 +228,16 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
                                 model.setTitle(binding.etTitle.getText().toString().trim());
                                 model.setId_savings(modelSavings.getId());
                                 model.setType_currency(tinyDb.getString("currency"));
-                                onSubmit(model);
+                                UpdateSavingsActivity.this.onSubmit(model);
                                 Intent intent = new Intent();
                                 intent.putExtra("savings_progress",model);
                                 intent.putExtra("position", position);
                                 setResult(REQUEST_CODE_SAVINGS, intent);
                                 finish();
-                            })
-                            .setCancelText("Tidak")
-                            .show();
+                            }
+                        }
+                    });
+                    dialogConfirm.showDialogConfirm("Update","Apakah anda yakin ingin update data ?");
                 }
                 break;
         }

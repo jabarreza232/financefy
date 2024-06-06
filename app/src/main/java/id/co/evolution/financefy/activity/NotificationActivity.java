@@ -37,6 +37,7 @@ import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelNotification;
+import id.co.evolution.financefy.model.ModelPrimaryColor;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
 import id.co.evolution.financefy.model.ModelUser;
@@ -50,6 +51,7 @@ import id.co.evolution.financefy.viewmodel.ViewModelSavingsProgress;
 @AndroidEntryPoint
 public class NotificationActivity extends AppCompatActivity {
     ActivityNotificationBinding mBinding;
+    ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
     public ViewModelFinance viewModelFinance;
     public ViewModelSavings viewModelSavings;
     public ViewModelSavingsProgress viewModelSavingsProgress;
@@ -73,6 +75,10 @@ public class NotificationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if(tinyDb.getObject("model_primary_color", ModelPrimaryColor.class)!=null) {
+            modelPrimaryColor= tinyDb.getObject("model_primary_color",ModelPrimaryColor.class);
+            Tools.setThemeActivity(getTheme(),modelPrimaryColor);
+        }
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_notification);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 

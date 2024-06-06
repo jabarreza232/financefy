@@ -15,6 +15,7 @@ import android.view.WindowManager;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
 
@@ -82,18 +83,15 @@ public class DialogSettingPin {
                         Toast.makeText(context, "Mohon untuk di isi minimal 6 digit!", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    new SweetAlertDialog(dialog.getContext(), SweetAlertDialog.WARNING_TYPE)
-                            .setTitleText("Atur PIN")
-                            .setContentText("Apakah anda yakin ingin mengatur PIN anda ?")
-                            .setConfirmText("Ya")
-                            .setConfirmClickListener(sweetAlertDialog -> {
-                                sweetAlertDialog.dismiss();
-                                dismiss();
-                                Toast.makeText(context, "PIN telah di atur !", Toast.LENGTH_SHORT).show();
-                            })
-                            .setCancelText("Tidak")
-                            .show();
+                    DialogConfirm dialogConfirm = new DialogConfirm(context, inflater, result -> {
 
+                        if (result.equalsIgnoreCase("yes")){
+                            Toast.makeText(context, "PIN telah di atur !", Toast.LENGTH_SHORT).show();
+                            dismiss();
+                        }
+
+                    });
+                    dialogConfirm.showDialogConfirm("Atur PIN","Apakah anda yakin ingin mengatur PIN anda ? ");
                     dialogInterfaceCallback.onSubmit(Tools.replaceStringNumberFormat(result));
                     break;
                 default:

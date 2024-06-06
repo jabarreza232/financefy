@@ -1,5 +1,6 @@
 package id.co.evolution.financefy.fragment;
 
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS_TARGET;
 import static id.co.evolution.financefy.helper.Tools.calculatePercentage;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
@@ -38,8 +39,10 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.activity.UpdateSavingsActivity;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAccountBinding;
+import id.co.evolution.financefy.dialog.DialogConfirm;
 import id.co.evolution.financefy.dialog.DialogCreateUser;
 import id.co.evolution.financefy.dialog.DialogSavings;
 import id.co.evolution.financefy.helper.FinanceFilter;
@@ -344,11 +347,10 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
                                 setDataSavings(modelSavings.get(index));
                                 break;
                             case REMOVED:
-                                new SweetAlertDialog(getContext(), SweetAlertDialog.WARNING_TYPE)
-                                        .setTitleText("Hapus")
-                                        .setContentText("Apakah anda yakin ingin hapus tabungan '" + modelSavings.get(index).getTitle() + "'?")
-                                        .setConfirmText("Ya")
-                                        .setConfirmClickListener(sweetAlertDialog -> {
+                                DialogConfirm dialogConfirm = new DialogConfirm(getContext(), getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                                    @Override
+                                    public void onSubmit(@NonNull String result) {
+                                        if(result.equalsIgnoreCase("yes")){
                                             ModelSavings modelSaving;
                                             if (index - 1 < 0) {
                                                 modelSaving = modelSavings.get(index + 1);
@@ -359,10 +361,12 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
                                             new SavingsRepository.RemoveSavings(modelSavings.get(index), savingsRepository.savingsDao).execute();
                                             modelSavings.remove(index);
-                                            sweetAlertDialog.dismiss();
-                                        })
-                                        .setCancelText("Tidak")
-                                        .show();
+                                        }
+                                    }
+                                });
+                                dialogConfirm.showDialogConfirm("Hapus","Apakah anda yakin ingin hapus tabungan '" + modelSavings.get(index).getTitle() + "'?");
+
+
                                 break;
                             case EDIT:
                                 mCallbackOnActivityResult.updateDataSavingsTarget(this.dataSavings, index, this.dataSavings.get(index));

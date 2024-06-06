@@ -1,5 +1,6 @@
 package id.co.evolution.financefy.activity;
 
+import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_FINANCE;
 import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
 
@@ -15,6 +16,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
@@ -33,6 +35,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.dialog.DialogConfirm;
 import id.co.evolution.financefy.dialog.DialogFinance;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
@@ -174,33 +177,30 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
                 }
 
                 if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty()) {
+                    DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                        @Override
+                        public void onSubmit(@NonNull String result) {
+                           if(result.equalsIgnoreCase("yes")){
+                               ModelFinance model = new ModelFinance();
+                               model.setDate(date);
+                               model.setJumlah(Tools.replaceCurrencyStringToDouble(jumlah));
+                               model.setTipe(type);
+                               model.setKategori(category);
+                               model.setKeterangan(binding.etDescription.getText().toString().trim());
+                               model.setMonth(month);
+                               model.setId_finance_user(modelUser.getId());
+                               model.setType_currency(modelUser.getType_currency());
 
-                    new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                            .setTitleText("Submit")
-                            .setContentText("Apakah anda yakin ingin submit data ?")
-                            .setConfirmText("Ya")
-                            .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                                @Override
-                                public void onClick(SweetAlertDialog sweetAlertDialog) {
-                                    ModelFinance model = new ModelFinance();
-                                    model.setDate(date);
-                                    model.setJumlah(Tools.replaceCurrencyStringToDouble(jumlah));
-                                    model.setTipe(type);
-                                    model.setKategori(category);
-                                    model.setKeterangan(binding.etDescription.getText().toString().trim());
-                                    model.setMonth(month);
-                                    model.setId_finance_user(modelUser.getId());
-                                    model.setType_currency(modelUser.getType_currency());
+                               CreateFinanceActivity.this.onSubmit(model);
+                               Intent intent = new Intent();
+                               intent.putExtra("finance", model);
+                               setResult(RESULT_OK, intent);
+                               finish();
+                           }
+                        }
+                    });
+                    dialogConfirm.showDialogConfirm("Submit","Apakah anda yakin ingin submit data ?");
 
-                                    onSubmit(model);
-                                    Intent intent = new Intent();
-                                    intent.putExtra("finance", model);
-                                    setResult(RESULT_OK, intent);
-                                    finish();
-                                }
-                            })
-                            .setCancelText("Tidak")
-                            .show();
                 }
                 break;
         }

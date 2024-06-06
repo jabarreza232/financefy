@@ -1,11 +1,13 @@
 package id.co.evolution.financefy.helper;
 
 import android.animation.ObjectAnimator;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.util.Property;
 import android.view.View;
 
@@ -13,6 +15,7 @@ import androidx.core.content.ContextCompat;
 
 import id.co.evolution.financefy.dummy.DummyPrimaryColor.PRIMARY_COLOR;
 
+import java.io.File;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -74,6 +77,63 @@ public class Tools {
             }
         }
     }
+    // Fungsi untuk menghapus cache internal aplikasi
+    public static void clearCache(Context context) {
+        try {
+            File cacheDir = context.getCacheDir();
+            deleteDir(cacheDir);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Fungsi untuk menghitung ukuran cache internal aplikasi
+    public static long getCacheSize(Context context) {
+        try {
+            File cacheDir = context.getCacheDir();
+            return getDirSize(cacheDir);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // Fungsi rekursif untuk menghapus direktori
+    private static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+            return dir.delete();
+        } else if (dir != null && dir.isFile()) {
+            return dir.delete();
+        } else {
+            return false;
+        }
+    }
+
+    // Fungsi rekursif untuk menghitung ukuran direktori
+    private static long getDirSize(File dir) {
+        long size = 0;
+        if (dir != null && dir.isDirectory()) {
+            String[] children = dir.list();
+            if (children != null) {
+                for (String child : children) {
+                    size += getDirSize(new File(dir, child));
+                }
+            }
+        } else if (dir != null && dir.isFile()) {
+            size += dir.length();
+        }
+
+        Log.d("TAG", "Directory: " + dir.getAbsolutePath() + " Size: " + size);
+        return size;
+    }
+
     public static String getFormattedMonthSimple(Long dateTime) {
         SimpleDateFormat newFormat = new SimpleDateFormat("MM-yyyy");
         return newFormat.format(new Date(dateTime));

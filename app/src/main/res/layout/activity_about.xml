@@ -23,7 +23,7 @@
         android:layout_below="@id/img_financefy"
         android:layout_marginStart="10dp"
         android:text="App Version"
-        android:textColor="@color/blackTextColor" />
+        android:textColor="?android:textColorPrimary" />
 
     <TextView
         android:id="@+id/txt_app_version"
@@ -33,7 +33,7 @@
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="10dp"
         android:text="1.7.8"
-        android:textColor="@color/blackTextColor" />
+        android:textColor="?android:textColorPrimary" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -43,7 +43,7 @@
         android:id="@+id/label_system_version"
         android:layout_marginTop="10dp"
         android:text="Android Version"
-        android:textColor="@color/blackTextColor" />
+        android:textColor="?android:textColorPrimary" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -54,7 +54,7 @@
         android:layout_marginEnd="10dp"
         tools:text="Android 12"
         android:id="@+id/txt_system_version"
-        android:textColor="@color/blackTextColor" />
+        android:textColor="?android:textColorPrimary" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
         android:id="@+id/label_device_model"
         android:layout_marginTop="10dp"
         android:text="Device Model"
-        android:textColor="@color/blackTextColor" />
+        android:textColor="?android:textColorPrimary" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -74,7 +74,7 @@
         android:layout_marginEnd="10dp"
         tools:text="M1231231G"
         android:id="@+id/txt_device_model"
-        android:textColor="@color/blackTextColor" />
+        android:textColor="?android:textColorPrimary" />
 
 
 </RelativeLayout>

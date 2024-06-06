@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
@@ -31,6 +32,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateSavingsTargetBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.dialog.DialogConfirm;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
@@ -182,27 +184,25 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
                 }
 
                 if (!binding.etAmount.getText().toString().isEmpty()) {
+                    DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                        @Override
+                        public void onSubmit(@NonNull String result) {
+                            ModelSavings model = new ModelSavings();
+                            model.setDate_target(date);
+                            model.setId_savings_user(modelUser.getId());
+                            model.setType_currency(modelUser.getType_currency());
+                            model.setTargetValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
+                            model.setTitle(binding.etTitle.getText().toString().trim());
+                            viewModelSaving.inputUpdateSavings("Create", model);
 
-                    new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                            .setTitleText("Submit")
-                            .setContentText("Apakah anda yakin ingin submit data ?")
-                            .setConfirmText("Ya")
-                            .setConfirmClickListener(sweetAlertDialog -> {
-                                ModelSavings model = new ModelSavings();
-                                model.setDate_target(date);
-                                model.setId_savings_user(modelUser.getId());
-                                model.setType_currency(modelUser.getType_currency());
-                                model.setTargetValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
-                                model.setTitle(binding.etTitle.getText().toString().trim());
-                                viewModelSaving.inputUpdateSavings("Create", model);
+                            Intent intent = new Intent();
+                            intent.putExtra("savings", modelSavings);
+                            setResult(RESULT_OK, intent);
+                            finish();
+                        }
+                    });
+                    dialogConfirm.showDialogConfirm("Submit","Apakah anda yakin ingin submit data ?");
 
-                                Intent intent = new Intent();
-                                intent.putExtra("savings", modelSavings);
-                                setResult(RESULT_OK, intent);
-                                finish();
-                            })
-                            .setCancelText("Tidak")
-                            .show();
                 }
                 break;
         }

@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
@@ -32,8 +33,10 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCreateSavingsProgressBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
+import id.co.evolution.financefy.dialog.DialogConfirm;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
+import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
 import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
@@ -197,12 +200,10 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
                 }
 
                 if (!binding.etAmount.getText().toString().isEmpty()) {
-
-                    new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                            .setTitleText("Submit")
-                            .setContentText("Apakah anda yakin ingin submit data ?")
-                            .setConfirmText("Ya")
-                            .setConfirmClickListener(sweetAlertDialog -> {
+                    DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                        @Override
+                        public void onSubmit(@NonNull String result) {
+                            if(result.equalsIgnoreCase("yes")){
                                 ModelSavingsProgress model = new ModelSavingsProgress();
                                 model.setDate_progress_savings(date);
                                 model.setMonth(month);
@@ -211,14 +212,16 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
                                 model.setTitle(binding.etTitle.getText().toString().trim());
                                 model.setId_savings(modelSavings.getId());
                                 model.setType_currency(modelSavings.getType_currency());
-                                onSubmit(model);
+                                CreateSavingsProgressActivity.this.onSubmit(model);
                                 Intent intent = new Intent();
                                 intent.putExtra("savings", modelSavings);
                                 setResult(RESULT_OK, intent);
                                 finish();
-                            })
-                            .setCancelText("Tidak")
-                            .show();
+                            }
+                        }
+                    });
+                    dialogConfirm.showDialogConfirm("Submit","Apakah anda yakin ingin submit data ?");
+
                 }
                 break;
         }

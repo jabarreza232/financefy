@@ -99,27 +99,27 @@
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
+<!--        <androidx.cardview.widget.CardView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="10dp"-->
+<!--            android:layout_marginEnd="10dp"-->
+<!--            app:cardCornerRadius="5dp"-->
+<!--            app:cardElevation="3dp">-->
 
-            <TextView
-                android:id="@+id/txt_delete_cache"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_baseline_cached_24"
-                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
-                android:drawablePadding="5dp"
-                android:drawableTint="?android:textColorPrimary"
-                android:padding="10dp"
-                android:text="Hapus Cache"
-                android:textColor="?android:textColorPrimary"
-                android:textSize="15sp" />
-        </androidx.cardview.widget.CardView>
+<!--            <TextView-->
+<!--                android:id="@+id/txt_delete_cache"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:drawableStart="@drawable/ic_baseline_cached_24"-->
+<!--                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"-->
+<!--                android:drawablePadding="5dp"-->
+<!--                android:drawableTint="?android:textColorPrimary"-->
+<!--                android:padding="10dp"-->
+<!--                android:text="Hapus Cache"-->
+<!--                android:textColor="?android:textColorPrimary"-->
+<!--                android:textSize="15sp" />-->
+<!--        </androidx.cardview.widget.CardView>-->
 
         <TextView
             android:id="@+id/txt_security"
@@ -139,19 +139,42 @@
             android:layout_marginBottom="3dp"
             app:cardCornerRadius="5dp"
             app:cardElevation="3dp">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/txt_pin_setting"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_baseline_security_24"
-                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
                 android:drawablePadding="5dp"
-                android:drawableTint="?android:textColorPrimary"
                 android:padding="10dp"
+                android:drawableTint="?android:textColorPrimary"
                 android:text="Atur Pin"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="15sp" />
+            <TextView
+                android:id="@+id/txt_status_pin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="Tidak Aktif"
+                android:layout_toStartOf="@+id/img_keyboard_arrow_right"
+                android:textColor="@color/red"
+                android:textSize="15sp" />
+
+            <ImageView
+                android:id="@+id/img_keyboard_arrow_right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                app:tint="?android:textColorPrimary"
+                android:layout_alignParentEnd="true"
+                android:padding="10dp"
+                />
+        </RelativeLayout>
+
         </androidx.cardview.widget.CardView>
 
 
