@@ -1,11 +1,14 @@
 package id.co.evolution.financefy.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,7 +22,8 @@ public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.Vi
     Context context;
     List<String> data;
     MethodCallback methodCallback;
-
+    int selectedPosition = -1;
+    int lastSelectedPosition = -1;
     public AdapterCalculator(Context context, List<String> data, MethodCallback methodCallback) {
         this.context = context;
         this.data = data;
@@ -55,9 +59,24 @@ public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.Vi
         public void bindData(String modelFilter, int position) {
             binding.txtName.setText(modelFilter);
 
-            itemView.setOnClickListener(v -> {
-                methodCallback.onClick(data, position);
+
+            itemView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if(event.getAction() == MotionEvent.ACTION_UP){
+                        binding.txtName.setBackground(ContextCompat.getDrawable(context,R.drawable.shape_selected_calculator));
+
+                        // Do what you want
+                        return true;
+                    }
+                    methodCallback.onClick(data, position);
+
+                    binding.txtName.setBackgroundColor(ContextCompat.getColor(context,R.color.blueColor));
+                    return false;
+                }
             });
+
+
         }
     }
 }

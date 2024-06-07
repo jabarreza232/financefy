@@ -104,7 +104,8 @@
                 android:layout_alignParentBottom="true"
                 android:background="@drawable/shape_bottom_navigation"
                 app:labelVisibilityMode="labeled"
-                app:menu="@menu/menu_bottom_navigation" />
+                app:menu="@menu/menu_bottom_navigation"
+                />
         </RelativeLayout>
         <!--                app:itemIconTint="@drawable/state_bottom_navigation"-->
         <!--                app:itemTextColor="@drawable/state_bottom_navigation"-->

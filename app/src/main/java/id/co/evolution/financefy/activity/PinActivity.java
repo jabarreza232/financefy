@@ -82,6 +82,9 @@ public class PinActivity extends AppCompatActivity {
         });
         binding.rvCalculator.setLayoutManager(new GridLayoutManager(this, 3));
         binding.rvCalculator.setAdapter(adapterCalculator);
+        binding.rvCalculator.setClickable(true);
+        binding.rvCalculator.setFocusable(true);
+        binding.rvCalculator.setFocusableInTouchMode(true);
 
         binding.btnDelete.setOnClickListener(v -> {
             if (!result.isEmpty() && result.length() > 1) {

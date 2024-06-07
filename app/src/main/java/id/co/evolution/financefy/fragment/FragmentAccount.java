@@ -283,6 +283,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
             List<String> dataName = new ArrayList<>();
             for (ModelUser user1 : modelUsers) dataName.add(user1.getName());
+
             dataUser = modelUsers;
 
             ArrayAdapter<String> adapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item, dataName.toArray());

@@ -15,31 +15,14 @@
             tools:context=".fragment.FragmentAll">
 
 
-            <FrameLayout
+
+
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_margin="10dp"
                 android:background="@drawable/shape_line_gray"
-                android:layout_margin="10dp"
-                >
-                <Spinner
-                    android:id="@+id/spin_choose_account"
-                    android:layout_width="match_parent"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp"
-                    android:layout_height="60dp"
-                    android:ellipsize="end"
-                    android:inputType="none"/>
-
-            </FrameLayout>
-
-
-
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@drawable/shape_line_gray">
+                app:cardElevation="10dp">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -50,7 +33,7 @@
                         android:id="@+id/txt_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_toStartOf="@id/img_edit"
+                        android:layout_toStartOf="@id/img_more"
                         android:fontFamily="@font/ubuntu_b"
                         android:text="@string/sample_name"
                         android:textColor="?android:attr/textColorPrimary"
@@ -73,13 +56,37 @@
                         android:layout_toStartOf="@id/img_more"
                         android:fontFamily="@font/ubuntu_r"
                         android:text="Pribadi - Menabung"
-                        android:textColor="?android:attr/textColorPrimary"
+                        android:layout_marginTop="5dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/blueColor"
                         android:textSize="13sp" />
 
                 </RelativeLayout>
 
 
-            </FrameLayout>
+            </androidx.cardview.widget.CardView>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/shape_line_gray"
+                android:layout_margin="10dp"
+                app:cardElevation="10dp"
+                >
+
+                <Spinner
+                    android:id="@+id/spin_choose_account"
+                    android:layout_width="match_parent"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:layout_height="60dp"
+                    android:ellipsize="end"
+                    android:textSize="15sp"
+                    android:inputType="none"
+                    />
+
+            </androidx.cardview.widget.CardView>
+
+
 
 
             <include
@@ -100,9 +107,13 @@
             android:gravity="center"
             android:padding="10dp"
             android:text="Tambah Akun"
+            android:textStyle="bold"
             android:textColor="@color/white"
+            android:textSize="15sp"
             app:backgroundTint="@color/blueColor"
             app:icon="@drawable/ic_add"
+            app:iconSize="30dp"
+            android:textAllCaps="false"
             app:iconGravity="end"
             app:iconTint="@color/white" />
     </RelativeLayout>
