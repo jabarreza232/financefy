@@ -27,6 +27,8 @@ public interface FinanceDao {
 
     @Query("SELECT * FROM finance WHERE month IN(:month) AND id_finance_user IN(:id_user)AND type_currency IN(:type_currency)")
     LiveData<List<ModelFinance>> loadAllbyMonth(String month, int id_user,String type_currency);
+    @Query("SELECT * FROM finance WHERE date IN(:date) AND id_finance_user IN(:id_user)AND type_currency IN(:type_currency)")
+    LiveData<List<ModelFinance>> loadAllbyDate(String date, int id_user,String type_currency);
 
     @Query("SELECT * FROM finance WHERE month IN(:year) AND id_finance_user IN(:id_user)AND type_currency IN(:type_currency)")
     LiveData<List<ModelFinance>> loadAllByYear(String year, int id_user,String type_currency);

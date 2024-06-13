@@ -35,6 +35,9 @@ public class ViewModelFinance extends ViewModel {
     public LiveData<List<ModelFinance>> getFinanceByWeek(List<String> date, int id_user, String type_currency) {
         return financeRepository.getFinanceByWeek(date, id_user,type_currency);
     }
+    public LiveData<List<ModelFinance>> getAllFinanceByDate(String date, int id_user, String type_currency) {
+        return financeRepository.getAllFinanceByDate(date, id_user,type_currency);
+    }
 
     public LiveData<List<ModelFinance>> getFinanceByType(String type, String type_currency) {
         return financeRepository.getFinanceByType(type, type_currency);

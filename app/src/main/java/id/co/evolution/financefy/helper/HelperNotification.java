@@ -56,13 +56,16 @@ public class HelperNotification {
             intent.putExtra("key",keyNotif);
             modelNotification.requestCode = requestCode;
             tinyDb.putObject(keyNotif,modelNotification);
-            pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_MUTABLE);
+            pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE);
         }
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
         // Set the alarm to start at approximately 2:00 p.m.
         Calendar calendar = Calendar.getInstance();
+
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.set(Calendar.HOUR_OF_DAY, 8);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
 
         alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
 
@@ -75,4 +78,24 @@ public class HelperNotification {
             }
         }
     }
+    public static long getTimeInMillisForTomorrow() {
+        // Mendapatkan instance dari Calendar
+        Calendar calendar = Calendar.getInstance();
+
+        // Mengatur waktu kalender ke waktu saat ini
+        calendar.setTimeInMillis(System.currentTimeMillis());
+
+        // Menambah satu hari ke waktu saat ini
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
+
+        // Mengatur jam, menit, dan detik ke waktu yang sama pada hari esok
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, calendar.get(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.get(Calendar.MILLISECOND));
+
+        // Mengembalikan timeInMillis untuk hari esok
+        return calendar.getTimeInMillis();
+    }
+
 }

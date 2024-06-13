@@ -52,6 +52,9 @@ public class FinanceRepository {
     public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(String type, List<String> date, int id_user, String type_currency) {
         return financeDao.findByTypeAndWeek(type, date, id_user, type_currency);
     }
+    public LiveData<List<ModelFinance>> getAllFinanceByDate( String date, int id_user, String type_currency) {
+        return financeDao.loadAllbyDate( date, id_user, type_currency);
+    }
 
     public LiveData<List<ModelFinance>> getFinanceByUserId(int id_user, String type_currency) {
         return financeDao.findFinanceByUserId(id_user, type_currency);

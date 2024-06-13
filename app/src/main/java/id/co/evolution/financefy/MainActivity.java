@@ -98,13 +98,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public ModelPrimaryColor modelPrimaryColor = Tools.modelPrimaryColor;
     public HelperNotification helperNotification;
     public boolean isCheckedNotifSavings,isCheckedNotifFinance;
-
+   public boolean isPinSetting;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         changeUINightMode();
         String type_currency = tinyDb.getString("currency");
-        boolean isPinSetting = tinyDb.getBoolean("isSettingPin");
+         isPinSetting = tinyDb.getBoolean("isSettingPin");
         boolean isPinInput = getIntent().getBooleanExtra("isInputPin", false);
 
         if (isPinSetting && !isPinInput) {
@@ -238,19 +238,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     fragment = new FragmentAll();
                     changeFragment(fragment);
                     binding.layout.fabAdd.show();
+                    getSupportActionBar().setTitle("Records");
                     break;
                 case "analysis":
                     if (isUserDailyFinance)
                         fragment = new FragmentAnalysis();
                     else fragment = new FragmentAnalysisSavings();
-
+                    getSupportActionBar().setTitle("Analysis");
                     changeFragment(fragment);
                     break;
                 case "accounts":
+                    getSupportActionBar().setTitle("Accounts");
                     fragment = new FragmentAccount();
                     changeFragment(fragment);
                     break;
                 case "settings":
+                    getSupportActionBar().setTitle("Settings");
                     fragment = new FragmentSettings();
                     changeFragment(fragment);
                     break;

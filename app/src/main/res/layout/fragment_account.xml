@@ -7,6 +7,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -96,25 +100,29 @@
                 android:id="@+id/layout_account_finance_journal"
                 layout="@layout/layout_account_finance_journal" />
         </LinearLayout>
-
+        </androidx.core.widget.NestedScrollView>
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/fab_add_account"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
-            android:layout_margin="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
             android:gravity="center"
             android:padding="10dp"
-            android:text="Tambah Akun"
-            android:textStyle="bold"
+            android:visibility="gone"
+            android:text="Tambah Akun Baru"
+            android:textAllCaps="false"
             android:textColor="@color/white"
-            android:textSize="15sp"
+            android:textSize="13sp"
+            android:textStyle="bold"
             app:backgroundTint="@color/blueColor"
             app:icon="@drawable/ic_add"
-            app:iconSize="30dp"
-            android:textAllCaps="false"
             app:iconGravity="end"
+            app:iconSize="24dp"
             app:iconTint="@color/white" />
     </RelativeLayout>
 </layout>

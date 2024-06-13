@@ -149,11 +149,12 @@
                 android:layout_height="wrap_content"
                 android:drawableStart="@drawable/ic_baseline_security_24"
                 android:drawablePadding="5dp"
-                android:padding="10dp"
                 android:drawableTint="?android:textColorPrimary"
+                android:padding="10dp"
                 android:text="Atur Pin"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="15sp" />
+
             <TextView
                 android:id="@+id/txt_status_pin"
                 android:layout_width="wrap_content"

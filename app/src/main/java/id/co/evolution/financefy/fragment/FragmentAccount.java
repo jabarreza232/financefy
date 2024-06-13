@@ -4,6 +4,7 @@ import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUES
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS_TARGET;
 import static id.co.evolution.financefy.helper.Tools.calculatePercentage;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
+import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 import static id.co.evolution.financefy.helper.Tools.modelPrimaryColor;
 
 import android.annotation.SuppressLint;
@@ -12,6 +13,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -24,6 +28,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
@@ -40,6 +46,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.activity.UpdateSavingsActivity;
+import id.co.evolution.financefy.adapter.AdapterAnalysisFinance;
+import id.co.evolution.financefy.adapter.AdapterAnalysisSavings;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAccountBinding;
 import id.co.evolution.financefy.dialog.DialogConfirm;
@@ -71,6 +79,9 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     List<ModelUser> dataUser = new ArrayList<>();
     List<ModelSavings> dataSavings = new ArrayList<>();
     List<ModelFinance> dataFinance = new ArrayList<>();
+    List<ModelFinance> dataIncome = new ArrayList<>();
+    List<ModelFinance> dataExpense = new ArrayList<>();
+    AdapterAnalysisSavings adapter;
     FragmentAccountBinding binding;
     DialogCreateUser dialogCreateUser;
     @Inject
@@ -90,7 +101,8 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     public ViewModelSavingsProgress viewModelSavingsProgress;
     @Inject
     TinyDb tinyDb;
-
+    @Inject
+    SavingsFilter savingsFilter;
     boolean isAddSavings;
     int count_savings,count_users;
 
@@ -101,6 +113,8 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     CallbackOnActivityResult mCallbackOnActivityResult;
     Locale locale;
     HelperNotification helperNotification;
+    AdapterAnalysisFinance adapterIncome,adapterExpense;
+
     //TODO NOTE SAVINGS : Menabung, FINANCE : JURNAL KEUANGAN
 
     public FragmentAccount() {
@@ -127,8 +141,10 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         date_ship_millis = today.getTimeInMillis();
         locale = mainActivity.user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
         isAddSavings = false;
+        setHasOptionsMenu(true);
         return binding.getRoot();
     }
+
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -189,7 +205,64 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             refreshDataFinance();
         }
     }
+    private void showDataIncome(List<ModelFinance>data){
+        if(financeFilter.listIncome(data).size()>0){
+            dataIncome = financeFilter.listIncome(data);
+            dataIncome = financeFilter.listAnalysis(dataIncome, getString(R.string.pemasukan));
 
+            adapterIncome = new AdapterAnalysisFinance(getActivity(), dataIncome);
+            adapterIncome.setLocale(locale);
+            adapterIncome.setLayoutAnalysis(AdapterAnalysisFinance.LAYOUT_ANALYSIS.FROM_ACCOUNT);
+            binding.layoutAccountFinanceJournal.rvIncome.setLayoutManager(new LinearLayoutManager(getActivity()));
+            binding.layoutAccountFinanceJournal.rvIncome.setAdapter(adapterIncome);
+            binding.layoutAccountFinanceJournal.rvIncome.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    if (dy < 0 && !binding.fabAddAccount.isShown())
+                        binding.fabAddAccount.show();
+                    else if (dy > 0 && binding.fabAddAccount.isShown() && !((MainActivity) getActivity()).isFabOpen)
+                        binding.fabAddAccount.hide();
+                }
+
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                }
+            });
+            adapterIncome.notifyDataSetChanged();
+        }
+
+    }
+
+    private void showDataExpense(List<ModelFinance>data){
+        if(financeFilter.listExpense(data).size()>0){
+            dataExpense = financeFilter.listExpense(data);
+            dataExpense = financeFilter.listAnalysis(dataExpense, getString(R.string.pengeluaran));
+
+            adapterExpense = new AdapterAnalysisFinance(getActivity(), dataExpense);
+            adapterExpense.setLocale(locale);
+            adapterExpense.setLayoutAnalysis(AdapterAnalysisFinance.LAYOUT_ANALYSIS.FROM_ACCOUNT);
+            binding.layoutAccountFinanceJournal.rvExpense.setLayoutManager(new LinearLayoutManager(getActivity()));
+            binding.layoutAccountFinanceJournal.rvExpense.setAdapter(adapterExpense);
+            binding.layoutAccountFinanceJournal.rvExpense.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    if (dy < 0 && !binding.fabAddAccount.isShown())
+                        binding.fabAddAccount.show();
+                    else if (dy > 0 && binding.fabAddAccount.isShown() && !((MainActivity) getActivity()).isFabOpen)
+                        binding.fabAddAccount.hide();
+                }
+
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                }
+            });
+            adapterExpense.notifyDataSetChanged();
+        }
+    }
     private void showDialogChoose() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Pilih Opsi");
@@ -306,7 +379,26 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
     }
 
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_add_account, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
 
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.add_account:
+                showDialogAddAccount(true);
+                // Not implemented here
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
     private void refreshDataFinance() {
 
         viewModelFinance.getFinanceByUserId(mainActivity.user.getId(), mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelFinance -> {
@@ -314,6 +406,8 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
             binding.layoutAccountFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(dataFinance), locale));
             binding.layoutAccountFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(dataFinance), locale));
+            showDataIncome(modelFinance);
+            showDataExpense(modelFinance);
         });
 
 //
@@ -385,16 +479,54 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
     private void setDataSavings(ModelSavings modelSavings) {
         mainActivity.modelSavings = modelSavings;
+
         double percentage = calculatePercentage((double) modelSavings.getProcessValue(), (double) modelSavings.getTargetValue());
         String txtPercentage = percentage >= 100 ? getString(R.string.achieved) : percentage + "%";
 
+
         tinyDb.putObject("savings", modelSavings);
+        if(modelSavings.getDate_target()!=null){
+            long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
+
+            long remainingDaysAfterYears = restOfTheDay % 365;
+            long months = remainingDaysAfterYears / 30;
+            long remainingDays = remainingDaysAfterYears % 30;
+
+            if(restOfTheDay>0){
+                if(restOfTheDay>=365){
+                    long years = restOfTheDay / 365;
+                    binding.layoutAccountSavings.txtDescriptionSaving.setText("Target dan progress menabung \n\nWaktu tersisa: "+years+" tahun "+months+" bulan " + remainingDays + " hari");
+                }else if(restOfTheDay>=30){
+                    binding.layoutAccountSavings.txtDescriptionSaving.setText("Target dan progress menabung \n\nWaktu tersisa: "+months+" bulan " + remainingDays + " hari");
+                } else if (restOfTheDay>0){
+                    binding.layoutAccountSavings.txtDescriptionSaving.setText("Target dan progress menabung \n\nWaktu tersisa: " + remainingDays + " hari");
+                }else {
+                    binding.layoutAccountSavings.txtDescriptionSaving.setText("Target dan progress menabung \n\nWaktu tersisa: selesai");
+                }
+            }
+            else
+                binding.layoutAccountSavings.txtDescriptionSaving.setText("Selesai");
+
+        }
         binding.layoutAccountSavings.txtChooseSavings.setText(modelSavings.getTitle());
         binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue(), locale));
         binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue(), locale));
         binding.layoutAccountSavings.txtPercentageSavings.setText(txtPercentage);
         binding.layoutAccountSavings.progressBarTargetSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutAccountSavings.progressBarTargetSavings.setMax(100);
+
+        viewModelSavingsProgress.findAllSavingsByIdSavings(mainActivity.modelSavings.getId(), mainActivity.modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
+            List<ModelSavingsProgress>savingsData = new ArrayList<>(dataSavings);
+
+            savingsData = savingsFilter.listAnalysis(savingsData);
+
+            adapter = new AdapterAnalysisSavings(getActivity(), savingsData);
+            adapter.setLocale(locale);
+            adapter.setTotalValue(modelSavings.getTargetValue());
+            binding.layoutAccountSavings.rvProgressSavings.setLayoutManager(new LinearLayoutManager(getActivity()));
+            binding.layoutAccountSavings.rvProgressSavings.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+        });
     }
 
 
@@ -415,9 +547,11 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         locale = user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
         tinyDb.putString("currency",user.getType_currency());
 
-        viewModelFinance.getFinanceByUserId(user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+        viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()),user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
             dataFinance = modelFinances;
             boolean isChecked = tinyDb.getBoolean("isCheckedFinance");
+
+            tinyDb.putBoolean("isCheckedFinance", isChecked);
             String description = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinance), locale) + "\n" +
                     "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinance), locale);
             ModelNotification modelNotification =new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), description);

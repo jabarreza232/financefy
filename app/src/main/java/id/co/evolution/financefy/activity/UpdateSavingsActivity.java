@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -234,6 +235,8 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
                                 intent.putExtra("position", position);
                                 setResult(REQUEST_CODE_SAVINGS, intent);
                                 finish();
+                                Toast.makeText(UpdateSavingsActivity.this, "Catatan progress menabung berhasil di ubah !", Toast.LENGTH_SHORT).show();
+
                             }
                         }
                     });

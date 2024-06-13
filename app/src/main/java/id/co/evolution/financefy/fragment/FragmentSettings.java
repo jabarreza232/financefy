@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -23,6 +24,7 @@ import id.co.evolution.financefy.activity.AboutActivity;
 import id.co.evolution.financefy.activity.NotificationActivity;
 import id.co.evolution.financefy.activity.SwitchThemeActivity;
 import id.co.evolution.financefy.databinding.FragmentSettingsBinding;
+import id.co.evolution.financefy.dialog.DialogConfirm;
 import id.co.evolution.financefy.dialog.DialogSettingPin;
 import id.co.evolution.financefy.helper.TinyDb;
 
@@ -77,16 +79,35 @@ public class FragmentSettings extends Fragment {
         });
         changeStatusPin();
         binding.txtPinSetting.setOnClickListener(v->{
-            DialogSettingPin dialogSettingPin = new DialogSettingPin(getContext(), getLayoutInflater(), new DialogSettingPin.DialogInterfaceCallback() {
-                @Override
-                public void onSubmit(String result) {
-                    tinyDb.putString("pin", result);
-                    tinyDb.putBoolean("isSettingPin", true);
-                    changeStatusPin();
-                }
-            });
+            showDialogSettingPIN();
+        });
+        if(mainActivity.isPinSetting){
+            binding.txtStatusPin.setText("Aktif");
+            binding.txtStatusPin.setTextColor(ContextCompat.getColor(getContext(),R.color.green));
+        }else{
+            binding.txtStatusPin.setText("Tidak Aktif");
+            binding.txtStatusPin.setTextColor(ContextCompat.getColor(getContext(),R.color.red));
+        }
+        binding.txtStatusPin.setOnClickListener(v->{
+            if(mainActivity.isPinSetting){
+                DialogConfirm dialogConfirm = new DialogConfirm(getContext(), inflater, result -> {
 
-            dialogSettingPin.show();
+                    if (result.equalsIgnoreCase("yes")){
+                        Toast.makeText(getContext(), "PIN telah berhasil di non aktifkan !", Toast.LENGTH_SHORT).show();
+                        tinyDb.putString("pin", "");
+                        tinyDb.putBoolean("isSettingPin", false);
+                        mainActivity.isPinSetting = false;
+                        binding.txtStatusPin.setText("Tidak Aktif");
+                        binding.txtStatusPin.setTextColor(ContextCompat.getColor(getContext(),R.color.red));
+
+                    }
+                });
+                dialogConfirm.showDialogConfirm("Menonaktifkan PIN","Apakah anda yakin ingin menonaktifkan PIN anda ? ");
+
+            }else{
+                showDialogSettingPIN();
+            }
+
         });
         binding.txtMoney.setOnClickListener(v->{
             setCurrencySettings();
@@ -102,6 +123,19 @@ public class FragmentSettings extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+    private void showDialogSettingPIN(){
+        DialogSettingPin dialogSettingPin = new DialogSettingPin(getContext(), getLayoutInflater(), new DialogSettingPin.DialogInterfaceCallback() {
+            @Override
+            public void onSubmit(String result) {
+                tinyDb.putString("pin", result);
+                tinyDb.putBoolean("isSettingPin", true);
+                mainActivity.isPinSetting = true;
+                changeStatusPin();
+            }
+        });
+
+        dialogSettingPin.show();
     }
     private void changeStatusPin(){
         if(tinyDb.getBoolean("isSettingPin")){

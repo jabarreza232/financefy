@@ -20,37 +20,67 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp">
 
-
-                <TextView
-                    android:id="@+id/txt_kategori"
+                <RelativeLayout
+                    android:id="@+id/rl_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:layout_toStartOf="@id/txt_jumlah"
-                    android:fontFamily="@font/lato_bold"
-                    android:textColor="?android:textColorPrimary"
-                    android:textSize="15sp"
-                    tools:text="Makanan" />
+                    android:layout_toStartOf="@id/txt_percentage">
+
+                    <TextView
+                        android:id="@+id/txt_kategori"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_toStartOf="@id/txt_jumlah"
+                        android:fontFamily="@font/lato_bold"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="15sp"
+                        tools:text="Makanan" />
 
 
-                <TextView
-                    android:id="@+id/txt_jumlah"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp"
-                    android:layout_toStartOf="@id/txt_percentage"
-                    android:fontFamily="@font/ubuntu_r"
-                    android:textColor="?android:textColorPrimary"
-                    android:textSize="13sp"
-                    tools:text="Rp.15000" />
+                    <TextView
+                        android:id="@+id/txt_jumlah"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginTop="7dp"
+                        android:fontFamily="@font/ubuntu_r"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="13sp"
+                        tools:text="Rp.15000" />
 
+                    <TextView
+                        android:id="@+id/txt_jumlah_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/txt_kategori"
+                        android:layout_marginTop="7dp"
+                        android:fontFamily="@font/ubuntu_r"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="13sp"
+                        android:visibility="gone"
+                        tools:text="Rp.15000" />
+                    <TextView
+                        android:layout_marginTop="7dp"
+                        android:id="@+id/txt_percentage_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/ubuntu_r"
+                        android:layout_below="@id/txt_jumlah_2"
+                        android:text="17%"
+                        android:padding="3dp"
+                        android:visibility="gone"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="13sp" />
+
+                </RelativeLayout>
 
                 <ProgressBar
                     android:id="@+id/progress_finance"
                     style="@android:style/Widget.ProgressBar.Horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/txt_jumlah"
+                    android:layout_below="@id/rl_text"
                     android:layout_marginTop="10dp"
                     android:layout_toStartOf="@id/txt_percentage"
                     android:progressDrawable="@drawable/progress_income_drawable"

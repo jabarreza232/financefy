@@ -136,6 +136,15 @@ public class FinanceFilter {
         }
         return list;
     }
+    public List<ModelFinance> listExpense(List<ModelFinance> data) {
+        List<ModelFinance> list = new ArrayList<>();
+        for (ModelFinance modelFinance : data) {
+            if (modelFinance.getTipe().equalsIgnoreCase("pengeluaran")) {
+                list.add(modelFinance);
+            }
+        }
+        return list;
+    }
 
     public List<ModelFinance> listAnalysis(List<ModelFinance> data, String type) {
         List<ModelFinance> list = new ArrayList<>();

@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="?attr/colorSurface"
     android:id="@+id/place_account_finance_journal">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/ubuntu_b"
+        android:text="Total pengeluaran dan pemasukan"
+        android:textColor="?android:attr/textColorPrimary"
+        android:padding="10dp"
+        android:textSize="15sp" />
 
     <RelativeLayout
         android:visibility="gone"
@@ -68,7 +76,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="horizontal"
         android:layout_margin="5dp"
         android:weightSum="2">
@@ -114,13 +122,17 @@
                     android:textStyle="bold"
                     android:textColor="@color/red" />
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_expense"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
 
         <androidx.cardview.widget.CardView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
             app:cardElevation="10dp"
             android:layout_margin="5dp"
@@ -130,7 +142,6 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
                 android:orientation="vertical">
 
                 <ImageView
@@ -159,6 +170,10 @@
                     android:text="Rp.50.000"
                     android:textColor="@color/green" />
 
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_income"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 

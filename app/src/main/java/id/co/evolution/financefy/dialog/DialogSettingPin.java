@@ -68,6 +68,9 @@ public class DialogSettingPin {
         dialog.setContentView(dialogView);
         binding = DataBindingUtil.bind(dialogView);
         binding.etAmount.setText(result);
+        binding.imgClose.setOnClickListener(v->{
+            dismiss();
+        });
 
         AdapterCalculator adapterCalculator = new AdapterCalculator(context, DummyNumberPin.getNumberPinConfirm(), (data, position) -> {
             List<String> dataList = (List<String>) data;

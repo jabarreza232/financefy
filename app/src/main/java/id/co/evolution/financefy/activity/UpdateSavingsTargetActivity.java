@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -219,6 +220,8 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
                             intent.putExtra("savings", model);
                             setResult(REQUEST_CODE_UPDATE_SAVINGS_TARGET, intent);
                             finish();
+                            Toast.makeText(UpdateSavingsTargetActivity.this, "Catatan target menabung berhasil di ubah !", Toast.LENGTH_SHORT).show();
+
                         }
                         }
                     });

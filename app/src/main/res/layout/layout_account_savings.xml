@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout >
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/colorSurface"
     android:orientation="vertical"
+    android:visibility="gone"
     android:id="@+id/place_account_savings"
-   android:visibility="gone"
-    >
+   >
+
 
     <androidx.cardview.widget.CardView
         android:id="@+id/place_choose_savings"
@@ -40,7 +42,18 @@
 
 
     </androidx.cardview.widget.CardView>
-
+    <TextView
+        android:layout_margin="10dp"
+        android:background="@drawable/shape_line_blue"
+        android:textAlignment="center"
+        android:id="@+id/txt_description_saving"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/ubuntu_b"
+        android:text="Target dan progress menabung \n\nWaktu: 2 bulan 30 hari lagi"
+        android:textColor="?android:attr/textColorPrimary"
+        android:padding="10dp"
+        android:textSize="15sp" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -107,6 +120,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
+
                 android:orientation="vertical">
 
             <ImageView
@@ -174,5 +188,18 @@
 
         </androidx.cardview.widget.CardView>
     </LinearLayout>
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        app:cardElevation="10dp"
+        >
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/rv_progress_savings"
+        />
+    </androidx.cardview.widget.CardView>
 </LinearLayout>
+
 </layout>

@@ -59,7 +59,9 @@ public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.Vi
         public void bindData(String modelFilter, int position) {
             binding.txtName.setText(modelFilter);
 
-
+            itemView.setOnClickListener(v -> {
+                methodCallback.onClick(data, position);
+            });
             itemView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {

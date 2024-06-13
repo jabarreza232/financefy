@@ -538,7 +538,8 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         if (typeChart == TYPE_CHART.BAR_CHART) {
 
           if(data.size()>1)  new FragmentAnalysisSavings.BarChartAsyncTask(data).execute();
-            binding.barChartAnalysis.setVisibility(data.size() > 0 ? View.VISIBLE : View.GONE);
+
+          binding.barChartAnalysis.setVisibility(data.size() > 0 ? View.VISIBLE : View.GONE);
         } else {
             new FragmentAnalysisSavings.PieChartAsyncTask(savingsFilter.listAnalysis(data)).execute();
             binding.pieChartAnalysis.setVisibility(data.size() > 0 ? View.VISIBLE : View.GONE);

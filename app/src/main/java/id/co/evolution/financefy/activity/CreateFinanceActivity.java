@@ -196,6 +196,8 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
                                intent.putExtra("finance", model);
                                setResult(RESULT_OK, intent);
                                finish();
+                               Toast.makeText(CreateFinanceActivity.this, "Catatan "+type+" berhasil di tambahkan !", Toast.LENGTH_SHORT).show();
+
                            }
                         }
                     });

@@ -1,5 +1,7 @@
 package id.co.evolution.financefy.activity;
 
+import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -63,7 +65,7 @@ public class NotificationActivity extends AppCompatActivity {
     SavingsProgressRepository savingsProgressRepository;
     public List<ModelFinance> dataFinance = new ArrayList<>();
     public List<ModelSavingsProgress> dataSaving = new ArrayList<>();
-    public ArrayList<Object> dataNotification = new ArrayList<>();
+
     public ModelUser user;
     public ModelSavings modelSavings = new ModelSavings();
 
@@ -94,7 +96,7 @@ public class NotificationActivity extends AppCompatActivity {
 
         locale = user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
 
-        viewModelFinance.getFinanceByUserId(user.getId(), user.getType_currency()).observe(this, modelFinances -> {
+        viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()),user.getId(), user.getType_currency()).observe(this, modelFinances -> {
             dataFinance = modelFinances;
             boolean isChecked = tinyDb.getBoolean("isCheckedFinance");
             mBinding.switchNotificationFinance.setChecked(isChecked);
@@ -107,6 +109,7 @@ public class NotificationActivity extends AppCompatActivity {
             boolean isChecked = tinyDb.getBoolean("isCheckedSavings");
             mBinding.switchNotificationSavings.setChecked(isChecked);
         });
+
 
 
         mBinding.switchNotificationFinance.setOnClickListener(view -> {
@@ -123,7 +126,7 @@ public class NotificationActivity extends AppCompatActivity {
         mBinding.switchNotificationSavings.setOnClickListener(view -> {
             boolean isChecked = mBinding.switchNotificationSavings.isChecked();
             tinyDb.putBoolean("isCheckedSavings", isChecked);
-            ModelNotification modelNotification =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale));
+            ModelNotification modelNotification =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hingga hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale));
             helperNotification.reminderSet(isChecked,modelNotification,getString(R.string.menabung),100);
         });
     }

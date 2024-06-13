@@ -214,6 +214,8 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
                                 intent.putExtra("position", position);
                                 setResult(REQUEST_CODE_FINANCE, intent);
                                 finish();
+                                Toast.makeText(UpdateFinanceActivity.this, "Catatan "+type+" berhasil di ubah !", Toast.LENGTH_SHORT).show();
+
                             }
                         }
                     });
