@@ -10,6 +10,7 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.Property;
 import android.view.View;
+import android.widget.ImageView;
 
 import androidx.core.content.ContextCompat;
 
@@ -47,6 +48,7 @@ public class Tools {
 
     public static void setThemeActivity(Resources.Theme theme,ModelPrimaryColor modelPrimaryColor){
         if(modelPrimaryColor!=null){
+
             if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Orange.toString()))
                 theme.applyStyle(R.style.AppThemeOrange,true);
             else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Brown.toString()))
@@ -54,6 +56,19 @@ public class Tools {
             else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Green.toString()))
                 theme.applyStyle(R.style.AppThemeGreen,true);
             else theme.applyStyle(R.style.AppTheme,true);
+
+        }
+    }
+    public static void setThemeNoActionBarActivity(Resources.Theme theme,ModelPrimaryColor modelPrimaryColor){
+        if(modelPrimaryColor!=null){
+
+            if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Orange.toString()))
+                theme.applyStyle(R.style.AppThemeOrangeNoActionBar,true);
+            else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Brown.toString()))
+                theme.applyStyle(R.style.AppThemeBrownNoActionBar,true);
+            else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Green.toString()))
+                theme.applyStyle(R.style.AppThemeGreenNoActionBar,true);
+            else theme.applyStyle(R.style.AppThemeNoActionBar,true);
 
         }
     }
@@ -67,6 +82,13 @@ public class Tools {
         if(modelPrimaryColor!=null){
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 view.setBackgroundTintList(ContextCompat.getColorStateList(view.getContext(),modelPrimaryColor.getColorPrimary()));
+            }
+        }
+    }
+    public static void setImageTintView(ImageView view, ModelPrimaryColor modelPrimaryColor){
+        if(modelPrimaryColor!=null){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                view.setColorFilter(ContextCompat.getColor(view.getContext(),modelPrimaryColor.getColorPrimary()));
             }
         }
     }

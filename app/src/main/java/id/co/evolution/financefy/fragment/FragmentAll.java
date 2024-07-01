@@ -267,6 +267,16 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
             }
         });
         FloatingActionButton fabAdd = ((MainActivity) getActivity()).binding.layout.fabAdd;
+        binding.nsView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+
+                 if (scrollY > oldScrollY && fabAdd.isShown() && !((MainActivity) getActivity()).isFabOpen)
+                    fabAdd.hide();
+                 else if(!fabAdd.isShown())
+                     fabAdd.show();
+            }
+        });
 
         binding.rvList.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
@@ -463,10 +473,10 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
                 }
 
                 if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan)) && adapter != null) {
-                    adapter.setType(type_layout_manager);
+                    adapter.setType(TYPE_LAYOUT_MANAGER.VERTICAL);
                     adapter.notifyDataSetChanged();
                 } else {
-                    adapterSavings.setType(type_layout_manager);
+                    adapterSavings.setType(TYPE_LAYOUT_MANAGER.VERTICAL);
                     adapterSavings.notifyDataSetChanged();
                 }
                 return true;
@@ -658,7 +668,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
         adapter = new AdapterFinance(getActivity(), listNestedFinance, this::showDialogFinance);
         adapter.setLocale(locale);
 
-        adapter.setType(type_layout_manager);
+        adapter.setType(TYPE_LAYOUT_MANAGER.VERTICAL);
         binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.rvList.setAdapter(adapter);
         adapter.notifyDataSetChanged();

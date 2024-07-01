@@ -67,11 +67,13 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+        Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
+
         binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_target);
 
-        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
-        Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
+        Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
 
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -86,7 +88,9 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
         viewModelSaving = new ViewModelProvider(this).get(ViewModelSavings.class);
         viewModelSaving.init(savingsRepository);
 
-        binding.txtHeader.setText("Input data");
+        binding.txtHeader.setText("Input Data Target Tabungan");
+        binding.txtDescription.setText("Silakan input data target tabungan Anda pada form yang tersedia.");
+
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);

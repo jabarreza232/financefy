@@ -73,13 +73,14 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+
+        Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
+
         binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_progress);
 
-        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
-        Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
-
-
+        Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
 
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -96,7 +97,8 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
         viewModelSavingsProgress.init(savingsProgressRepository);
         viewModelSaving.init(savingsRepository);
 
-        binding.txtHeader.setText("Input data");
+        binding.txtHeader.setText("Input Data Tabungan");
+        binding.txtDescription.setText("Silakan input data tabungan Anda pada form progress menabung yang tersedia.");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);

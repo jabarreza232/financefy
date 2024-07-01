@@ -6,8 +6,9 @@
         android:id="@+id/linearlayout_savings_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_below="@id/txt_type_account"
-        android:orientation="horizontal">
+        >
 
 
         <LinearLayout
@@ -26,14 +27,14 @@
                 <TextView
                     android:id="@+id/txt_title"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginTop="5dp"
+                    android:layout_height="wrap_content"
                     android:layout_toStartOf="@id/txt_percentage"
                     android:drawableEnd="@drawable/ic_arrow_drop_down"
                     android:ellipsize="end"
-                    android:fontFamily="@font/lato_bold"
+                    android:fontFamily="@font/ubuntu_b"
                     android:gravity="start|center"
                     android:lines="1"
+                    android:background="?attr/selectableItemBackground"
                     android:textColor="?android:attr/textColorPrimary"
                     android:textSize="15sp"
                     tools:text="Pencapaian"
@@ -43,7 +44,7 @@
                 <TextView
                     android:id="@+id/txt_percentage"
                     android:layout_width="wrap_content"
-                    android:layout_height="48dp"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
                     android:layout_marginTop="7dp"
                     android:layout_marginEnd="10dp"
@@ -51,7 +52,9 @@
                     android:gravity="center"
                     android:textColor="?android:attr/textColorPrimary"
                     android:textSize="15sp"
-                    tools:text="20%" />
+                    tools:text="20%"
+                    android:layout_above="@id/progress_savings"
+                    />
 
 
                 <ProgressBar
@@ -121,6 +124,7 @@
                     android:layout_alignParentEnd="true"
                     android:padding="10dp"
                     android:src="@drawable/ic_baseline_more_vert_24"
+                    android:background="?attr/selectableItemBackgroundBorderless"
                     app:tint="@color/white" />
 
             </RelativeLayout>

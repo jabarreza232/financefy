@@ -39,7 +39,7 @@ public class BaseFinanceActivity extends AppCompatActivity {
 
 
     public void showDatePickerDialog() {
-        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+    if(modelPrimaryColor==null) modelPrimaryColor= Tools.modelPrimaryColor;
 
         DatePickerDialog datePickerDialog = DatePickerDialog.newInstance((view, year, monthOfYear, dayOfMonth) -> {
             Calendar calendar = Calendar.getInstance();

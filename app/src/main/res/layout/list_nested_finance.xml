@@ -12,6 +12,7 @@
 
 
         <LinearLayout
+            android:id="@+id/ll_nested_finance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -20,6 +21,7 @@
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/place_finance"
+                android:foreground="?attr/selectableItemBackground"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"

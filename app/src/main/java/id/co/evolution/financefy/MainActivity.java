@@ -224,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setUpFragment() {
+        getSupportActionBar().setTitle("Records");
         changeFragment(new FragmentAll());
         binding.layout.bnMain.setOnItemSelectedListener(item -> {
             Fragment fragment = null;

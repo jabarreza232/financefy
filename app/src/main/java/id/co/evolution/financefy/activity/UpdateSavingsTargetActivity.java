@@ -68,11 +68,16 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+        Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
+
         binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_target);
 
-        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
-        Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
+        Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
+
+        binding.txtHeader.setText("Update Data Target Tabungan");
+        binding.txtDescription.setText("Silakan update data target tabungan Anda pada form yang tersedia.");
 
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

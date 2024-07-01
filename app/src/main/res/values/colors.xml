@@ -28,13 +28,15 @@
     <!-- dots inactive colors -->
     <color name="colorGrey50">#B4B1B1</color>
     <color name="colorGrey30">#D6D4D4</color>
+    <color name="colorGrey">#9E9E9E</color>
+    <color name="mtrl_textinput_default_box_stroke_color">#fff</color>
 
     <color name="colorNavigationIcon">#dae9f6</color>
     <color name="colorNavigationText">#ffffff</color>
     <color name="dot_dark_screen">#d6410000</color>
     <!-- dots active colors -->
     <color name="dot_light_screen">#ff1a1a</color>
-    <color name="red">#E90707</color>
+    <color name="red">#F44336</color>
     <color name="colorShimmer">#cccccc</color>
 
     <color name="white">#ffffff</color>
@@ -42,6 +44,7 @@
     <color name="whiteTextColor">#fff</color>
     <color name="primaryTextColor">#00a5ff</color>
     <color name="blueColor">#0074B8</color>
+    <color name="blueColorLight">#00A1FF</color>
     <!--colros for card-->
     <color name="whiteCardColor">#fff</color>
 
@@ -63,7 +66,7 @@
 
     <color name="bottomNavigationTintColor">#B2B2B2</color>
     <color name="bottomNavigationSelectedColor">#00a5ff</color>
-<color name="green">#1B9C65</color>
+<color name="green">#4CAF50</color>
     <!--FC4926-->
     <!--colors for light mode-->
     <color name="contentBodyColor">#FCFCFC</color>

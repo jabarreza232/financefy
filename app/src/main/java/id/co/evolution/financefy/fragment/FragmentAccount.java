@@ -359,7 +359,8 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
             dataUser = modelUsers;
 
-            ArrayAdapter<String> adapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item, dataName.toArray());
+            ArrayAdapter<String> adapter = new ArrayAdapter(getContext(), R.layout.spinner_item, dataName.toArray());
+            adapter.setDropDownViewResource(R.layout.spinner_item);
             binding.spinChooseAccount.setAdapter(adapter);
             for (int i = 0; i < dataUser.size(); i++) {
                 if (dataUser.get(i).getId() == mainActivity.user.getId()) {

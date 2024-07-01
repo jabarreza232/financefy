@@ -15,7 +15,7 @@
             android:layout_height="match_parent"
             android:alpha="0.5"
             android:scaleType="centerCrop"
-            android:src="@drawable/finance_background" />
+            android:src="@drawable/bg_ilustration" />
 
         <ImageView
             android:id="@+id/img_back"
@@ -34,9 +34,12 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/img_back"
             android:layout_alignParentBottom="true"
-            android:layout_marginTop="100dp"
             android:background="@drawable/shape_form">
-
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginBottom="?attr/actionBarSize"
+            >
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -47,17 +50,33 @@
                     android:id="@+id/txt_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="@font/lato_bold"
-                    android:padding="10dp"
+                    android:fontFamily="@font/ubuntu_b"
+                    android:padding="5dp"
                     android:text="Input Savings"
                     android:textColor="?android:attr/textColorPrimary"
                     android:textSize="19sp" />
+                <TextView
+                    android:id="@+id/txt_description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/ubuntu_r"
+                    android:padding="5dp"
+                    android:text="Silakan input data keuangan Anda pada form pemasukan yang tersedia."
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="17sp" />
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginBottom="16dp"
                     android:background="@color/colorGrey30" />
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp"
+                    android:scaleType="centerCrop"
+                    android:backgroundTint="?attr/colorOnSurface"
+                    android:layout_marginBottom="10dp"
+                    android:src="@drawable/illustration_progress_savings" />
 
 
                 <RelativeLayout
@@ -68,6 +87,7 @@
                     android:background="@drawable/shape_date">
 
                     <TextView
+                        android:background="?attr/selectableItemBackground"
                         android:id="@+id/txt_date"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -76,6 +96,7 @@
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <ImageView
+                        android:background="?attr/selectableItemBackgroundBorderless"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_alignParentRight="true"
@@ -92,9 +113,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Title"
-                    app:errorEnabled="true"
-                    app:boxStrokeColor="?android:attr/textColorPrimary"
-                    app:hintTextColor="?android:attr/textColorPrimary">
+                    app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/et_title"
@@ -117,9 +136,7 @@
                         android:layout_height="wrap_content"
                         android:layout_toStartOf="@id/btn_calculator"
                         android:hint="Amount of money"
-                        app:boxStrokeColor="?android:attr/textColorPrimary"
-                        app:errorEnabled="true"
-                        app:hintTextColor="?android:attr/textColorPrimary">
+                        app:errorEnabled="true">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/et_amount"
@@ -130,13 +147,15 @@
 
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <Button
+                    <ImageView
                         android:id="@+id/btn_calculator"
                         android:layout_width="64dp"
                         android:layout_height="64dp"
                         android:layout_alignParentEnd="true"
-                        android:background="@drawable/ic_outline_calculate_24"
-                        android:backgroundTint="@color/colorPrimary" />
+                        android:src="@drawable/ic_outline_calculate_24"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        app:tint="@color/colorPrimary"
+                        />
                 </RelativeLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -145,9 +164,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Note"
-                    app:boxStrokeColor="?android:attr/textColorPrimary"
-                    app:errorEnabled="true"
-                    app:hintTextColor="?android:attr/textColorPrimary">
+                    app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/et_description"
@@ -178,6 +195,7 @@
                         android:textColor="@android:color/white" />
                 </androidx.cardview.widget.CardView>
             </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
         </FrameLayout>
 
     </RelativeLayout>

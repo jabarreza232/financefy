@@ -4,8 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
 
-    <RelativeLayout
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/ns_view"
         android:layout_width="match_parent"
+        android:background="?attr/colorSurface"
         android:layout_height="match_parent">
 
         <LinearLayout
@@ -54,10 +56,10 @@
                             android:layout_below="@id/txt_name"
                             android:layout_marginStart="10dp"
                             android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="16dp"
+                            android:layout_marginBottom="5dp"
                             android:fontFamily="@font/ubuntu_r"
                             android:text="Bisnis"
-                            android:textColor="?android:attr/textColorPrimary"
+                            android:textColor="@color/blueColorLight"
                             android:textSize="13sp" />
 
                         <include
@@ -80,8 +82,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="10dp"
-                        android:background="@android:color/transparent"
-                        android:padding="13dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="9dp"
+                        android:layout_marginTop="6dp"
                         android:src="@drawable/ic_baseline_keyboard_arrow_left_24"
                         app:tint="@color/white" />
 
@@ -99,6 +102,7 @@
                             android:id="@+id/txt_month"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
                             android:fontFamily="@font/ubuntu_r"
                             android:padding="16dp"
                             android:text="Month"
@@ -115,8 +119,9 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentEnd="true"
                         android:layout_marginEnd="10dp"
-                        android:background="@android:color/transparent"
-                        android:padding="13dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="9dp"
+                        android:layout_marginTop="6dp"
                         android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
                         app:tint="@color/white" />
                 </RelativeLayout>
@@ -130,16 +135,16 @@
             <LinearLayout
                 android:id="@+id/place_empty"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="36dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
                 android:orientation="vertical"
                 android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/empty"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/empty_box" />
+                    android:layout_height="180dp"
+                    android:src="@drawable/empty" />
 
                 <TextView
                     android:id="@+id/txt_empty"
@@ -155,6 +160,6 @@
         </LinearLayout>
 
 
-    </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </layout>

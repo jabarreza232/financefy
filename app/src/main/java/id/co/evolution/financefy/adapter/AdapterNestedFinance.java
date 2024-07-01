@@ -66,7 +66,9 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
             holder.binding.jumlah.setTextColor(ContextCompat.getColor(context, R.color.green));
         }
 
-
+        holder.binding.placeFinance.setOnClickListener(v->{
+            methodCallback.onClick(data, i);
+        });
         holder.binding.imgEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

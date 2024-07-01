@@ -5,6 +5,20 @@
         <item name="colorPrimary">@color/colorPrimaryOrange</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDarkOrange</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">@color/colorPrimaryOrange</item>
+        <item name="colorControlActivated">@color/colorPrimaryOrange</item>
+        <item name="boxStrokeColor">@color/colorPrimaryOrange</item>
+
+    </style>
+    <style name="AppThemeOrangeNoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimaryOrange</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkOrange</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">@color/colorPrimaryOrange</item>
+        <item name="colorControlActivated">@color/colorPrimaryOrange</item>
+        <item name="boxStrokeColor">@color/colorPrimaryOrange</item>
+
     </style>
 
     <style name="AppThemeBrown" parent="Theme.MaterialComponents.DayNight.DarkActionBar.Bridge">
@@ -12,12 +26,37 @@
         <item name="colorPrimary">@color/colorPrimaryBrown</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDarkBrown</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">@color/colorPrimaryBrown</item>
+        <item name="colorControlActivated">@color/colorPrimaryBrown</item>
+        <item name="boxStrokeColor">@color/colorPrimaryBrown</item>
     </style>
+    <style name="AppThemeBrownNoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimaryBrown</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkBrown</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">@color/colorPrimaryBrown</item>
+        <item name="colorControlActivated">@color/colorPrimaryBrown</item>
+        <item name="boxStrokeColor">@color/colorPrimaryBrown</item>
+    </style>
+
     <style name="AppThemeGreen" parent="Theme.MaterialComponents.DayNight.DarkActionBar.Bridge">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimaryGreen</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDarkGreen</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="boxStrokeColor">@color/colorPrimaryGreen</item>
+        <item name="colorControlNormal">@color/colorPrimaryGreen</item>
+        <item name="colorControlActivated">@color/colorPrimaryGreen</item>
+    </style>
+    <style name="AppThemeGreenNoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimaryGreen</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkGreen</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="boxStrokeColor">@color/colorPrimaryGreen</item>
+        <item name="colorControlNormal">@color/colorPrimaryGreen</item>
+        <item name="colorControlActivated">@color/colorPrimaryGreen</item>
     </style>
 
 </resources>

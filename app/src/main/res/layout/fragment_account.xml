@@ -62,7 +62,7 @@
                         android:text="Pribadi - Menabung"
                         android:layout_marginTop="5dp"
                         android:textStyle="bold"
-                        android:textColor="@color/blueColor"
+                        android:textColor="@color/blueColorLight"
                         android:textSize="13sp" />
 
                 </RelativeLayout>
@@ -86,6 +86,8 @@
                     android:ellipsize="end"
                     android:textSize="15sp"
                     android:inputType="none"
+                    android:dropDownSelector="@drawable/ic_arrow_drop_down"
+                    android:backgroundTint="?attr/colorOnSurface"
                     />
 
             </androidx.cardview.widget.CardView>

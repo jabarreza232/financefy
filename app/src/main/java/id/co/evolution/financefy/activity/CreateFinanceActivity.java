@@ -56,7 +56,7 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
       FinanceRepository financeRepository;
     @Inject
     TinyDb tinyDb;
-    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
+
     Locale locale;
     ModelUser modelUser;
 
@@ -64,13 +64,15 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
-
         modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
 
-        Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
-        Tools.setBackgroundTintView(binding.btnCalculator,modelPrimaryColor);
 
+        Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
+
+        Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
+        Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
         //TODO HIDE STATUS BAR
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow();
@@ -84,7 +86,8 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
 
-        binding.txtHeader.setText("Input data");
+        binding.txtHeader.setText("Input Keuangan");
+        binding.txtDescription.setText("Silakan input data keuangan Anda pada form yang tersedia.");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
