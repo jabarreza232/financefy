@@ -5,7 +5,9 @@ import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUES
 import static id.co.evolution.financefy.helper.Tools.calculatePercentage;
 import static id.co.evolution.financefy.helper.Tools.changeTitleColor;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
+import static id.co.evolution.financefy.helper.Tools.getObjectAnimator;
 
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +27,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.PopupMenu;
 
 import androidx.activity.result.ActivityResult;
@@ -217,6 +221,9 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         binding.layoutSavingsProgress.imgChooseRecommendation.setOnClickListener(v -> {
 
             showMenu(v);
+        });
+        binding.btnToggle.setOnClickListener(v->{
+            toggleView();
         });
         return binding.getRoot();
     }
@@ -871,5 +878,39 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
 
     private List<String> getListDateWeek() {
         return localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek));
+    }
+
+    boolean isHidden;
+    public void toggleView() {
+        if (isHidden) {
+            // Show the view with animation
+            ObjectAnimator animatorFabOpen = getObjectAnimator(binding.btnToggle, View.ROTATION, 0, 300);
+            animatorFabOpen.start();
+            binding.headerView.setVisibility(View.VISIBLE);
+            binding.placeDateMonth.setVisibility(View.VISIBLE);
+            Tools.setBackgroundColorView(binding.llAppBar, ((MainActivity)getActivity()).modelPrimaryColor);
+            binding.headerView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.fade_in));
+        } else {
+            // Hide the view with animation
+            Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.fade_out);
+            slideUp.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {}
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    binding.headerView.setVisibility(View.GONE);
+                    binding.placeDateMonth.setVisibility(View.GONE);
+                    binding.llAppBar.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.white));
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+            binding.headerView.startAnimation(slideUp);
+            ObjectAnimator animatorFabClose = getObjectAnimator(binding.btnToggle, View.ROTATION, 180, 300);
+            animatorFabClose.start();
+        }
+        isHidden = !isHidden;
     }
 }

@@ -97,8 +97,8 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
         viewModelSavingsProgress.init(savingsProgressRepository);
         viewModelSaving.init(savingsRepository);
 
-        binding.txtHeader.setText("Input Data Tabungan");
-        binding.txtDescription.setText("Silakan input data tabungan Anda pada form progress menabung yang tersedia.");
+        binding.txtHeader.setText("Input Data Progress Menabung");
+        binding.txtDescription.setText("Silakan input data tabungan Anda pada form yang tersedia.");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);

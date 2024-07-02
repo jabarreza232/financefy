@@ -1,6 +1,7 @@
 package id.co.evolution.financefy.fragment;
 
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
+import static id.co.evolution.financefy.helper.Tools.getObjectAnimator;
 
 
 import androidx.annotation.NonNull;
@@ -9,6 +10,7 @@ import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -31,6 +33,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.components.Legend;
@@ -195,7 +199,9 @@ public class FragmentAnalysis extends Fragment {
             }
         });
 
-
+        binding.btnToggle.setOnClickListener(v->{
+            toggleView();
+        });
         binding.placeMonth.setOnClickListener(v -> showDialogMonthPicker());
 
         binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.colorGrey50)));
@@ -835,6 +841,39 @@ public class FragmentAnalysis extends Fragment {
 
     private List<String> getListDateWeek() {
         return localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek));
+    }
+    boolean isHidden;
+    public void toggleView() {
+        if (isHidden) {
+            // Show the view with animation
+            ObjectAnimator animatorFabOpen = getObjectAnimator(binding.btnToggle, View.ROTATION, 0, 300);
+            animatorFabOpen.start();
+            binding.headerView.setVisibility(View.VISIBLE);
+            binding.placeDateMonth.setVisibility(View.VISIBLE);
+            Tools.setBackgroundColorView(binding.llAppBar, ((MainActivity)getActivity()).modelPrimaryColor);
+            binding.headerView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.fade_in));
+        } else {
+            // Hide the view with animation
+            Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.fade_out);
+            slideUp.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {}
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    binding.headerView.setVisibility(View.GONE);
+                    binding.placeDateMonth.setVisibility(View.GONE);
+                    binding.llAppBar.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.white));
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {}
+            });
+            binding.headerView.startAnimation(slideUp);
+            ObjectAnimator animatorFabClose = getObjectAnimator(binding.btnToggle, View.ROTATION, 180, 300);
+            animatorFabClose.start();
+        }
+        isHidden = !isHidden;
     }
 }
 

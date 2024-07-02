@@ -30,6 +30,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -296,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.fab_add) {
-
+            FragmentManager fm = getSupportFragmentManager();
 
             if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
                 Log.e("TAG", "onClick: " + user.getId());

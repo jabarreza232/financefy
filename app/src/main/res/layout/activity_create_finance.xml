@@ -33,6 +33,9 @@
                 android:layout_margin="16dp"
                 android:orientation="vertical">
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/img_back"
@@ -40,33 +43,38 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
                     android:background="?selectableItemBackgroundBorderless"
-                    app:backgroundTint="@color/blackTextColor"
+                    app:backgroundTint="@color/white"
                     android:padding="10dp"
-                    android:src="@drawable/ic_close"
-                    android:layout_gravity="center"
-                    app:tint="@color/white"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_baseline_keyboard_arrow_left_24"
+                    android:layout_marginEnd="10dp"
+                    app:tint="@color/colorAccent"
                     app:fabSize="mini"
+                    android:layout_marginStart="5dp"
                     />
 
 
                 <TextView
+                    android:layout_toEndOf="@id/img_back"
                     android:id="@+id/txt_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/ubuntu_b"
-                    android:padding="5dp"
                     android:text="Input Keuangan"
                     android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="19sp" />
+                    android:textSize="17sp" />
                 <TextView
+                    android:layout_toEndOf="@id/img_back"
+                    android:layout_below="@id/txt_header"
                     android:id="@+id/txt_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/ubuntu_r"
-                    android:padding="5dp"
                     android:text="Silakan input data keuangan Anda pada form pemasukan yang tersedia."
                     android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="17sp" />
+                    android:layout_marginBottom="10dp"
+                    android:textSize="15sp" />
+                </RelativeLayout>
 
                 <View
                     android:layout_width="match_parent"

@@ -17,49 +17,62 @@
             android:scaleType="centerCrop"
             android:src="@drawable/bg_ilustration" />
 
-        <ImageView
-            android:id="@+id/img_back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:background="?selectableItemBackgroundBorderless"
-            android:padding="16dp"
-            android:src="@drawable/ic_close"
-            app:tint="@color/white" />
 
 
         <FrameLayout
             android:id="@+id/place_form"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/img_back"
+            android:layout_height="match_parent"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/shape_form">
+            android:background="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_margin="16dp"
                 android:orientation="vertical">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-                <TextView
-                    android:id="@+id/txt_header"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/ubuntu_b"
-                    android:padding="5dp"
-                    android:text="Input Savings Target"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="19sp" />
-                <TextView
-                    android:id="@+id/txt_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/ubuntu_r"
-                    android:padding="5dp"
-                    android:text="Silakan input data keuangan Anda pada form pemasukan yang tersedia."
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="17sp" />
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/img_back"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:background="?selectableItemBackgroundBorderless"
+                        app:backgroundTint="@color/white"
+                        android:padding="10dp"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_baseline_keyboard_arrow_left_24"
+                        android:layout_marginEnd="10dp"
+                        app:tint="@color/colorAccent"
+                        app:fabSize="mini"
+                        android:layout_marginStart="5dp"
+                        />
+
+
+                    <TextView
+                        android:layout_toEndOf="@id/img_back"
+                        android:id="@+id/txt_header"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/ubuntu_b"
+                        android:text="Input Savings Target"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="17sp" />
+                    <TextView
+                        android:layout_marginBottom="10dp"
+                        android:layout_toEndOf="@id/img_back"
+                        android:layout_below="@id/txt_header"
+                        android:id="@+id/txt_description"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/ubuntu_r"
+                        android:text="Silakan input data keuangan Anda pada form pemasukan yang tersedia."
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="15sp" />
+                </RelativeLayout>
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
