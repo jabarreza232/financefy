@@ -203,8 +203,8 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
                             Intent intent = new Intent();
                             intent.putExtra("savings", modelSavings);
                             setResult(RESULT_OK, intent);
-                            finish();
                             Toast.makeText(CreateSavingsTargetActivity.this, "Catatan target menabung berhasil di tambahkan !", Toast.LENGTH_SHORT).show();
+                            finish();
 
                         }
                     });

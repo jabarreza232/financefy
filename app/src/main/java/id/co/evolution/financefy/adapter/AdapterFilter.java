@@ -62,11 +62,11 @@ public class AdapterFilter extends RecyclerView.Adapter<AdapterFilter.ViewHolder
             binding.txtName.setText(modelFilter.getValue());
 
             if (modelFilter.isChecked()) {
-                binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_selected_filter));
-                binding.imgChecked.setVisibility(View.VISIBLE);
+                binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_input_form_calculator));
+                binding.txtName.setTextColor(ContextCompat.getColor(context,R.color.white));
             } else {
-                binding.txtName.setBackgroundColor(ContextCompat.getColor(context, R.color.colorGrey30));
-                binding.imgChecked.setVisibility(View.GONE);
+                binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_selected_filter));
+                binding.txtName.setTextColor(ContextCompat.getColor(context,R.color.blackTextColor));
             }
 
             itemView.setOnClickListener(v -> {

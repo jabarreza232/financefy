@@ -98,15 +98,15 @@
                     android:id="@+id/place_empty"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="36dp"
+                    android:layout_marginTop="10dp"
                     android:orientation="vertical"
                     android:visibility="gone">
 
                     <ImageView
                         android:id="@+id/empty"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/empty_box" />
+                        android:layout_height="180dp"
+                        android:src="@drawable/empty" />
 
                     <TextView
                         android:id="@+id/txt_empty"

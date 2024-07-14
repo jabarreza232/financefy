@@ -455,7 +455,8 @@ binding.btnToggle.setOnClickListener(v->{
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         inflater.inflate(R.menu.menu_finance, menu);
-        super.onCreateOptionsMenu(menu, inflater);
+        MenuItem item = menu.findItem(R.id.view_list);
+        item.setVisible(false);
     }
 
 
@@ -471,23 +472,23 @@ binding.btnToggle.setOnClickListener(v->{
                 }
                 // Not implemented here
                 break;
-            case R.id.view_list:
-                if (type_layout_manager == TYPE_LAYOUT_MANAGER.GRID) {
-                    item.setIcon(R.drawable.ic_baseline_grid_view_24);
-                    type_layout_manager = TYPE_LAYOUT_MANAGER.VERTICAL;
-                } else if (type_layout_manager == TYPE_LAYOUT_MANAGER.VERTICAL) {
-                    item.setIcon(R.drawable.ic_baseline_format_list_bulleted_24);
-                    type_layout_manager = TYPE_LAYOUT_MANAGER.GRID;
-                }
-
-                if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan)) && adapter != null) {
-                    adapter.setType(TYPE_LAYOUT_MANAGER.VERTICAL);
-                    adapter.notifyDataSetChanged();
-                } else {
-                    adapterSavings.setType(TYPE_LAYOUT_MANAGER.VERTICAL);
-                    adapterSavings.notifyDataSetChanged();
-                }
-                return true;
+//            case R.id.view_list:
+//                if (type_layout_manager == TYPE_LAYOUT_MANAGER.GRID) {
+//                    item.setIcon(R.drawable.ic_baseline_grid_view_24);
+//                    type_layout_manager = TYPE_LAYOUT_MANAGER.VERTICAL;
+//                } else if (type_layout_manager == TYPE_LAYOUT_MANAGER.VERTICAL) {
+//                    item.setIcon(R.drawable.ic_baseline_format_list_bulleted_24);
+//                    type_layout_manager = TYPE_LAYOUT_MANAGER.GRID;
+//                }
+//
+//                if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan)) && adapter != null) {
+//                    adapter.setType(TYPE_LAYOUT_MANAGER.VERTICAL);
+//                    adapter.notifyDataSetChanged();
+//                } else {
+//                    adapterSavings.setType(TYPE_LAYOUT_MANAGER.VERTICAL);
+//                    adapterSavings.notifyDataSetChanged();
+//                }
+//                return true;
 
             default:
                 break;
@@ -700,7 +701,7 @@ binding.btnToggle.setOnClickListener(v->{
         adapterSavings = new AdapterSavings(listNestedSavings, this::showDialogSavings);
         adapterSavings.setLocale(locale);
         adapterSavings.setTotal_value((int) modelSavings.getTargetValue());
-        adapterSavings.setType(type_layout_manager);
+        adapterSavings.setType(TYPE_LAYOUT_MANAGER.VERTICAL);
         binding.rvList.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.rvList.setAdapter(adapterSavings);
         adapterSavings.notifyDataSetChanged();

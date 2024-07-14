@@ -219,9 +219,8 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
                                 Intent intent = new Intent();
                                 intent.putExtra("savings", modelSavings);
                                 setResult(RESULT_OK, intent);
-                                finish();
                                 Toast.makeText(CreateSavingsProgressActivity.this, "Catatan progress menabung berhasil di tambahkan !", Toast.LENGTH_SHORT).show();
-
+                                finish();
                             }
                         }
                     });

@@ -36,12 +36,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="2dp"
                 android:layout_marginBottom="10dp"
-                android:background="@color/colorAccent" />
+                android:background="@color/colorAccent"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
                 android:fontFamily="@font/ubuntu_b"
                 android:text="Tipe"
                 android:id="@+id/txt_type"
@@ -58,7 +57,6 @@
                 android:id="@+id/txt_nominal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
                 android:fontFamily="@font/ubuntu_b"
                 android:text="Nominal"
                 android:textColor="?android:textColorPrimary"
@@ -73,7 +71,6 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
                 android:fontFamily="@font/ubuntu_b"
                 android:text="Jangka Waktu"
                 android:textColor="?android:textColorPrimary"
@@ -88,17 +85,20 @@
         </LinearLayout>
 
 
-        <TextView
+        <Button
             android:id="@+id/txt_submit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="80dp"
+            android:layout_height="36dp"
             android:layout_marginTop="16dp"
             android:fontFamily="@font/ubuntu_b"
             android:text="Submit"
+            android:background="@drawable/shape_input_form_calculator"
             android:layout_below="@id/place_filter"
             android:layout_alignParentEnd="true"
-            android:textColor="@color/colorAccent"
-            android:textSize="15sp"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            android:padding="10dp"
+            android:textAllCaps="false"
             />
 
 

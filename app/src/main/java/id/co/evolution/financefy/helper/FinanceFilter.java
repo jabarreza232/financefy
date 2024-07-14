@@ -59,7 +59,7 @@ public class FinanceFilter {
     public void setUpFilter() {
         filterType.add(new ModelFilter("Pengeluaran"));
         filterType.add(new ModelFilter("Pemasukan"));
-        filterType.add(new ModelFilter("Semuanya"));
+        filterType.add(new ModelFilter("Semua"));
 
         filterNominal.add(new ModelFilter("Tertinggi-Terendah"));
         filterNominal.add(new ModelFilter("Terendah-Tertinggi"));

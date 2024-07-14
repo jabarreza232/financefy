@@ -38,6 +38,20 @@ public class Tools {
         PEMASUKAN,
         PENGELUARAN
     }
+    public enum CATEGORY_INCOME {
+        HASIL_USAHA,
+        BONUS,
+        GAJI
+    }
+
+    public enum CATEGORY_EXPENSE {
+        BELANJA_UMUM,
+        MAkANAN,
+        PULSA_HP,
+        TRANSPORTASI,
+        TAGIHAN,
+        PAKET_INTERNET
+    }
 
     public enum TYPE {
         CLICKED,

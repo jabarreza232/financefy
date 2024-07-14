@@ -56,12 +56,12 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, final int i) {
         holder.binding.txtJudul.setText(data.get(i).getKategori());
-        holder.binding.keterangan.setVisibility(!data.get(i).getKeterangan().isEmpty() ? View.VISIBLE : View.GONE);
-        holder.binding.keterangan.setText(data.get(i).getKeterangan());
+        holder.binding.keterangan.setText(data.get(i).getKeterangan().isEmpty()||data.get(i).getKeterangan()==null?"Tidak ada deskripsi":data.get(i).getKeterangan());
         holder.binding.jumlah.setText(data.get(i).getJumlahDesc(locale));
 
         if (data.get(i).getTipe().equalsIgnoreCase("pengeluaran")) {
             holder.binding.jumlah.setTextColor(ContextCompat.getColor(context, R.color.red));
+
         } else {
             holder.binding.jumlah.setTextColor(ContextCompat.getColor(context, R.color.green));
         }
@@ -69,12 +69,7 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
         holder.binding.placeFinance.setOnClickListener(v->{
             methodCallback.onClick(data, i);
         });
-        holder.binding.imgEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                methodCallback.onClick(data, i);
-            }
-        });
+
 
     }
 
