@@ -660,9 +660,9 @@ public class FragmentAnalysis extends Fragment {
                 BarDataSet barDataSetSalary = new BarDataSet(entriesSalary, CATEGORY_INCOME.GAJI.name().toLowerCase());
 
 
-                barDataSetBonus.setColor(ContextCompat.getColor(getContext(), R.color.blueColor));
-                barDataSetCompanyResult.setColor(ContextCompat.getColor(getContext(), R.color.red));
-                barDataSetSalary.setColor(ContextCompat.getColor(getContext(), R.color.colorTextYellow));
+                barDataSetBonus.setColor(ContextCompat.getColor(getContext(), R.color.color_bonus));
+                barDataSetCompanyResult.setColor(ContextCompat.getColor(getContext(), R.color.color_hasil_usaha));
+                barDataSetSalary.setColor(ContextCompat.getColor(getContext(), R.color.color_gaji));
 
                 barDataSets.add(barDataSetCompanyResult);
                 barDataSets.add(barDataSetBonus);
@@ -723,12 +723,12 @@ public class FragmentAnalysis extends Fragment {
                 BarDataSet barDataSetInternetPackages = new BarDataSet(entriesInternetPackages, CATEGORY_EXPENSE.PAKET_INTERNET.name().toLowerCase());
 
 
-                barDataSetGeneralShopping.setColor(ContextCompat.getColor(getContext(), R.color.blueColor));
-                barDataSetFood.setColor(ContextCompat.getColor(getContext(), R.color.red));
-                barDataSetPulse.setColor(ContextCompat.getColor(getContext(), R.color.colorTextYellow));
-                barDataSetTransportation.setColor(ContextCompat.getColor(getContext(), R.color.colorTextGreen));
-                barDataSetBill.setColor(ContextCompat.getColor(getContext(), R.color.colorPrimary));
-                barDataSetInternetPackages.setColor(ContextCompat.getColor(getContext(), R.color.colorTextOrange));
+                barDataSetGeneralShopping.setColor(ContextCompat.getColor(getContext(), R.color.color_shopping));
+                barDataSetFood.setColor(ContextCompat.getColor(getContext(), R.color.color_food));
+                barDataSetPulse.setColor(ContextCompat.getColor(getContext(), R.color.color_pulsa));
+                barDataSetTransportation.setColor(ContextCompat.getColor(getContext(), R.color.color_transport));
+                barDataSetBill.setColor(ContextCompat.getColor(getContext(), R.color.color_bill));
+                barDataSetInternetPackages.setColor(ContextCompat.getColor(getContext(), R.color.color_network));
 
 
                 barDataSets.add(barDataSetGeneralShopping);

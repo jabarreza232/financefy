@@ -16,6 +16,12 @@
         <item>Tagihan</item>
         <item>Paket Internet</item>
     </array>
+    <string name="belanja_umum">Belanja Umum</string>
+    <string name="makanan">Makanan</string>
+    <string name="pulsa_hp">Pulsa HP</string>
+    <string name="transportasi">Transportasi</string>
+    <string name="tagihan">Tagihan</string>
+    <string name="paket_internet">Paket Internet</string>
 
 
     <array name="category_pemasukan">
@@ -23,6 +29,9 @@
         <item>Gaji</item>
         <item>Hasil Usaha</item>
     </array>
+    <string name="gaji">Gaji</string>
+    <string name="bonus">Bonus</string>
+    <string name="hasil_usaha">Hasil Usaha</string>
 
     <array name="type_user">
         <item>@string/pribadi</item>

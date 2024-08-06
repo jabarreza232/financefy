@@ -14,7 +14,6 @@
     <color name="colorPrimaryDarkBrown">#5D4037</color>
 
 
-
     <color name="colorAccent">#0960CA</color>
     <color name="colorDefaultText">#808080</color>
     <color name="colorText">#DE595E</color>
@@ -66,7 +65,7 @@
 
     <color name="bottomNavigationTintColor">#B2B2B2</color>
     <color name="bottomNavigationSelectedColor">#00a5ff</color>
-<color name="green">#4CAF50</color>
+    <color name="green">#4CAF50</color>
     <!--FC4926-->
     <!--colors for light mode-->
     <color name="contentBodyColor">#FCFCFC</color>
@@ -80,4 +79,18 @@
     <color name="profileBackground">#fff</color>
     <color name="blackTextColor">#000</color>
     <color name="profileEditTextColor">#707070</color>
+
+
+    <!--WARNA PENGELUARAN-->
+    <color name="color_shopping">#4CAF50</color>
+    <color name="color_food">#FF9800</color>
+    <color name="color_pulsa">#2196F3</color>
+    <color name="color_transport">#9C27B0</color>
+    <color name="color_bill">#F44336</color>
+    <color name="color_network">#FFEB3B</color>
+    <!--WARNA PEMASUKAN-->
+    <color name="color_bonus">#03A9F4</color>
+    <color name="color_gaji">#8BC34A</color>
+    <color name="color_hasil_usaha">#E91E63</color>
+
 </resources>

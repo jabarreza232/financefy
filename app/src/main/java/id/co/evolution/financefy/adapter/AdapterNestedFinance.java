@@ -70,9 +70,43 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
             methodCallback.onClick(data, i);
         });
 
-
+        showImageCategory(holder,data.get(i).getKategori());
     }
+    private void showImageCategory(ViewHolder holder,String category){
+        //PENGELUARAN
+        if(category.contains(context.getString(R.string.belanja_umum))){
+            holder.binding.imgCategory.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.baseline_shopping_basket_24));
+            holder.binding.imgCategory.setBackgroundColor(ContextCompat.getColor(context,R.color.color_shopping));
+        }else if(category.contains(context.getString(R.string.makanan))){
+            holder.binding.imgCategory.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.baseline_fastfood_24));
+            holder.binding.imgCategory.setBackgroundColor(ContextCompat.getColor(context,R.color.color_food));
+        }else if(category.contains(context.getString(R.string.pulsa_hp))){
+            holder.binding.imgCategory.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.baseline_phonelink_ring_24));
+            holder.binding.imgCategory.setBackgroundColor(ContextCompat.getColor(context,R.color.color_pulsa));
+        }else if(category.contains(context.getString(R.string.transportasi))){
+            holder.binding.imgCategory.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.baseline_emoji_transportation_24));
+            holder.binding.imgCategory.setBackgroundColor(ContextCompat.getColor(context,R.color.color_transport));
+        }else if(category.contains(context.getString(R.string.tagihan))){
+            holder.binding.imgCategory.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.baseline_credit_card_24));
+            holder.binding.imgCategory.setBackgroundColor(ContextCompat.getColor(context,R.color.color_bill));
+        }else if(category.contains(context.getString(R.string.paket_internet))){
+            holder.binding.imgCategory.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.baseline_language_24));
+            holder.binding.imgCategory.setBackgroundColor(ContextCompat.getColor(context,R.color.color_network));
 
+        }
+
+        //PEMASUKAN
+        if(category.contains(context.getString(R.string.gaji))){
+            holder.binding.imgCategory.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.baseline_account_balance_wallet_24));
+            holder.binding.imgCategory.setBackgroundColor(ContextCompat.getColor(context,R.color.color_gaji));
+        }else if(category.contains(context.getString(R.string.bonus))){
+            holder.binding.imgCategory.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.baseline_monetization_on_24));
+            holder.binding.imgCategory.setBackgroundColor(ContextCompat.getColor(context,R.color.color_bonus));
+        }else if(category.contains(context.getString(R.string.hasil_usaha))){
+            holder.binding.imgCategory.setImageDrawable(ContextCompat.getDrawable(context,R.drawable.baseline_business_24));
+            holder.binding.imgCategory.setBackgroundColor(ContextCompat.getColor(context,R.color.color_hasil_usaha));
+        }
+    }
     @Override
     public int getItemCount() {
         return data == null ? 0 : data.size();

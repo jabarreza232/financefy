@@ -139,6 +139,7 @@
                     app:fabSize="mini"
                     app:backgroundTint="@color/white"
 android:layout_margin="10dp"
+
                     app:borderWidth="0dp"
                     app:elevation="0dp"
                     app:pressedTranslationZ="0dp"
