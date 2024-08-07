@@ -15,6 +15,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
@@ -22,8 +23,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
 
+import androidx.annotation.AttrRes;
+import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -199,7 +203,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onBackPressed();
 
     }
-
+    @ColorInt
+    public int getColorFromAttr(Context context, @AttrRes int attrColor) {
+        TypedValue typedValue = new TypedValue();
+        context.getTheme().resolveAttribute(attrColor, typedValue, true);
+        if (typedValue.resourceId != 0) {
+            return ContextCompat.getColor(context, typedValue.resourceId);
+        } else {
+            return typedValue.data;
+        }
+    }
     private void changeUINightMode() {
         String nightMode = tinyDb.getString("night_mode");
         if (TextUtils.equals(nightMode, "mode_night_yes")) {

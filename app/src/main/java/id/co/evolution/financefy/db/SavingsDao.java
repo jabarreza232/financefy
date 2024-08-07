@@ -28,7 +28,7 @@ public interface SavingsDao {
     LiveData<List<ModelSavings>> findByIdUser(int id_user,String type_currency);
 
 
-    @Query("SELECT * FROM savings WHERE id_savings =:id AND type_currency IN(:type_currency) LIMIT 1")
+    @Query("SELECT * FROM savings WHERE id_savings =:id AND type_currency IN(:type_currency) ")
     LiveData<ModelSavings> findById(int id,String type_currency);
 
 

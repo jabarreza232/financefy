@@ -4,6 +4,7 @@ import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 import static id.co.evolution.financefy.helper.Tools.getObjectAnimator;
 
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -16,6 +17,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -863,7 +865,9 @@ public class FragmentAnalysis extends Fragment {
                 public void onAnimationEnd(Animation animation) {
                     binding.headerView.setVisibility(View.GONE);
                     binding.placeDateMonth.setVisibility(View.GONE);
-                    binding.llAppBar.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.white));
+                    @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorSurface);
+
+                    binding.llAppBar.setBackground(new ColorDrawable(colorSurface));
                 }
 
                 @Override

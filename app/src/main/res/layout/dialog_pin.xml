@@ -67,6 +67,7 @@
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/white"
                     android:enabled="false"
+                    android:maxLength="6"
                     android:inputType="numberPassword"
                     android:textAlignment="center"
                     android:textColor="@color/white"

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/all"
+        android:title="@string/semuanya"
+        />
+
+    <item
+        android:id="@+id/expense"
+        android:title="@string/pengeluaran" />
+
+    <item
+        android:id="@+id/income"
+        android:title="@string/pemasukan" />
+
+</menu>

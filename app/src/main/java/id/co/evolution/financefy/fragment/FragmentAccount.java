@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.PopupMenu;
 
 import androidx.activity.result.ActivityResult;
 import androidx.annotation.NonNull;
@@ -36,8 +37,11 @@ import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -194,6 +198,9 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         binding.imgMore.setOnClickListener(v -> {
             showDialogChoose();
         });
+        binding.layoutAccountFinanceJournal.imgChooseFilter.setOnClickListener(v->{
+            showMenu(v);
+        });
     }
 
     private void refreshDataUserByCategory() {
@@ -206,62 +213,126 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         }
     }
     private void showDataIncome(List<ModelFinance>data){
+        ModelFinance income1 = new ModelFinance(0, getString(R.string.pemasukan), getString(R.string.gaji), 100);
+        ModelFinance income2 = new ModelFinance(0, getString(R.string.pemasukan), getString(R.string.bonus), 100);
+        ModelFinance income3 = new ModelFinance(0, getString(R.string.pemasukan), getString(R.string.hasil_usaha), 100);
+
         if(financeFilter.listIncome(data).size()>0){
             dataIncome = financeFilter.listIncome(data);
             dataIncome = financeFilter.listAnalysis(dataIncome, getString(R.string.pemasukan));
+            if (!isDuplicate(dataIncome, income1)) {
+                dataIncome.add(income1);
+            }
+            if (!isDuplicate(dataIncome, income2)) {
+                dataIncome.add(income2);
+            }
+            if (!isDuplicate(dataIncome, income3)) {
+                dataIncome.add(income3);
+            }
+        }else{
+            Set<ModelFinance> dataIncomeSet = new HashSet<>();
 
-            adapterIncome = new AdapterAnalysisFinance(getActivity(), dataIncome);
-            adapterIncome.setLocale(locale);
-            adapterIncome.setLayoutAnalysis(AdapterAnalysisFinance.LAYOUT_ANALYSIS.FROM_ACCOUNT);
-            binding.layoutAccountFinanceJournal.rvIncome.setLayoutManager(new LinearLayoutManager(getActivity()));
-            binding.layoutAccountFinanceJournal.rvIncome.setAdapter(adapterIncome);
-            binding.layoutAccountFinanceJournal.rvIncome.addOnScrollListener(new RecyclerView.OnScrollListener() {
+// Contoh data yang akan ditambahkan
 
-                @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    if (dy < 0 && !binding.fabAddAccount.isShown())
-                        binding.fabAddAccount.show();
-                    else if (dy > 0 && binding.fabAddAccount.isShown() && !((MainActivity) getActivity()).isFabOpen)
-                        binding.fabAddAccount.hide();
-                }
-
-                @Override
-                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                    super.onScrollStateChanged(recyclerView, newState);
-                }
-            });
-            adapterIncome.notifyDataSetChanged();
+// Tambahkan data ke dalam set
+            dataIncomeSet.add(income1);
+            dataIncomeSet.add(income2);
+            dataIncomeSet.add(income3);
+            dataIncome = new ArrayList<>(dataIncomeSet);
         }
+        adapterIncome = new AdapterAnalysisFinance(getActivity(), dataIncome);
+        adapterIncome.setLocale(locale);
+        adapterIncome.setLayoutAnalysis(AdapterAnalysisFinance.LAYOUT_ANALYSIS.FROM_ACCOUNT);
+        binding.layoutAccountFinanceJournal.rvIncome.setLayoutManager(new LinearLayoutManager(getActivity()));
+        binding.layoutAccountFinanceJournal.rvIncome.setAdapter(adapterIncome);
+        binding.layoutAccountFinanceJournal.rvIncome.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy < 0 && !binding.fabAddAccount.isShown())
+                    binding.fabAddAccount.show();
+                else if (dy > 0 && binding.fabAddAccount.isShown() && !((MainActivity) getActivity()).isFabOpen)
+                    binding.fabAddAccount.hide();
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
+        adapterIncome.notifyDataSetChanged();
     }
-
+    private boolean isDuplicate(List<ModelFinance> list, ModelFinance data) {
+        for (ModelFinance item : list) {
+            if (item.equals(data)) {
+                return true;
+            }
+        }
+        return false;
+    }
     private void showDataExpense(List<ModelFinance>data){
+        ModelFinance expense1 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.belanja_umum), 100);
+        ModelFinance expense2 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.makanan), 100);
+        ModelFinance expense3 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.pulsa_hp), 100);
+        ModelFinance expense4 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.transportasi), 100);
+        ModelFinance expense5 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.tagihan), 100);
+        ModelFinance expense6 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.paket_internet), 100);
+
         if(financeFilter.listExpense(data).size()>0){
             dataExpense = financeFilter.listExpense(data);
             dataExpense = financeFilter.listAnalysis(dataExpense, getString(R.string.pengeluaran));
 
-            adapterExpense = new AdapterAnalysisFinance(getActivity(), dataExpense);
-            adapterExpense.setLocale(locale);
-            adapterExpense.setLayoutAnalysis(AdapterAnalysisFinance.LAYOUT_ANALYSIS.FROM_ACCOUNT);
-            binding.layoutAccountFinanceJournal.rvExpense.setLayoutManager(new LinearLayoutManager(getActivity()));
-            binding.layoutAccountFinanceJournal.rvExpense.setAdapter(adapterExpense);
-            binding.layoutAccountFinanceJournal.rvExpense.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            if (!isDuplicate(dataExpense,expense1)) {
+                dataExpense.add(expense1);
+            }
+            if (!isDuplicate(dataExpense,expense2)) {
+                dataExpense.add(expense2);
+            }
+            if (!isDuplicate(dataExpense,expense3)) {
+                dataExpense.add(expense3);
+            }
+            if (!isDuplicate(dataExpense,expense4)) {
+                dataExpense.add(expense4);
+            }
+            if (!isDuplicate(dataExpense,expense5)) {
+                dataExpense.add(expense5);
+            }
+            if(!isDuplicate(dataExpense,expense6)){
+                dataExpense.add(expense6);
+            }
+        }else{
+            Set<ModelFinance> dataExpenseSet = new HashSet<>();
 
-                @Override
-                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                    if (dy < 0 && !binding.fabAddAccount.isShown())
-                        binding.fabAddAccount.show();
-                    else if (dy > 0 && binding.fabAddAccount.isShown() && !((MainActivity) getActivity()).isFabOpen)
-                        binding.fabAddAccount.hide();
-                }
-
-                @Override
-                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                    super.onScrollStateChanged(recyclerView, newState);
-                }
-            });
-            adapterExpense.notifyDataSetChanged();
+            dataExpenseSet.add(expense1);
+            dataExpenseSet.add(expense2);
+            dataExpenseSet.add(expense3);
+            dataExpenseSet.add(expense4);
+            dataExpenseSet.add(expense5);
+            dataExpenseSet.add(expense6);
+            dataExpense = new ArrayList<>(dataExpenseSet);
         }
+
+        adapterExpense = new AdapterAnalysisFinance(getActivity(), dataExpense);
+        adapterExpense.setLocale(locale);
+        adapterExpense.setLayoutAnalysis(AdapterAnalysisFinance.LAYOUT_ANALYSIS.FROM_ACCOUNT);
+        binding.layoutAccountFinanceJournal.rvExpense.setLayoutManager(new LinearLayoutManager(getActivity()));
+        binding.layoutAccountFinanceJournal.rvExpense.setAdapter(adapterExpense);
+        binding.layoutAccountFinanceJournal.rvExpense.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy < 0 && !binding.fabAddAccount.isShown())
+                    binding.fabAddAccount.show();
+                else if (dy > 0 && binding.fabAddAccount.isShown() && !((MainActivity) getActivity()).isFabOpen)
+                    binding.fabAddAccount.hide();
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
+        adapterExpense.notifyDataSetChanged();
     }
     private void showDialogChoose() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -480,54 +551,84 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
     private void setDataSavings(ModelSavings modelSavings) {
         mainActivity.modelSavings = modelSavings;
+        viewModelSavingsProgress.findTotalProcessValueByIdSavings(modelSavings.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings1 -> {
+            int progressValue = modelSavings1!=null?modelSavings1:0;
 
-        double percentage = calculatePercentage((double) modelSavings.getProcessValue(), (double) modelSavings.getTargetValue());
-        String txtPercentage = percentage >= 100 ? getString(R.string.achieved) : percentage + "%";
+            if (progressValue>=0) {
+                modelSavings.setProcessValue(progressValue);
+                viewModelSavings.inputUpdateSavings("update",modelSavings);
+                double percentage = calculatePercentage((double) progressValue, (double) modelSavings.getTargetValue());
+                String txtPercentage = percentage >= 100 ? "100%": percentage + "%";
 
 
-        tinyDb.putObject("savings", modelSavings);
-        if(modelSavings.getDate_target()!=null){
-            long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
+                tinyDb.putObject("savings", modelSavings);
+                if(modelSavings.getDate_target()!=null){
+                    long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
 
-            long remainingDaysAfterYears = restOfTheDay % 365;
-            long months = remainingDaysAfterYears / 30;
-            long remainingDays = remainingDaysAfterYears % 30;
+                    long remainingDaysAfterYears = restOfTheDay % 365;
+                    long months = remainingDaysAfterYears / 30;
+                    long remainingDays = remainingDaysAfterYears % 30;
 
-            if(restOfTheDay>0){
-                if(restOfTheDay>=365){
-                    long years = restOfTheDay / 365;
-                    binding.layoutAccountSavings.txtDescriptionSaving.setText("Target dan progress menabung \n\nWaktu tersisa: "+years+" tahun "+months+" bulan " + remainingDays + " hari");
-                }else if(restOfTheDay>=30){
-                    binding.layoutAccountSavings.txtDescriptionSaving.setText("Target dan progress menabung \n\nWaktu tersisa: "+months+" bulan " + remainingDays + " hari");
-                } else if (restOfTheDay>0){
-                    binding.layoutAccountSavings.txtDescriptionSaving.setText("Target dan progress menabung \n\nWaktu tersisa: " + remainingDays + " hari");
-                }else {
-                    binding.layoutAccountSavings.txtDescriptionSaving.setText("Target dan progress menabung \n\nWaktu tersisa: selesai");
+                    if(restOfTheDay>0){
+                        if(restOfTheDay>=365){
+                            long years = restOfTheDay / 365;
+                            binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: "+years+" tahun "+months+" bulan " + remainingDays + " hari");
+                        }else if(restOfTheDay>=30){
+                            binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: "+months+" bulan " + remainingDays + " hari");
+                        }else {
+                            binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: " + remainingDays + " hari");
+                        }
+                    }
+                    else
+                        binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: selesai");
+
                 }
+                binding.layoutAccountSavings.txtChooseSavings.setText(modelSavings.getTitle());
+                binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue(), locale));
+                binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(progressValue, locale));
+                binding.layoutAccountSavings.txtPercentageSavings.setText("Selamat, Anda sudah mencapai "+txtPercentage+" dari target menabung Anda!");
+                binding.layoutAccountSavings.progressBarTargetSavings.setProgress((int) Tools.calculatePercentage(progressValue, modelSavings.getTargetValue()));
+                binding.layoutAccountSavings.progressBarTargetSavings.setMax(100);
+
+                viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId(), modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
+                    List<ModelSavingsProgress>savingsData = new ArrayList<>(dataSavings);
+
+                    savingsData = savingsFilter.listAnalysis(savingsData);
+
+                    adapter = new AdapterAnalysisSavings(getActivity(), savingsData);
+                    adapter.setLocale(locale);
+                    adapter.setTotalValue(modelSavings.getTargetValue());
+                    binding.layoutAccountSavings.rvProgressSavings.setLayoutManager(new LinearLayoutManager(getActivity()));
+                    binding.layoutAccountSavings.rvProgressSavings.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                });
             }
-            else
-                binding.layoutAccountSavings.txtDescriptionSaving.setText("Selesai");
-
-        }
-        binding.layoutAccountSavings.txtChooseSavings.setText(modelSavings.getTitle());
-        binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue(), locale));
-        binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(modelSavings.getProcessValue(), locale));
-        binding.layoutAccountSavings.txtPercentageSavings.setText(txtPercentage);
-        binding.layoutAccountSavings.progressBarTargetSavings.setProgress((int) Tools.calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
-        binding.layoutAccountSavings.progressBarTargetSavings.setMax(100);
-
-        viewModelSavingsProgress.findAllSavingsByIdSavings(mainActivity.modelSavings.getId(), mainActivity.modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
-            List<ModelSavingsProgress>savingsData = new ArrayList<>(dataSavings);
-
-            savingsData = savingsFilter.listAnalysis(savingsData);
-
-            adapter = new AdapterAnalysisSavings(getActivity(), savingsData);
-            adapter.setLocale(locale);
-            adapter.setTotalValue(modelSavings.getTargetValue());
-            binding.layoutAccountSavings.rvProgressSavings.setLayoutManager(new LinearLayoutManager(getActivity()));
-            binding.layoutAccountSavings.rvProgressSavings.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
         });
+
+    }
+    private void showMenu(View view) {
+        PopupMenu popupMenu = new PopupMenu(getContext(), view);
+        popupMenu.getMenuInflater().inflate(R.menu.menu_type_finance, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(menuItem -> {
+
+            switch (menuItem.getItemId()) {
+                case R.id.all:
+                    binding.layoutAccountFinanceJournal.cardExpense.setVisibility(View.VISIBLE);
+                    binding.layoutAccountFinanceJournal.cardIncome.setVisibility(View.VISIBLE);
+                    break;
+                case R.id.expense:
+                    binding.layoutAccountFinanceJournal.cardExpense.setVisibility(View.VISIBLE);
+                    binding.layoutAccountFinanceJournal.cardIncome.setVisibility(View.GONE);
+                    break;
+                case R.id.income:
+                    binding.layoutAccountFinanceJournal.cardExpense.setVisibility(View.GONE);
+                    binding.layoutAccountFinanceJournal.cardIncome.setVisibility(View.VISIBLE);
+                    break;
+            }
+            return true;
+        });
+        popupMenu.show();
     }
 
 

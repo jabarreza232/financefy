@@ -81,6 +81,7 @@
                     tools:text="Rp.20.000 s/d Rp.50.000" />
 
                 <TextView
+                    android:visibility="gone"
                     android:id="@+id/txt_day"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

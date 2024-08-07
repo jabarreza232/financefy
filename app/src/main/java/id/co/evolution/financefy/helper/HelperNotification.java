@@ -51,7 +51,7 @@ public class HelperNotification {
                 }
             }
             tinyDb.putListObject("dataNotification",dataNotification);
-            pendingIntent = PendingIntent.getBroadcast(context, 200, intent, PendingIntent.FLAG_IMMUTABLE);
+            pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE);
         }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
             intent.putExtra("key",keyNotif);
             modelNotification.requestCode = requestCode;
@@ -66,8 +66,12 @@ public class HelperNotification {
         calendar.set(Calendar.HOUR_OF_DAY, 8);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
+        // Jika waktu yang ditetapkan sudah berlalu, setel alarm untuk hari berikutnya
+        if (Calendar.getInstance().after(calendar)) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
 
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
 
         if (pendingIntent != null && alarmManager != null && !isChecked) {
             alarmManager.cancel(pendingIntent);

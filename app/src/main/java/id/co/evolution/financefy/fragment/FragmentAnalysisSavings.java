@@ -14,6 +14,7 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.PopupMenu;
 
 import androidx.activity.result.ActivityResult;
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -409,7 +411,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                 if (typeChart == TYPE_CHART.PIE_CHART) {
                     item.setIcon(R.drawable.ic_baseline_bar_chart_24);
                     typeChart = TYPE_CHART.BAR_CHART;
-                    if (savingsData.size() > 1) new FragmentAnalysisSavings.BarChartAsyncTask(savingsData).execute();
+                    if (savingsData.size() > 0) new FragmentAnalysisSavings.BarChartAsyncTask(savingsData).execute();
                 } else if (typeChart == TYPE_CHART.BAR_CHART) {
                     item.setIcon(R.drawable.ic_baseline_pie_chart_24);
                     typeChart = TYPE_CHART.PIE_CHART;
@@ -544,8 +546,8 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         binding.txtEmpty.setText("Tidak ada data menabung");
         if (typeChart == TYPE_CHART.BAR_CHART) {
 
-          if(data.size()>1)  new FragmentAnalysisSavings.BarChartAsyncTask(data).execute();
-
+//          if(data.size()>1)  new FragmentAnalysisSavings.BarChartAsyncTask(data).execute();
+          new FragmentAnalysisSavings.BarChartAsyncTask(data).execute();
           binding.barChartAnalysis.setVisibility(data.size() > 0 ? View.VISIBLE : View.GONE);
         } else {
             new FragmentAnalysisSavings.PieChartAsyncTask(savingsFilter.listAnalysis(data)).execute();
@@ -553,9 +555,12 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         }
     }
     private void loadTotalSavingsTarget() {
-        viewModelSavings.findSavingsById(mainActivity.modelSavings.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings1 -> {
-            if (modelSavings1 != null) {
-                mainActivity.modelSavings.setProcessValue(modelSavings1.getProcessValue());
+        viewModelSavingsProgress.findTotalProcessValueByIdSavings(mainActivity.modelSavings.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings1 -> {
+            int progressValue = modelSavings1!=null?modelSavings1:0;
+
+            if (progressValue>=0) {
+                modelSavings.setProcessValue(progressValue);
+                viewModelSavings.inputUpdateSavings("update",modelSavings);
                 setSavingsTarget();
                 loadDataHeader();
             }
@@ -784,8 +789,21 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             barData.setValueFormatter(new LargeValueFormatter());
             barData.setValueTextSize(11);
             barData.setBarWidth(0.4f);
+            if (data.size() == 1) {
+                binding.barChartAnalysis.getXAxis().setAxisMinimum(-0.5f);
+                binding.barChartAnalysis.getXAxis().setAxisMaximum(0.5f);
+            } else {
+                binding.barChartAnalysis.getXAxis().setAxisMinimum(barData.getXMin() - 0.5f);
+                binding.barChartAnalysis.getXAxis().setAxisMaximum(barData.getXMax() + 0.5f);
+            }
 
-            binding.barChartAnalysis.setData(barData);
+            if (data.size()==0) {
+                binding.barChartAnalysis.clear();
+                binding.barChartAnalysis.setNoDataText("No data available");
+            } else {
+                binding.barChartAnalysis.setData(barData);
+                binding.barChartAnalysis.invalidate();  // Refresh chart
+            }
             // scaling can now only be done on x- and y-axis separately
             binding.barChartAnalysis.setPinchZoom(true);
 
@@ -901,7 +919,9 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                 public void onAnimationEnd(Animation animation) {
                     binding.headerView.setVisibility(View.GONE);
                     binding.placeDateMonth.setVisibility(View.GONE);
-                    binding.llAppBar.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.white));
+                    @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorSurface);
+
+                    binding.llAppBar.setBackground(new ColorDrawable(colorSurface));
                 }
 
                 @Override

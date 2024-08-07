@@ -39,6 +39,13 @@ public class ModelFinance implements Serializable {
     public ModelFinance() {
     }
 
+    public ModelFinance(double jumlah,String tipe, String kategori, long totalValue) {
+        this.jumlah = jumlah;
+        this.tipe =tipe;
+        this.kategori = kategori;
+        this.totalValue = totalValue;
+    }
+
     public int getId_finance_user() {
         return id_finance_user;
     }
@@ -172,4 +179,15 @@ public class ModelFinance implements Serializable {
 
         return result;
     };
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ModelFinance that = (ModelFinance) o;
+        return kategori.equals(that.kategori);
+    }
+
+
 }

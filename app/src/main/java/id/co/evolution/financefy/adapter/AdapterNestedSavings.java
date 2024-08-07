@@ -61,7 +61,7 @@ public class AdapterNestedSavings extends RecyclerView.Adapter<AdapterNestedSavi
         holder.binding.txtPercentage.setText(data.get(i).getPercentage(total_value)+"%");
         Log.e("TAG", "onBindViewHolder: "+total_value);
 
-        holder.binding.imgEdit.setOnClickListener(v -> methodCallback.onClick(data, i));
+        holder.binding.placeFinance.setOnClickListener(v -> methodCallback.onClick(data, i));
     }
 
     @Override

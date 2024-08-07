@@ -30,7 +30,7 @@ public interface SavingsProgressDao {
     @Query("SELECT * FROM savings_progress WHERE id_progress_savings =:id AND type_currency IN(:type_currency)LIMIT 1")
     LiveData<ModelSavingsProgress> findById(int id,String type_currency);
 
-    @Query("SELECT COUNT(process_value) FROM savings_progress WHERE id_savings=:id_savings AND type_currency IN(:type_currency)")
+    @Query("SELECT SUM(process_value) FROM savings_progress WHERE id_savings=:id_savings AND type_currency IN(:type_currency)")
     LiveData<Integer>findTotalProcessValueByIdSavings(int id_savings,String type_currency);
 
     @Query("SELECT COUNT(process_value) FROM savings_progress")

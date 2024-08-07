@@ -14,10 +14,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,6 +33,8 @@ import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
+import androidx.annotation.AttrRes;
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -689,8 +693,9 @@ binding.btnToggle.setOnClickListener(v->{
         savingsData = new ArrayList<>(data);
         ModelNotification modelNotification =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(savingsData), locale));
         mainActivity.helperNotification.reminderSet(mainActivity.isCheckedNotifSavings,modelNotification,getString(R.string.menabung),100);
-        modelSavings.setProcessValue(new SavingsFilter().totalValueByType(savingsData));
-        viewModelSavings.inputUpdateSavings("update",modelSavings);
+//        modelSavings.setProcessValue(new SavingsFilter().totalValueByType(savingsData));
+//        viewModelSavings.inputUpdateSavings("update",modelSavings);
+
         loadTotalSavingsTarget();
 
         if (filterNominal != null)
@@ -861,9 +866,11 @@ binding.btnToggle.setOnClickListener(v->{
     }
 
     private void loadTotalSavingsTarget() {
-        viewModelSavings.findSavingsById(mainActivity.modelSavings.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings1 -> {
-            if (modelSavings1 != null) {
-                modelSavings.setProcessValue(modelSavings1.getProcessValue());
+        viewModelSavingsProgress.findTotalProcessValueByIdSavings(mainActivity.modelSavings.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings1 -> {
+            int progressValue = modelSavings1!=null?modelSavings1:0;
+            if (progressValue>=0) {
+                modelSavings.setProcessValue(progressValue);
+                viewModelSavings.inputUpdateSavings("update",modelSavings);
                 setSavingsTarget();
                 loadDataHeaderSavings();
             }
@@ -895,7 +902,9 @@ binding.btnToggle.setOnClickListener(v->{
                 public void onAnimationEnd(Animation animation) {
                     binding.headerView.setVisibility(View.GONE);
                     binding.placeDateMonth.setVisibility(View.GONE);
-                    binding.llAppBar.setBackgroundColor(ContextCompat.getColor(getContext(),R.color.white));
+                    @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorSurface);
+
+                    binding.llAppBar.setBackground(new ColorDrawable(colorSurface));
                 }
 
                 @Override
@@ -908,4 +917,6 @@ binding.btnToggle.setOnClickListener(v->{
 
         isHidden = !isHidden;
     }
+    // Fungsi untuk mendapatkan warna dari atribut tema
+
 }
