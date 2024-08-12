@@ -8,14 +8,18 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.widget.Toast;
+
+import androidx.room.Room;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
+import dagger.hilt.android.AndroidEntryPoint;
+import id.co.evolution.financefy.db.FinanceDB;
 import id.co.evolution.financefy.model.ModelNotification;
-
 public class HelperNotification {
     Context context;
     TinyDb tinyDb;

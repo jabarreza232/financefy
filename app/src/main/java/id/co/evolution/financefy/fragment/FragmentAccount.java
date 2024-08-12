@@ -631,7 +631,9 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         popupMenu.show();
     }
 
-
+String descriptionFinance,descriptionSavings;
+    List<ModelFinance>dataFinanceNotification=new ArrayList<>();
+    List<ModelSavingsProgress> dataSaving=new ArrayList<>();
     private void setDataUser(ModelUser user) {
         binding.txtName.setText(user.getName());
         binding.txtDescription.setText(user.getType() + " - " + user.getCategory());
@@ -648,28 +650,56 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
         locale = user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
         tinyDb.putString("currency",user.getType_currency());
+        String timeNotification=        tinyDb.getString("time_notification");
+        if(!timeNotification.isEmpty()){
+            boolean isDailyNotification = tinyDb.getString("time_notification").equalsIgnoreCase("daily");
 
-        viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()),user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
-            dataFinance = modelFinances;
-            boolean isChecked = tinyDb.getBoolean("isCheckedFinance");
+            boolean isCheckedFinance = tinyDb.getBoolean("isCheckedFinance");
 
-            tinyDb.putBoolean("isCheckedFinance", isChecked);
-            String description = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinance), locale) + "\n" +
-                    "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinance), locale);
-            ModelNotification modelNotification =new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), description);
+            tinyDb.putBoolean("isCheckedFinance", isCheckedFinance);
+            viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()),user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+                dataFinance = modelFinances;
+            });
+            if (isDailyNotification) {
+                viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+                    dataFinanceNotification = modelFinances;
+                    descriptionFinance = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinanceNotification), locale) + "\n" +
+                            "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinanceNotification), locale);
+                });
 
-            helperNotification.reminderSet(isChecked,modelNotification,getString(R.string.jurnal_keuangan),200);
+            } else {
+                viewModelFinance.getFinanceByMonth(Tools.getFormattedMonthSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+                    dataFinanceNotification = modelFinances;
+                    descriptionFinance = "Data pemasukan anda bulan ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinanceNotification), locale) + "\n" +
+                            "Data pengeluaran anda bulan ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinanceNotification), locale);
+                });
+            }
 
-        });
+            ModelNotification modelNotification =new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), descriptionFinance);
 
-        if(mainActivity.modelSavings==null)
-            mainActivity.modelSavings = new ModelSavings();
+            mainActivity.helperNotification.reminderSet(isCheckedFinance,modelNotification,getString(R.string.jurnal_keuangan),200);
 
-        viewModelSavingsProgress.findAllSavingsByIdSavings(mainActivity.modelSavings.getId(), mainActivity.modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
-            boolean isChecked = tinyDb.getBoolean("isCheckedSavings");
-            ModelNotification modelNotification =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSavings), locale));
-            helperNotification.reminderSet(isChecked,modelNotification,getString(R.string.menabung),100);
-        });
+            if (mainActivity.modelSavings == null)
+                mainActivity.modelSavings = new ModelSavings();
+
+            boolean isCheckedSavings = tinyDb.getBoolean("isCheckedSavings");
+
+            if (isDailyNotification) {
+                viewModelSavingsProgress.findAllSavingsByDate(getFormattedDateSimple(System.currentTimeMillis()), mainActivity.modelSavings.getId(), mainActivity.modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
+                    dataSaving = dataSavings;
+                    descriptionSavings = "Progress menabung anda hingga hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale);
+                });
+            } else {
+                viewModelSavingsProgress.getSavingsByMonth(Tools.getFormattedMonthSimple(System.currentTimeMillis()), mainActivity.modelSavings.getId(), mainActivity.modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
+                    dataSaving = dataSavings;
+                    descriptionSavings = "Progress menabung anda bulan ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale);
+                });
+            }
+
+            ModelNotification modelNotificationSavings =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale));
+            helperNotification.reminderSet(isCheckedSavings,modelNotificationSavings,getString(R.string.menabung),100);
+
+        }
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -24,6 +25,7 @@ public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.Vi
     MethodCallback methodCallback;
     int selectedPosition = -1;
     int lastSelectedPosition = -1;
+
     public AdapterCalculator(Context context, List<String> data, MethodCallback methodCallback) {
         this.context = context;
         this.data = data;
@@ -50,6 +52,7 @@ public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.Vi
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         ListCalculatorBinding binding;
+        TextView activeButton;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -59,26 +62,52 @@ public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.Vi
         public void bindData(String modelFilter, int position) {
             binding.txtName.setText(modelFilter);
 
-            itemView.setOnClickListener(v -> {
-                methodCallback.onClick(data, position);
-            });
+//            itemView.setOnClickListener(v -> {
+//                methodCallback.onClick(data, position);
+//            });
             itemView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if(event.getAction() == MotionEvent.ACTION_UP){
-                        binding.txtName.setBackground(ContextCompat.getDrawable(context,R.drawable.shape_selected_calculator));
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        methodCallback.onClick(data, position);
+                        binding.txtName.setBackgroundColor(ContextCompat.getColor(context, R.color.blueColor));
+                        binding.txtName.setSelected(true);
+                        return true;
+                    }
+                    if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                        if(binding.txtName.isSelected()){
+                            binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_selected_calculator));
+                            binding.txtName.setSelected(false);
+                        }else{
+                            binding.txtName.setBackgroundColor(ContextCompat.getColor(context, R.color.blueColor));
+                            binding.txtName.setSelected(true);
+                        }
 
                         // Do what you want
                         return true;
                     }
-                    methodCallback.onClick(data, position);
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_selected_calculator));
+                        binding.txtName.setSelected(false);
+                        // Do what you want
+                        return true;
+                    }
 
-                    binding.txtName.setBackgroundColor(ContextCompat.getColor(context,R.color.blueColor));
                     return false;
                 }
             });
 
 
+        }
+
+        private void setActiveButton(TextView selectedButton) {
+            // Reset the previous active button
+            if (activeButton != null) {
+                activeButton.setSelected(false);
+            }
+            // Set the new active button
+            selectedButton.setBackgroundColor(ContextCompat.getColor(context, R.color.blueColor));
+            activeButton = selectedButton;
         }
     }
 }

@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         changeUINightMode();
+
         String type_currency = tinyDb.getString("currency");
          isPinSetting = tinyDb.getBoolean("isSettingPin");
         boolean isPinInput = getIntent().getBooleanExtra("isInputPin", false);

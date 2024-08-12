@@ -31,8 +31,8 @@ public class SavingsProgressRepository {
         return savingsDao.findTotalProcessValueByIdSavings(id,type_currency);
     }
 
-    public LiveData<List<ModelSavingsProgress>> getSavingsByDate(String date,String type_currency) {
-        return savingsDao.findByDate(date,type_currency);
+    public LiveData<List<ModelSavingsProgress>> getSavingsByDate(String date,int id_savings,String type_currency) {
+        return savingsDao.findByDate(date, id_savings,type_currency);
     }
 
     public LiveData<List<ModelSavingsProgress>> getSavingsByWeek(List<String> date, int id_savings,String type_currency) {

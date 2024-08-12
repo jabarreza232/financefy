@@ -531,7 +531,7 @@ public class TinyDb {
      *
      * @return true if writable, false otherwise
      */
-    private static boolean isExternalStorageWritable() {
+    public static boolean isExternalStorageWritable() {
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
 

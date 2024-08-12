@@ -6,6 +6,7 @@ import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUES
 import static id.co.evolution.financefy.helper.Tools.calculatePercentage;
 import static id.co.evolution.financefy.helper.Tools.changeTitleColor;
 import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
+import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 import static id.co.evolution.financefy.helper.Tools.getObjectAnimator;
 import static id.co.evolution.financefy.helper.Tools.modelPrimaryColor;
 
@@ -307,9 +308,12 @@ binding.btnToggle.setOnClickListener(v->{
         });
 
         binding.layoutSavingsProgress.imgChooseRecommendation.setOnClickListener(v -> {
-
             showMenu(v);
         });
+        String timeNotification=        tinyDb.getString("time_notification");
+        if(!timeNotification.isEmpty()){
+            setUpNotification();
+        }
     }
 
     private void showMenu(View view) {
@@ -666,11 +670,6 @@ binding.btnToggle.setOnClickListener(v->{
     private void loadDataFinance(List<ModelFinance> data) {
         financeData = new ArrayList<>(data);
         mainActivity.dataFinance = data;
-        String description = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(financeData), locale) + "\n" +
-                "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(financeData), locale);
-        ModelNotification modelNotification =new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), description);
-
-        mainActivity.helperNotification.reminderSet(mainActivity.isCheckedNotifFinance,modelNotification,getString(R.string.jurnal_keuangan),200);
 
         loadDataHeader(data);
         if (filterNominal != null)
@@ -691,9 +690,7 @@ binding.btnToggle.setOnClickListener(v->{
 
     private void loadDataSavings(List<ModelSavingsProgress> data) {
         savingsData = new ArrayList<>(data);
-        ModelNotification modelNotification =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(savingsData), locale));
-        mainActivity.helperNotification.reminderSet(mainActivity.isCheckedNotifSavings,modelNotification,getString(R.string.menabung),100);
-//        modelSavings.setProcessValue(new SavingsFilter().totalValueByType(savingsData));
+     //        modelSavings.setProcessValue(new SavingsFilter().totalValueByType(savingsData));
 //        viewModelSavings.inputUpdateSavings("update",modelSavings);
 
         loadTotalSavingsTarget();
@@ -918,5 +915,61 @@ binding.btnToggle.setOnClickListener(v->{
         isHidden = !isHidden;
     }
     // Fungsi untuk mendapatkan warna dari atribut tema
+    String descriptionFinance,descriptionSavings;
+    List<ModelFinance>dataFinanceNotification=new ArrayList<>();
+    List<ModelSavingsProgress> dataSaving=new ArrayList<>();
+    private void setUpNotification(){
+        boolean isDailyNotification = tinyDb.getString("time_notification").equalsIgnoreCase("daily");
 
+        boolean isCheckedFinance = tinyDb.getBoolean("isCheckedFinance");
+
+        tinyDb.putBoolean("isCheckedFinance", isCheckedFinance);
+        viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()),user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+            dataFinance = modelFinances;
+        });
+        if (isDailyNotification) {
+            viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+                dataFinanceNotification = modelFinances;
+                descriptionFinance = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinanceNotification), locale) + "\n" +
+                        "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinanceNotification), locale);
+
+            });
+
+        } else {
+            viewModelFinance.getFinanceByMonth(Tools.getFormattedMonthSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+                dataFinanceNotification = modelFinances;
+                descriptionFinance = "Data pemasukan anda bulan ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinanceNotification), locale) + "\n" +
+                        "Data pengeluaran anda bulan ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinanceNotification), locale);
+
+            });
+        }
+
+        ModelNotification modelNotification =new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), descriptionFinance);
+
+        mainActivity.helperNotification.reminderSet(isCheckedFinance,modelNotification,getString(R.string.jurnal_keuangan),200);
+
+        if (mainActivity.modelSavings == null)
+            mainActivity.modelSavings = new ModelSavings();
+
+        boolean isCheckedSavings = tinyDb.getBoolean("isCheckedSavings");
+
+        if (isDailyNotification) {
+
+            viewModelSavingsProgress.findAllSavingsByDate(getFormattedDateSimple(System.currentTimeMillis()), mainActivity.modelSavings.getId(), mainActivity.modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
+                dataSaving = dataSavings;
+                descriptionSavings = "Progress menabung anda hingga hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale);
+            });
+        } else {
+            viewModelSavingsProgress.getSavingsByMonth(Tools.getFormattedMonthSimple(System.currentTimeMillis()), mainActivity.modelSavings.getId(), mainActivity.modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
+                dataSaving = dataSavings;
+                descriptionSavings = "Progress menabung anda bulan ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale);
+            });
+        }
+
+
+
+        ModelNotification modelNotificationSavings =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale));
+        mainActivity.helperNotification.reminderSet(isCheckedSavings,modelNotificationSavings,getString(R.string.menabung),100);
+
+    }
 }

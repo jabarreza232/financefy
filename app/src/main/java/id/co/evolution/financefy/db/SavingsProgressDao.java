@@ -21,8 +21,8 @@ public interface SavingsProgressDao {
     @Query("SELECT * FROM savings_progress WHERE id_progress_savings IN(:savingsIds)")
     List<ModelSavingsProgress> loadAllbyIds(int[] savingsIds);
 
-    @Query("SELECT * FROM savings_progress WHERE date_progress_savings LIKE:date AND type_currency IN(:type_currency)")
-    LiveData<List<ModelSavingsProgress>> findByDate(String date,String type_currency);
+    @Query("SELECT * FROM savings_progress WHERE date_progress_savings LIKE:date AND id_savings IN(:id_savings) AND type_currency IN(:type_currency)")
+    LiveData<List<ModelSavingsProgress>> findByDate(String date,int id_savings,String type_currency);
 
     @Query("SELECT * FROM savings_progress WHERE id_savings =:id_savings AND type_currency IN(:type_currency)")
     LiveData<List<ModelSavingsProgress>> findByIdSavings(int id_savings,String type_currency);

@@ -212,6 +212,29 @@
                 android:textSize="15sp" />
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="5dp"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="3dp">
+
+            <TextView
+                android:id="@+id/txt_export_excel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/icon_excel"
+                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
+                android:drawablePadding="5dp"
+                android:drawableTint="?android:textColorPrimary"
+                android:padding="10dp"
+                android:text="Export Excel"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="15sp" />
+        </androidx.cardview.widget.CardView>
+
 
 <!--        <androidx.cardview.widget.CardView-->
 <!--            android:layout_width="match_parent"-->

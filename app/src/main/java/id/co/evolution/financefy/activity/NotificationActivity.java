@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
@@ -53,7 +54,7 @@ import id.co.evolution.financefy.viewmodel.ViewModelSavingsProgress;
 @AndroidEntryPoint
 public class NotificationActivity extends AppCompatActivity {
     ActivityNotificationBinding mBinding;
-    ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
+    ModelPrimaryColor modelPrimaryColor = Tools.modelPrimaryColor;
     public ViewModelFinance viewModelFinance;
     public ViewModelSavings viewModelSavings;
     public ViewModelSavingsProgress viewModelSavingsProgress;
@@ -73,13 +74,18 @@ public class NotificationActivity extends AppCompatActivity {
     TinyDb tinyDb;
     Locale locale;
     HelperNotification helperNotification;
+    Button activeButton;
+    boolean isDailyNotification;
+    String descriptionFinance, descriptionSavings;
+    boolean isCheckedFinance;
+    boolean isCheckedSavings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(tinyDb.getObject("model_primary_color", ModelPrimaryColor.class)!=null) {
-            modelPrimaryColor= tinyDb.getObject("model_primary_color",ModelPrimaryColor.class);
-            Tools.setThemeActivity(getTheme(),modelPrimaryColor);
+        if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+            modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+            Tools.setThemeActivity(getTheme(), modelPrimaryColor);
         }
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_notification);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -90,45 +96,135 @@ public class NotificationActivity extends AppCompatActivity {
 
         viewModelFinance.init(financeRepository);
         viewModelSavingsProgress.init(savingsProgressRepository);
-        helperNotification=new HelperNotification(this);
+        helperNotification = new HelperNotification(this);
         user = tinyDb.getObject("user", ModelUser.class);
         modelSavings = tinyDb.getObject("savings", ModelSavings.class);
-
+        String notif=tinyDb.getString("time_notification");
         locale = user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
-
-        viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()),user.getId(), user.getType_currency()).observe(this, modelFinances -> {
-            dataFinance = modelFinances;
-            boolean isChecked = tinyDb.getBoolean("isCheckedFinance");
-            mBinding.switchNotificationFinance.setChecked(isChecked);
-        });
-        if(modelSavings==null)
-            modelSavings = new ModelSavings();
-
-        viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId(), modelSavings.getType_currency()).observe(this, dataSavings -> {
-            dataSaving = dataSavings;
-            boolean isChecked = tinyDb.getBoolean("isCheckedSavings");
-            mBinding.switchNotificationSavings.setChecked(isChecked);
-        });
-
-
-
+        isCheckedFinance= tinyDb.getBoolean("isCheckedFinance");
+        isCheckedSavings= tinyDb.getBoolean("isCheckedSavings");
         mBinding.switchNotificationFinance.setOnClickListener(view -> {
+          boolean  isCheckedSavings = tinyDb.getBoolean("isCheckedSavings");
             boolean isChecked = mBinding.switchNotificationFinance.isChecked();
             tinyDb.putBoolean("isCheckedFinance", isChecked);
-            String description = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinance), locale) + "\n" +
-                    "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinance), locale);
-            ModelNotification modelNotification =new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), description);
-
-            helperNotification.reminderSet(isChecked,modelNotification,getString(R.string.jurnal_keuangan),200);
+            ModelNotification modelNotification = new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), descriptionFinance);
+            helperNotification.reminderSet(isChecked, modelNotification, getString(R.string.jurnal_keuangan), 200);
+            if(isChecked) Toast.makeText(this, "Notifikasi berhasil di setting!", Toast.LENGTH_SHORT).show();
+            if(!isCheckedSavings&&!isChecked){
+                tinyDb.putString("time_notification", "");
+                mBinding.buttonMonthly.setSelected(false);
+                mBinding.buttonDaily.setSelected(false);
+                mBinding.switchNotificationFinance.setEnabled(false);
+                mBinding.switchNotificationSavings.setEnabled(false);
+            }
         });
 
 
         mBinding.switchNotificationSavings.setOnClickListener(view -> {
+           boolean isCheckedFinance = tinyDb.getBoolean("isCheckedFinance");
             boolean isChecked = mBinding.switchNotificationSavings.isChecked();
             tinyDb.putBoolean("isCheckedSavings", isChecked);
-            ModelNotification modelNotification =new ModelNotification("Pengingat Progress Menabung: " + user.getName(),"Progress menabung anda hingga hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale));
-            helperNotification.reminderSet(isChecked,modelNotification,getString(R.string.menabung),100);
+            ModelNotification modelNotification = new ModelNotification("Pengingat Progress Menabung: " + user.getName(), descriptionSavings);
+            helperNotification.reminderSet(isChecked, modelNotification, getString(R.string.menabung), 100);
+            if(isChecked)  Toast.makeText(this, "Notifikasi berhasil di setting!", Toast.LENGTH_SHORT).show();
+            if(!isCheckedFinance&&!isChecked){
+                tinyDb.putString("time_notification", "");
+                mBinding.buttonMonthly.setSelected(false);
+                mBinding.buttonDaily.setSelected(false);
+                mBinding.switchNotificationFinance.setEnabled(false);
+                mBinding.switchNotificationSavings.setEnabled(false);
+            }
         });
+
+        mBinding.buttonDaily.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setActiveButton((Button) v);
+                tinyDb.putString("time_notification", "daily");
+                getNotification("daily");
+                mBinding.switchNotificationFinance.setEnabled(true);
+                mBinding.switchNotificationSavings.setEnabled(true);
+            }
+        });
+
+        mBinding.buttonMonthly.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setActiveButton((Button) v);
+                tinyDb.putString("time_notification", "monthly");
+                getNotification("monthly");
+                mBinding.switchNotificationFinance.setEnabled(true);
+                mBinding.switchNotificationSavings.setEnabled(true);
+            }
+        });
+        if(!notif.isEmpty()){
+            isDailyNotification = tinyDb.getString("time_notification").equalsIgnoreCase("daily");
+
+            if (isDailyNotification) {
+                mBinding.buttonDaily.setSelected(true);
+                mBinding.buttonMonthly.setSelected(false);
+                descriptionFinance = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinance), locale) + "\n" +
+                        "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinance), locale);
+
+                descriptionSavings = "Progress menabung anda hingga hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale);
+            } else {
+                mBinding.buttonMonthly.setSelected(true);
+                mBinding.buttonDaily.setSelected(false);
+                descriptionFinance = "Data pemasukan anda bulan ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinance), locale) + "\n" +
+                        "Data pengeluaran anda bulan ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinance), locale);
+
+                descriptionSavings = "Progress menabung anda bulan ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale);
+            }
+
+            mBinding.switchNotificationFinance.setChecked(isCheckedFinance);
+
+
+            mBinding.switchNotificationSavings.setChecked(isCheckedSavings);
+        }else{
+            mBinding.switchNotificationFinance.setEnabled(false);
+            mBinding.switchNotificationSavings.setEnabled(false);
+        }
+    }
+
+    private void getNotification(String time) {
+        if (time.equalsIgnoreCase("daily")) {
+            activeButton = mBinding.buttonMonthly;
+            setActiveButton(mBinding.buttonDaily);
+            viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(this, modelFinances -> {
+                dataFinance = modelFinances;
+            });
+            if (modelSavings == null)
+                modelSavings = new ModelSavings();
+
+            viewModelSavingsProgress.findAllSavingsByDate(getFormattedDateSimple(System.currentTimeMillis()), modelSavings.getId(), modelSavings.getType_currency()).observe(this, dataSavings -> {
+                dataSaving = dataSavings;
+            });
+        } else {
+            activeButton = mBinding.buttonDaily;
+
+            setActiveButton(mBinding.buttonMonthly);
+
+            viewModelFinance.getFinanceByMonth(Tools.getFormattedMonthSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(this, modelFinances -> {
+                dataFinance = modelFinances;
+            });
+            if (modelSavings == null)
+                modelSavings = new ModelSavings();
+
+            viewModelSavingsProgress.getSavingsByMonth(Tools.getFormattedMonthSimple(System.currentTimeMillis()), modelSavings.getId(), modelSavings.getType_currency()).observe(this, dataSavings -> {
+                dataSaving = dataSavings;
+
+            });
+        }
+    }
+
+    private void setActiveButton(Button selectedButton) {
+        // Reset the previous active button
+        if (activeButton != null) {
+            activeButton.setSelected(false);
+        }
+        // Set the new active button
+        selectedButton.setSelected(true);
+        activeButton = selectedButton;
     }
 
     @Override

@@ -44,8 +44,8 @@ public class ViewModelSavingsProgress extends ViewModel {
         return savingsRepository.getSavingsByWeek(date, id_savings,type_currency);
     }
 
-    public LiveData<List<ModelSavingsProgress>> findAllSavingsByDate(String date,String type_currency) {
-        return savingsRepository.getSavingsByDate(date,type_currency);
+    public LiveData<List<ModelSavingsProgress>> findAllSavingsByDate(String date,int id_savings,String type_currency) {
+        return savingsRepository.getSavingsByDate(date,id_savings,type_currency);
     }
     public LiveData<List<ModelSavingsProgress>> findAllSavingsByIdSavings(int id_savings,String type_currency) {
         return savingsRepository.getSavingsByIdSavings(id_savings,type_currency);
