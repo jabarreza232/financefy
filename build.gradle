@@ -5,7 +5,8 @@ ext.kotlin_version = '1.6.0'
     repositories {
         google()
         jcenter()
-        
+        mavenCentral()
+
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.3.0'

@@ -22,6 +22,9 @@
         android:theme="@style/AppTheme"
         android:requestLegacyExternalStorage="true"
         tools:replace="android:icon">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-5068422046187558~4930646758"/>
         <activity
             android:name=".activity.NotificationActivity"
             android:exported="false"

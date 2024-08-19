@@ -83,7 +83,7 @@ public class DialogSettingPin {
                     break;
                 case "OK":
                     if (result.length() < 6) {
-                        Toast.makeText(context, "Mohon untuk di isi minimal 6 digit!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Mohon untuk di isi maksimal 6 digit!", Toast.LENGTH_SHORT).show();
                         return;
                     }
                     DialogConfirm dialogConfirm = new DialogConfirm(context, inflater, result -> {

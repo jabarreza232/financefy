@@ -230,15 +230,10 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
                 dataIncome.add(income3);
             }
         }else{
-            Set<ModelFinance> dataIncomeSet = new HashSet<>();
 
-// Contoh data yang akan ditambahkan
-
-// Tambahkan data ke dalam set
-            dataIncomeSet.add(income1);
-            dataIncomeSet.add(income2);
-            dataIncomeSet.add(income3);
-            dataIncome = new ArrayList<>(dataIncomeSet);
+            dataIncome.add(income1);
+            dataIncome.add(income2);
+            dataIncome.add(income3);
         }
         adapterIncome = new AdapterAnalysisFinance(getActivity(), dataIncome);
         adapterIncome.setLocale(locale);
@@ -281,7 +276,6 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         if(financeFilter.listExpense(data).size()>0){
             dataExpense = financeFilter.listExpense(data);
             dataExpense = financeFilter.listAnalysis(dataExpense, getString(R.string.pengeluaran));
-
             if (!isDuplicate(dataExpense,expense1)) {
                 dataExpense.add(expense1);
             }
@@ -300,16 +294,13 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             if(!isDuplicate(dataExpense,expense6)){
                 dataExpense.add(expense6);
             }
-        }else{
-            Set<ModelFinance> dataExpenseSet = new HashSet<>();
-
-            dataExpenseSet.add(expense1);
-            dataExpenseSet.add(expense2);
-            dataExpenseSet.add(expense3);
-            dataExpenseSet.add(expense4);
-            dataExpenseSet.add(expense5);
-            dataExpenseSet.add(expense6);
-            dataExpense = new ArrayList<>(dataExpenseSet);
+        } else {
+            dataExpense.add(expense1);
+            dataExpense.add(expense2);
+            dataExpense.add(expense3);
+            dataExpense.add(expense4);
+            dataExpense.add(expense5);
+            dataExpense.add(expense6);
         }
 
         adapterExpense = new AdapterAnalysisFinance(getActivity(), dataExpense);
