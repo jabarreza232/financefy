@@ -20,6 +20,26 @@
         <item name="boxStrokeColor">@color/colorPrimaryOrange</item>
 
     </style>
+    <style name="AppThemeRed" parent="Theme.MaterialComponents.DayNight.DarkActionBar.Bridge">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimaryRed</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkRed</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">@color/colorPrimaryRed</item>
+        <item name="colorControlActivated">@color/colorPrimaryRed</item>
+        <item name="boxStrokeColor">@color/colorPrimaryRed</item>
+
+    </style>
+    <style name="AppThemeRedNoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimaryRed</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkRed</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">@color/colorPrimaryRed</item>
+        <item name="colorControlActivated">@color/colorPrimaryRed</item>
+        <item name="boxStrokeColor">@color/colorPrimaryRed</item>
+
+    </style>
 
     <style name="AppThemeBrown" parent="Theme.MaterialComponents.DayNight.DarkActionBar.Bridge">
         <!-- Customize your theme here. -->

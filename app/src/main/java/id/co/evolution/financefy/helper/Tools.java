@@ -69,6 +69,8 @@ public class Tools {
                 theme.applyStyle(R.style.AppThemeBrown,true);
             else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Green.toString()))
                 theme.applyStyle(R.style.AppThemeGreen,true);
+            else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Red.toString()))
+                theme.applyStyle(R.style.AppThemeRed,true);
             else theme.applyStyle(R.style.AppTheme,true);
 
         }
@@ -82,6 +84,8 @@ public class Tools {
                 theme.applyStyle(R.style.AppThemeBrownNoActionBar,true);
             else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Green.toString()))
                 theme.applyStyle(R.style.AppThemeGreenNoActionBar,true);
+             else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Red.toString()))
+                theme.applyStyle(R.style.AppThemeRedNoActionBar,true);
             else theme.applyStyle(R.style.AppThemeNoActionBar,true);
 
         }

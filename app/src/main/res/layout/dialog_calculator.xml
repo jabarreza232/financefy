@@ -60,7 +60,7 @@
             android:layout_margin="10dp"
             android:background="@drawable/shape_selected_calculator"
             android:fontFamily="@font/ubuntu_b"
-            android:text="Submit"
+            android:text="Kirim"
             android:textColor="@color/colorAccent"
             android:textSize="15sp" />
     </LinearLayout>

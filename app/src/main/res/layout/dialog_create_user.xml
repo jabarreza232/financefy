@@ -28,9 +28,10 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/lato_bold"
                 android:padding="10dp"
-                android:text="Input User"
+                android:text="Masukkan form pengguna"
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="19sp" />
+
             <ImageView
                 android:id="@+id/img_close"
                 android:layout_width="wrap_content"
@@ -54,7 +55,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Name"
+                android:hint="Nama"
                 app:errorEnabled="true"
                 >
 
@@ -81,7 +82,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
-                    android:text="Type"
+                    android:text="Tipe"
                     android:textColor="?android:attr/textColorPrimary" />
 
                 <ImageView
@@ -114,7 +115,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:text="Category"
+            android:text="Kategori"
             android:background="?attr/selectableItemBackground"
             android:textColor="?android:attr/textColorPrimary" />
 
@@ -144,7 +145,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
-            android:text="Type Currency"
+            android:text="Tipe Mata Uang"
             android:textColor="?android:attr/textColorPrimary"
             android:background="?attr/selectableItemBackground" />
 
@@ -169,7 +170,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/lato_bold"
                 android:padding="10dp"
-                android:text="Input Target Savings"
+                android:text="Masukkan form target menabung"
                 android:textColor="?android:attr/textColorPrimary"
                 android:textSize="19sp"
                 android:visibility="gone"/>
@@ -187,7 +188,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Title"
+                android:hint="Judul"
                 app:errorEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -223,7 +224,7 @@
                         android:paddingTop="16dp"
                         android:paddingBottom="16dp"
                         android:paddingEnd="48dp"
-                        android:text="Date"
+                        android:text="Tanggal"
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <ImageView
@@ -254,7 +255,7 @@
                         android:layout_height="wrap_content"
                         android:enabled="false"
                         android:padding="16dp"
-                        android:text="Type Currency"
+                        android:text="Tipe Mata Uang"
                         android:textColor="@color/colorGrey50" />
 
                     <ImageView
@@ -281,7 +282,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_toStartOf="@id/btn_calculator"
-                    android:hint="Amount of money"
+                    android:hint="Jumlah Uang"
                     app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -314,7 +315,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/ubuntu_b"
                     android:padding="10dp"
-                    android:text="Submit"
+                    android:text="Kirim"
                     android:textAlignment="center"
                     android:textColor="@android:color/white" />
             </androidx.cardview.widget.CardView>

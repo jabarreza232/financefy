@@ -21,7 +21,6 @@
             android:id="@+id/place_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:background="@color/white">
             <androidx.core.widget.NestedScrollView
                 android:layout_width="match_parent"
@@ -102,7 +101,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="16dp"
-                        android:text="Date"
+                        android:text="Tanggal"
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <ImageView
@@ -131,7 +130,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:padding="16dp"
-                        android:text="Type"
+                        android:text="Tipe"
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <ImageView
@@ -159,7 +158,7 @@
                         android:layout_height="wrap_content"
                         android:padding="16dp"
                         android:background="?attr/selectableItemBackground"
-                        android:text="Category"
+                        android:text="Kategori"
                         android:textColor="?android:attr/textColorPrimary" />
 
                     <ImageView
@@ -184,7 +183,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_toStartOf="@id/btn_calculator"
-                        android:hint="Amount of money"
+                        android:hint="Jumlah Uang"
                         app:errorEnabled="true">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -212,7 +211,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Note"
+                    android:hint="Catatan"
                     app:errorEnabled="true">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -239,7 +238,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/ubuntu_b"
                         android:padding="16dp"
-                        android:text="Submit"
+                        android:text="Kirim"
                         android:textAlignment="center"
                         android:textColor="@android:color/white" />
                 </androidx.cardview.widget.CardView>

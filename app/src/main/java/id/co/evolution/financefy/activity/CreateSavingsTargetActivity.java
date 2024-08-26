@@ -76,10 +76,6 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
         Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
 
         //TODO HIDE STATUS BAR
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window w = getWindow();
-            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        }
 
         cur_calendar.get(Calendar.YEAR);
         cur_calendar.get(Calendar.MONTH);
@@ -88,8 +84,8 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
         viewModelSaving = new ViewModelProvider(this).get(ViewModelSavings.class);
         viewModelSaving.init(savingsRepository);
 
-        binding.txtHeader.setText("Input Data Target Tabungan");
-        binding.txtDescription.setText("Silakan input data target tabungan Anda pada form yang tersedia.");
+        binding.txtHeader.setText("Masukkan Data Target Menabung");
+        binding.txtDescription.setText("Silakan masukkan data target menabung Anda pada form yang tersedia.");
 
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);

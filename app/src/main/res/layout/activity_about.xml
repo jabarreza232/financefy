@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/img_financefy"
         android:layout_marginStart="10dp"
-        android:text="App Version"
+        android:text="Versi Aplikasi"
         android:textColor="?android:textColorPrimary" />
 
     <TextView
@@ -42,7 +42,7 @@
         android:layout_marginStart="10dp"
         android:id="@+id/label_system_version"
         android:layout_marginTop="10dp"
-        android:text="Android Version"
+        android:text="Versi Android"
         android:textColor="?android:textColorPrimary" />
 
     <TextView
@@ -62,7 +62,7 @@
         android:layout_marginStart="10dp"
         android:id="@+id/label_device_model"
         android:layout_marginTop="10dp"
-        android:text="Device Model"
+        android:text="Model Perangkat"
         android:textColor="?android:textColorPrimary" />
 
     <TextView

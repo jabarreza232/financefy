@@ -91,7 +91,7 @@
             android:layout_height="36dp"
             android:layout_marginTop="16dp"
             android:fontFamily="@font/ubuntu_b"
-            android:text="Submit"
+            android:text="Kirim"
             android:background="@drawable/shape_input_form_calculator"
             android:layout_below="@id/place_filter"
             android:layout_alignParentEnd="true"

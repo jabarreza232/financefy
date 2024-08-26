@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:padding="10dp"
-            android:text="GROUPS"
+            android:text="GRUP"
             android:textColor="?android:textColorPrimary"
             android:textSize="15sp" />
 
@@ -127,7 +127,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:padding="10dp"
-            android:text="SECURITY"
+            android:text="KEAMANAN"
             android:textColor="?android:textColorPrimary"
             android:textSize="15sp" />
 
@@ -185,7 +185,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="30dp"
             android:padding="10dp"
-            android:text="ADVANCED"
+            android:text="LANJUTAN"
             android:textColor="?android:textColorPrimary"
             android:textSize="15sp" />
 

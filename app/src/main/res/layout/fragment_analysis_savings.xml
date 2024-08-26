@@ -108,7 +108,7 @@
                                 android:layout_height="wrap_content"
                                 android:fontFamily="@font/ubuntu_r"
                                 android:padding="16dp"
-                                android:text="Month"
+                                android:text="Bulan"
                                 android:background="?attr/selectableItemBackground"
                                 android:textAlignment="center"
                                 android:textColor="@color/white"

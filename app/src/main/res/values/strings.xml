@@ -52,10 +52,10 @@
         <item>@string/jurnal_keuangan</item>
     </array>
 
-    <string name="record">Records</string>
-    <string name="analysis">Analysis</string>
-    <string name="account">Accounts</string>
-    <string name="settings">Settings</string>
+    <string name="record">Arsip</string>
+    <string name="analysis">Analisa</string>
+    <string name="account">Akun</string>
+    <string name="settings">Pengaturan</string>
     <string name="sample_name">M Jabbar Syahrial Reza</string>
 
     <string name="pribadi">Pribadi</string>

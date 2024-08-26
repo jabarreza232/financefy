@@ -81,10 +81,6 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
         Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
 
         //TODO HIDE STATUS BAR
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window w = getWindow();
-            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        }
 
         cur_calendar.get(Calendar.YEAR);
         cur_calendar.get(Calendar.MONTH);
@@ -95,8 +91,8 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
         viewModelSavingsProgress.init(savingsProgressRepository);
         viewModelSaving.init(savingsRepository);
 
-        binding.txtHeader.setText("Update Data Tabungan");
-        binding.txtDescription.setText("Silakan update data tabungan Anda pada form progress menabung yang tersedia.");
+        binding.txtHeader.setText("Ubah Data Tabungan");
+        binding.txtDescription.setText("Silakan ubah data tabungan Anda pada form progress menabung yang tersedia.");
 
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);

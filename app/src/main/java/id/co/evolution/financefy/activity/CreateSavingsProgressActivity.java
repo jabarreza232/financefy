@@ -83,10 +83,7 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
         Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
 
         //TODO HIDE STATUS BAR
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window w = getWindow();
-            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        }
+
 
         cur_calendar.get(Calendar.YEAR);
         cur_calendar.get(Calendar.MONTH);
@@ -97,8 +94,8 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
         viewModelSavingsProgress.init(savingsProgressRepository);
         viewModelSaving.init(savingsRepository);
 
-        binding.txtHeader.setText("Input Data Progress Menabung");
-        binding.txtDescription.setText("Silakan input data tabungan Anda pada form yang tersedia.");
+        binding.txtHeader.setText("Masukkan Data Progress Menabung");
+        binding.txtDescription.setText("Silakan masukkan data tabungan Anda pada form yang tersedia.");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);

@@ -74,10 +74,6 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
         Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
         //TODO HIDE STATUS BAR
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window w = getWindow();
-            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        }
 
         cur_calendar.get(Calendar.YEAR);
         cur_calendar.get(Calendar.MONTH);
@@ -86,8 +82,8 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
 
-        binding.txtHeader.setText("Input Keuangan");
-        binding.txtDescription.setText("Silakan input data keuangan Anda pada form yang tersedia.");
+        binding.txtHeader.setText("Masukkan Data Keuangan");
+        binding.txtDescription.setText("Silakan masukkan data keuangan Anda pada form yang tersedia.");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);

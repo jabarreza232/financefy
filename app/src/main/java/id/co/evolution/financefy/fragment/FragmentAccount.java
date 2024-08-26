@@ -216,7 +216,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         ModelFinance income1 = new ModelFinance(0, getString(R.string.pemasukan), getString(R.string.gaji), 100);
         ModelFinance income2 = new ModelFinance(0, getString(R.string.pemasukan), getString(R.string.bonus), 100);
         ModelFinance income3 = new ModelFinance(0, getString(R.string.pemasukan), getString(R.string.hasil_usaha), 100);
-
+        dataIncome = new ArrayList<>();
         if(financeFilter.listIncome(data).size()>0){
             dataIncome = financeFilter.listIncome(data);
             dataIncome = financeFilter.listAnalysis(dataIncome, getString(R.string.pemasukan));
@@ -272,7 +272,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         ModelFinance expense4 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.transportasi), 100);
         ModelFinance expense5 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.tagihan), 100);
         ModelFinance expense6 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.paket_internet), 100);
-
+        dataExpense = new ArrayList<>();
         if(financeFilter.listExpense(data).size()>0){
             dataExpense = financeFilter.listExpense(data);
             dataExpense = financeFilter.listAnalysis(dataExpense, getString(R.string.pengeluaran));

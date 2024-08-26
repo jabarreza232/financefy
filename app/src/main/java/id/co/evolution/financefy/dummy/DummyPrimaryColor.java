@@ -12,7 +12,8 @@ public class DummyPrimaryColor {
         Purple,
         Orange,
         Green,
-        Brown
+        Brown,
+        Red
     }
 
 
@@ -22,6 +23,7 @@ public class DummyPrimaryColor {
         data.add(new ModelPrimaryColor("Orange",R.color.colorPrimaryOrange,R.color.colorPrimaryDarkOrange));
         data.add(new ModelPrimaryColor("Green",R.color.colorPrimaryGreen,R.color.colorPrimaryDarkGreen));
         data.add(new ModelPrimaryColor("Brown",R.color.colorPrimaryBrown,R.color.colorPrimaryDarkBrown));
+        data.add(new ModelPrimaryColor("Red",R.color.colorPrimaryRed,R.color.colorPrimaryDarkRed));
         return data;
     }
 }

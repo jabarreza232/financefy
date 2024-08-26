@@ -125,8 +125,8 @@ class DialogCreateUser(
 
     fun showDialogCreateUser(isAddAccount: Boolean,modelPrimaryColor:ModelPrimaryColor) {
         this.isAddAccount = isAddAccount
-        val textHeader = if (isAddAccount) "Input User" else "Update User"
-        val textHeaderSavings = if (isAddAccount||countSavings==0) "Input Target Savings" else "Update Target Savings"
+        val textHeader = if (isAddAccount) "Masukkan form User" else "Ubah form User"
+        val textHeaderSavings = if (isAddAccount||countSavings==0) "Masukkan Form Target Menabung" else "Ubah Form Target Menabung"
         txtHeader.text = textHeader
 
         txtHeaderTargetSavings.text = textHeaderSavings

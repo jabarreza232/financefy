@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setUpFragment() {
-        getSupportActionBar().setTitle("Records");
+        getSupportActionBar().setTitle(getString(R.string.record));
         changeFragment(new FragmentAll());
         binding.layout.bnMain.setOnItemSelectedListener(item -> {
             Fragment fragment = null;
@@ -257,26 +257,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             isUserDailyFinance = user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan));
 
             switch (item.getTitle().toString().toLowerCase()) {
-                case "records":
+                case "arsip":
                     fragment = new FragmentAll();
                     changeFragment(fragment);
                     binding.layout.fabAdd.show();
-                    getSupportActionBar().setTitle("Records");
+                    getSupportActionBar().setTitle(getString(R.string.record));
                     break;
-                case "analysis":
+                case "analisa":
                     if (isUserDailyFinance)
                         fragment = new FragmentAnalysis();
                     else fragment = new FragmentAnalysisSavings();
-                    getSupportActionBar().setTitle("Analysis");
+                    getSupportActionBar().setTitle(getString(R.string.analysis));
                     changeFragment(fragment);
                     break;
-                case "accounts":
-                    getSupportActionBar().setTitle("Accounts");
+                case "akun":
+                    getSupportActionBar().setTitle(getString(R.string.account));
                     fragment = new FragmentAccount();
                     changeFragment(fragment);
                     break;
-                case "settings":
-                    getSupportActionBar().setTitle("Settings");
+                case "pengaturan":
+                    getSupportActionBar().setTitle(getString(R.string.settings));
                     fragment = new FragmentSettings();
                     changeFragment(fragment);
                     break;

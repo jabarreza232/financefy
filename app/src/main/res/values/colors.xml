@@ -12,6 +12,9 @@
     <!--Color Brown-->
     <color name="colorPrimaryBrown">#795548</color>
     <color name="colorPrimaryDarkBrown">#5D4037</color>
+    <!--Color Red Grape-->
+    <color name="colorPrimaryRed">#C80101</color>
+    <color name="colorPrimaryDarkRed">#800000</color>
 
 
     <color name="colorAccent">#0960CA</color>

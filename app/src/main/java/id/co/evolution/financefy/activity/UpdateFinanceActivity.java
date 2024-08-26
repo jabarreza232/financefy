@@ -83,17 +83,14 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
-        binding.txtHeader.setText("Update Keuangan");
-        binding.txtDescription.setText("Silakan update data keuangan Anda pada form yang tersedia.");
+        binding.txtHeader.setText("Ubah Data Keuangan");
+        binding.txtDescription.setText("Silakan ubah data keuangan Anda pada form yang tersedia.");
 
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
         Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
 
         //TODO HIDE STATUS BAR
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window w = getWindow();
-            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        }
+
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);

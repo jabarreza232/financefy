@@ -76,14 +76,10 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
         Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
 
-        binding.txtHeader.setText("Update Data Target Tabungan");
-        binding.txtDescription.setText("Silakan update data target tabungan Anda pada form yang tersedia.");
+        binding.txtHeader.setText("Ubah Data Target Menabung");
+        binding.txtDescription.setText("Silakan ubah data target menabung Anda pada form yang tersedia.");
 
         //TODO HIDE STATUS BAR
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window w = getWindow();
-            w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        }
 
         cur_calendar.get(Calendar.YEAR);
         cur_calendar.get(Calendar.MONTH);

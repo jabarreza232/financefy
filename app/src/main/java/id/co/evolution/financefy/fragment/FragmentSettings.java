@@ -90,6 +90,8 @@ public class FragmentSettings extends Fragment {
     public ModelUser user;
     private InterstitialAd mInterstitialAd;
     private static final String TAG = "FragmentSettings";
+    private Locale locale;
+
     public FragmentSettings() {
         // Required empty public constructor
     }
@@ -110,6 +112,8 @@ public class FragmentSettings extends Fragment {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_settings, container, false);
         user = tinyDb.getObject("user", ModelUser.class);
+        locale =user.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+
         binding.cvSwitchTheme.setOnClickListener(v -> {
             if (mInterstitialAd != null) {
                 mInterstitialAd.show(getActivity());
@@ -152,6 +156,7 @@ public class FragmentSettings extends Fragment {
                 });
             } else {
                 Log.d("TAG", "The interstitial ad wasn't ready yet.");
+                adRequest();
             }
 
         });
@@ -225,31 +230,34 @@ public class FragmentSettings extends Fragment {
 
             }
         });
-        AdRequest adRequest = new AdRequest.Builder().build();
-
-        InterstitialAd.load(getContext(),"ca-app-pub-5068422046187558/6331529776", adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
-                        // The mInterstitialAd reference will be null until
-                        // an ad is loaded.
-                        mInterstitialAd = interstitialAd;
-                        Log.i(TAG, "onAdLoaded");
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        // Handle the error
-                        Log.d(TAG, loadAdError.toString());
-                        mInterstitialAd = null;
-                    }
-                });
 
 
 //        changeColorThemeSettings(mainActivity.modelPrimaryColor);
         return binding.getRoot();
     }
+private void adRequest(){
+    AdRequest adRequest = new AdRequest.Builder().build();
+    //official ad unit id = ca-app-pub-5068422046187558/6331529776
+    //example ad unit id = ca-app-pub-3940256099942544/1033173712
+    InterstitialAd.load(getContext(),"ca-app-pub-3940256099942544/1033173712", adRequest,
+            new InterstitialAdLoadCallback() {
+                @Override
+                public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                    // The mInterstitialAd reference will be null until
+                    // an ad is loaded.
+                    mInterstitialAd = interstitialAd;
+                    Log.i(TAG, "onAdLoaded");
+                }
 
+                @Override
+                public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                    // Handle the error
+                    Log.d(TAG, loadAdError.toString());
+                    mInterstitialAd = null;
+                }
+            });
+
+}
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -389,11 +397,8 @@ public class FragmentSettings extends Fragment {
             });
         } else {
             Log.d("TAG", "The interstitial ad wasn't ready yet.");
+            adRequest();
         }
-
-
-
-
     }
     public static <T> boolean isOfType(Object input) {
         return input != null; // won't compile
@@ -430,8 +435,8 @@ public class FragmentSettings extends Fragment {
             for (ModelFinance modelFinance : dataFinance) {
                 Row dataRow = sheet.createRow(rowNum++);
                 dataRow.createCell(0).setCellValue(modelFinance.getId());
-                dataRow.createCell(1).setCellValue(modelFinance.getJumlahDesc(Locale.getDefault()));
-                sheet.setColumnWidth(1, (modelFinance.getJumlahDesc(Locale.getDefault()).length() * 400));
+                dataRow.createCell(1).setCellValue(modelFinance.getJumlahDesc(locale));
+                sheet.setColumnWidth(1, (modelFinance.getJumlahDesc(locale).length() * 400));
                 dataRow.createCell(2).setCellValue(modelFinance.getKategori());
                 sheet.setColumnWidth(2, (modelFinance.getKategori().length() * 400));
                 dataRow.createCell(3).setCellValue(modelFinance.getKeterangan());
@@ -455,8 +460,8 @@ public class FragmentSettings extends Fragment {
             sheet.setColumnWidth(0, (mainActivity.modelSavings.getTitle().length() * 400));
 
             Row headerSavingsTargetRow = sheet.createRow(3);
-            headerSavingsTargetRow.createCell(0).setCellValue("Target: " + Tools.convertToCurrency(mainActivity.modelSavings.getTargetValue(),Locale.getDefault()));
-            sheet.setColumnWidth(0, (Tools.convertToCurrency(mainActivity.modelSavings.getTargetValue(),Locale.getDefault()).length() * 400));
+            headerSavingsTargetRow.createCell(0).setCellValue("Target: " + Tools.convertToCurrency(mainActivity.modelSavings.getTargetValue(),locale));
+            sheet.setColumnWidth(0, (Tools.convertToCurrency(mainActivity.modelSavings.getTargetValue(),locale).length() * 400));
 
             List<ModelSavingsProgress> dataSavings  = new ArrayList<>();
             for (Object object:data){
@@ -478,8 +483,8 @@ public class FragmentSettings extends Fragment {
                 sheet.setColumnWidth(1, (modelSavingsProgress.getTitle().length() * 400));
                 dataRow.createCell(2).setCellValue(modelSavingsProgress.getDescription());
                 sheet.setColumnWidth(2, (modelSavingsProgress.getDescription().length() * 400));
-                dataRow.createCell(3).setCellValue(Tools.convertToCurrency(modelSavingsProgress.getProcessValue(),Locale.getDefault()));
-                sheet.setColumnWidth(3, (Tools.convertToCurrency(modelSavingsProgress.getProcessValue(),Locale.getDefault()).length() * 400));
+                dataRow.createCell(3).setCellValue(Tools.convertToCurrency(modelSavingsProgress.getProcessValue(),locale));
+                sheet.setColumnWidth(3, (Tools.convertToCurrency(modelSavingsProgress.getProcessValue(),locale).length() * 400));
 
                 dataRow.createCell(4).setCellValue(modelSavingsProgress.getDate_progress_savings());
                 sheet.setColumnWidth(4, (modelSavingsProgress.getDate_progress_savings().length() * 400));
