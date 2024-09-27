@@ -36,7 +36,8 @@ android {
     kotlinOptions {
         jvmTarget = '11'
     }
-defaultConfig{
+    namespace 'id.co.evolution.financefy'
+    defaultConfig{
     buildConfigField 'String', 'VERSION_NAME', "\"${rootProject.appVersionName}\""
 }
 }
