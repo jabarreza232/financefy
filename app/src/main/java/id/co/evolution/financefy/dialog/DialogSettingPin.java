@@ -115,7 +115,10 @@ public class DialogSettingPin {
                 clearCalculate();
             }
         });
-
+        binding.btnDelete.setOnLongClickListener(v->{
+            clearCalculate();
+            return false;
+        });
         binding.etAmount.setEnabled(false);
         binding.etAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
 

@@ -112,7 +112,7 @@ public class SwitchThemeActivity extends AppCompatActivity {
         int selectedId = binding.rgTheme.getCheckedRadioButtonId();
         RadioButton selectedRadioButton = (RadioButton) findViewById(selectedId);
 
-        if(TextUtils.equals(selectedRadioButton.getText().toString(),"Dark")){
+        if(TextUtils.equals(selectedRadioButton.getText().toString(),"Dark")||TextUtils.equals(selectedRadioButton.getText().toString(),"Gelap")){
             tinyDb.putString("night_mode", "mode_night_yes");
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         }else{

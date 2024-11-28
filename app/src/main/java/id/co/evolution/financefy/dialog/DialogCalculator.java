@@ -252,6 +252,10 @@ public class DialogCalculator {
                 clearCalculate();
             }
         });
+        binding.btnDelete.setOnLongClickListener(v->{
+            clearCalculate();
+            return false;
+        });
 
         binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
