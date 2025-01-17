@@ -245,7 +245,7 @@ binding.btnToggle.setOnClickListener(v->{
                 @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
 
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), colorSurface)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
@@ -272,7 +272,7 @@ binding.btnToggle.setOnClickListener(v->{
                 @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
 
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), colorSurface)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
@@ -581,7 +581,7 @@ binding.btnToggle.setOnClickListener(v->{
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), colorSurface)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             }
@@ -599,7 +599,7 @@ binding.btnToggle.setOnClickListener(v->{
             @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
 
             if (date_ship_millis < today.getTimeInMillis())
-                binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), colorSurface)));
+                binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
             else
                 binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             binding.btnNext.setEnabled(date_ship_millis < today.getTimeInMillis());
@@ -609,14 +609,14 @@ binding.btnToggle.setOnClickListener(v->{
         }
     }
 
-    @SuppressLint("NewApi")
+    @SuppressLint({"NewApi", "ResourceType"})
     private void loadDataByMonth(long date_ship_milis) {
         binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
         month = Tools.getFormattedMonthSimple(date_ship_milis);
         @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
 
         if (date_ship_milis != today.getTimeInMillis()) {
-            binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), colorSurface)));
+            binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
             binding.btnNext.setEnabled(true);
         }
         if (date_ship_milis >= today.getTimeInMillis()) {

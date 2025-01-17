@@ -159,13 +159,15 @@ public class FragmentAnalysis extends Fragment {
         super.onAttach(context);
         mainActivity = ((MainActivity) context);
     }
-
+    int colorSurface;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_analysis, container, false);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
+        colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
+
         user = mainActivity.user;
         Tools.setBackgroundColorView(binding.llAppBar,mainActivity.modelPrimaryColor);
         getActivity().getTheme().resolveAttribute(android.R.attr.textColorPrimary, value, true);
@@ -220,8 +222,9 @@ public class FragmentAnalysis extends Fragment {
                 prevNextWeek = prevNextWeek - 7;
 
                 nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
+
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getActivity().getApplicationContext(), R.color.colorGrey50)));
 
@@ -250,7 +253,7 @@ public class FragmentAnalysis extends Fragment {
                 nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
                 binding.btnNext.setEnabled(nextWeekEnabled);
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
@@ -412,7 +415,7 @@ public class FragmentAnalysis extends Fragment {
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             }
@@ -428,7 +431,7 @@ public class FragmentAnalysis extends Fragment {
 
             //TODO jika range tanggal per minggu nya kurang dari tanggal hari maka bisa melakukan tombol next tanggal per minggunya
             if (date_ship_millis < today.getTimeInMillis())
-                binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
             else
                 binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             binding.btnNext.setEnabled(date_ship_millis < today.getTimeInMillis());
@@ -448,7 +451,7 @@ public class FragmentAnalysis extends Fragment {
         month = Tools.getFormattedMonthSimple(date_ship_milis);
 
         if (date_ship_milis != today.getTimeInMillis()) {
-            binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+            binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
             binding.btnNext.setEnabled(true);
         }
         if (date_ship_milis >= today.getTimeInMillis()) {
@@ -492,10 +495,10 @@ public class FragmentAnalysis extends Fragment {
 
     private void loadDataHeader(List<ModelFinance> data) {
         long total = (financeFilter.totalIncome(data) - financeFilter.totalExpense(data));
-        binding.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data),locale));
-        binding.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data),locale));
-        binding.txtTotalAll.setText(convertToCurrency(total,locale));
-        binding.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.green));
+        binding.layoutFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data),locale));
+        binding.layoutFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data),locale));
+        binding.layoutFinanceJournal.txtTotalAll.setText(convertToCurrency(total,locale));
+//        binding.layoutFinanceJournal.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.green));
     }
 
 

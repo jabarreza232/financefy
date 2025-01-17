@@ -35,15 +35,69 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_margin="16dp"
+                        app:cardBackgroundColor="?attr/colorSurface"
                         app:cardCornerRadius="6dp"
-                        app:cardElevation="5dp"
-                        app:cardBackgroundColor="?attr/colorSurface">
+                        app:cardElevation="5dp">
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content">
+                            <RelativeLayout
+                                android:id="@+id/place_date_month"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
 
+                                <ImageButton
+                                    android:id="@+id/btn_prev"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="10dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:padding="9dp"
+                                    android:layout_marginTop="6dp"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_left_24"
+                                    app:tint="?attr/colorOnSurface" />
+
+                                <RelativeLayout
+                                    android:id="@+id/place_month"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="10dp"
+                                    android:layout_marginRight="10dp"
+                                    android:layout_marginBottom="10dp"
+                                    android:layout_toStartOf="@id/btn_next"
+                                    android:layout_toEndOf="@id/btn_prev">
+
+                                    <TextView
+                                        android:id="@+id/txt_month"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:background="?attr/selectableItemBackground"
+                                        android:fontFamily="@font/ubuntu_r"
+                                        android:padding="16dp"
+                                        android:text="Month"
+                                        android:textAlignment="center"
+                                        android:textColor="?android:attr/textColorPrimary"
+                                        android:textSize="17sp" />
+
+
+                                </RelativeLayout>
+
+                                <ImageButton
+                                    android:id="@+id/btn_next"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_marginEnd="10dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:padding="9dp"
+                                    android:layout_marginTop="6dp"
+                                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                    app:tint="?attr/colorOnSurface" />
+
+                            </RelativeLayout>
                             <TextView
+                                android:layout_below="@id/place_date_month"
                                 android:id="@+id/txt_name"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -53,7 +107,7 @@
                                 android:fontFamily="@font/ubuntu_b"
                                 android:text="Good morning, Jackson!"
                                 android:textColor="?android:attr/textColorPrimary"
-                                android:textSize="15sp" />
+                                android:textSize="20sp" />
 
                             <TextView
                                 android:id="@+id/txt_type_account"
@@ -66,161 +120,16 @@
                                 android:fontFamily="@font/ubuntu_r"
                                 android:text="Bisnis"
                                 android:textColor="@color/blueColorLight"
-                                android:textSize="13sp" />
+                                android:textSize="18sp" />
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_below="@id/txt_type_account"
-                                android:layout_marginStart="10dp"
-                                android:layout_marginEnd="10dp"
-                                android:layout_marginBottom="10dp"
-                                android:orientation="horizontal"
-                                android:weightSum="3">
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginBottom="5dp"
-                                        android:fontFamily="@font/ubuntu_b"
-                                        android:text="PEMASUKAN"
-                                        android:textAlignment="center"
-                                        android:textColor="?android:attr/textColorPrimary"
-                                        android:textSize="13sp" />
-
-                                    <TextView
-                                        android:id="@+id/txt_total_income"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="@font/ubuntu_r"
-                                        android:text="Rp.0"
-                                        android:textAlignment="center"
-                                        android:textColor="@color/green"
-                                        android:textSize="13sp" />
-
-                                </LinearLayout>
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginBottom="5dp"
-                                        android:fontFamily="@font/ubuntu_b"
-                                        android:text="PENGELUARAN"
-                                        android:textAlignment="center"
-                                        android:textColor="?android:attr/textColorPrimary"
-                                        android:textSize="13sp" />
-
-                                    <TextView
-                                        android:id="@+id/txt_total_expense"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="@font/ubuntu_r"
-                                        android:text="Rp.0"
-                                        android:textAlignment="center"
-                                        android:textColor="@color/red"
-                                        android:textSize="13sp" />
-
-                                </LinearLayout>
+                            <include
+                                android:id="@+id/layout_finance_journal"
+                                layout="@layout/layout_finance_journal" />
 
 
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginBottom="5dp"
-                                        android:fontFamily="@font/ubuntu_b"
-                                        android:text="TOTAL"
-                                        android:textAlignment="center"
-                                        android:textColor="?android:attr/textColorPrimary"
-                                        android:textSize="13sp" />
-
-                                    <TextView
-                                        android:id="@+id/txt_total_all"
-                                        android:layout_width="match_parent"
-                                        android:layout_height="wrap_content"
-                                        android:fontFamily="@font/ubuntu_r"
-                                        android:text="Rp.0"
-                                        android:textAlignment="center"
-                                        android:textColor="@color/green"
-                                        android:textSize="13sp" />
-
-                                </LinearLayout>
-
-                            </LinearLayout>
 
                         </RelativeLayout>
                     </androidx.cardview.widget.CardView>
-
-                    <RelativeLayout
-                        android:id="@+id/place_date_month"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <ImageButton
-                            android:id="@+id/btn_prev"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:padding="9dp"
-                            android:layout_marginTop="6dp"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_left_24"
-                            app:tint="@color/white" />
-
-                        <RelativeLayout
-                            android:id="@+id/place_month"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginRight="10dp"
-                            android:layout_marginBottom="10dp"
-                            android:layout_toStartOf="@id/btn_next"
-                            android:layout_toEndOf="@id/btn_prev">
-
-                            <TextView
-                                android:id="@+id/txt_month"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="@font/ubuntu_r"
-                                android:padding="16dp"
-                                android:text="Bulan"
-                                android:background="?attr/selectableItemBackground"
-                                android:textAlignment="center"
-                                android:textColor="@color/white"
-                                android:textSize="17sp" />
-
-
-                        </RelativeLayout>
-
-                        <ImageButton
-                            android:id="@+id/btn_next"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_marginEnd="10dp"
-                            android:background="?attr/selectableItemBackgroundBorderless"
-                            android:padding="9dp"
-                            android:layout_marginTop="6dp"
-                            android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                            app:tint="@color/white" />
-                    </RelativeLayout>
 
                     <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/btn_toggle"

@@ -150,6 +150,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
     MainActivity mainActivity;
     @Inject
     TinyDb tinyDb;
+    int colorSurface;
 
     @Override
     public void result(ActivityResult result, Intent intent) {
@@ -212,6 +213,8 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_analysis_savings, container, false);
         Tools.setBackgroundColorView(binding.llAppBar,mainActivity.modelPrimaryColor);
         dataFinance = ((MainActivity) requireActivity()).dataFinance;
+        colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
+
         user = mainActivity.user;
         modelSavings = mainActivity.modelSavings;
         typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
@@ -312,7 +315,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
 
                 nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
@@ -339,7 +342,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
                 nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
                 binding.btnNext.setEnabled(nextWeekEnabled);
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
@@ -467,7 +470,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             }
@@ -483,7 +486,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
 
             //TODO jika range tanggal per minggu nya kurang dari tanggal hari maka bisa melakukan tombol next tanggal per minggunya
             if (date_ship_millis < today.getTimeInMillis())
-                binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
             else
                 binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             binding.btnNext.setEnabled(date_ship_millis < today.getTimeInMillis());
@@ -503,7 +506,7 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         month = Tools.getFormattedMonthSimple(date_ship_milis);
 
         if (date_ship_milis != today.getTimeInMillis()) {
-            binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+            binding.btnNext.setImageTintList(ColorStateList.valueOf(colorSurface));
             binding.btnNext.setEnabled(true);
         }
         if (date_ship_milis >= today.getTimeInMillis()) {
@@ -839,19 +842,19 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             xAxis.setLabelCount(listDate.size());
             xAxis.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
 
-            xAxis.setValueFormatter(new ValueFormatter() {
-                @Override
-                public String getFormattedValue(float value) {
-                    Log.e("cek_value", value + "");
-                    String date = "";
-                    if (value > -1 && value < listDate.size()) {
-                        date = listDate.get((int) value);
-                    }
-
+//            xAxis.setValueFormatter(new ValueFormatter() {
+//                @Override
+//                public String getFormattedValue(float value) {
+//                    Log.e("cek_value", value + "");
+//                    String date = "";
+//                    if (value > -1 && value < listDate.size()) {
+//                        date = listDate.get((int) value);
+//                    }
 //
-                    return "";
-                }
-            });
+////
+//                    return "";
+//                }
+//            });
 //        binding.barChartAnalysis.setDrawValueAboveBar(false);
             binding.barChartAnalysis.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
                 @Override
