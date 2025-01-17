@@ -192,7 +192,7 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     }
 
 
-    @SuppressLint("NewApi")
+    @SuppressLint({"NewApi", "ResourceType"})
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -242,8 +242,10 @@ binding.btnToggle.setOnClickListener(v->{
                     jika sudah sampai minggu saat ini di bulan saat ini  maka tombol next tidak berfungsi
                  */
                 nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
+                @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
+
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), colorSurface)));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
@@ -267,9 +269,10 @@ binding.btnToggle.setOnClickListener(v->{
 
                 nextWeekEnabled = localizedWeekHelper.getMonthLastWeekDay(prevNextWeek) <= today.getTimeInMillis();
                 binding.btnNext.setEnabled(nextWeekEnabled);
+                @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
 
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), colorSurface)));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
@@ -562,7 +565,7 @@ binding.btnToggle.setOnClickListener(v->{
         dialog.showDialogFilterSavings(financeFilter.filterNominal, financeFilter.filterPeriod, false);
     }
 
-    @SuppressLint({"NewApi", "SetTextI18n"})
+    @SuppressLint({"NewApi", "SetTextI18n", "ResourceType"})
     private void loadFilterByType() {
         prevNextWeek = 0;
 
@@ -574,9 +577,11 @@ binding.btnToggle.setOnClickListener(v->{
 //                if (modelFinances != null) loadDataFinance(modelFinances);
 //            });
         } else {
+            @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 if (nextWeekEnabled)
-                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                    binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), colorSurface)));
                 else
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             }
@@ -591,8 +596,10 @@ binding.btnToggle.setOnClickListener(v->{
         if (filterPeriod.equalsIgnoreCase(getString(R.string.bulanan))) {
             binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_millis));
             binding.placeMonth.setEnabled(true);
+            @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
+
             if (date_ship_millis < today.getTimeInMillis())
-                binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+                binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), colorSurface)));
             else
                 binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
             binding.btnNext.setEnabled(date_ship_millis < today.getTimeInMillis());
@@ -606,9 +613,10 @@ binding.btnToggle.setOnClickListener(v->{
     private void loadDataByMonth(long date_ship_milis) {
         binding.txtMonth.setText(Tools.getFormattedMonthTextSimple(date_ship_milis));
         month = Tools.getFormattedMonthSimple(date_ship_milis);
+        @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorOnSurface);
 
         if (date_ship_milis != today.getTimeInMillis()) {
-            binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.white)));
+            binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), colorSurface)));
             binding.btnNext.setEnabled(true);
         }
         if (date_ship_milis >= today.getTimeInMillis()) {
@@ -716,7 +724,7 @@ binding.btnToggle.setOnClickListener(v->{
         binding.layoutFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data),locale));
         binding.layoutFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data),locale));
         binding.layoutFinanceJournal.txtTotalAll.setText(convertToCurrency(total,locale));
-        binding.layoutFinanceJournal.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.green));
+        binding.layoutFinanceJournal.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.white));
     }
 
     @SuppressLint("SetTextI18n")

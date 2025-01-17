@@ -37,8 +37,62 @@
                     <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
+                        <RelativeLayout
+                            android:id="@+id/place_date_month"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
 
+                            <ImageButton
+                                android:id="@+id/btn_prev"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="10dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:padding="9dp"
+                                android:layout_marginTop="6dp"
+                                android:src="@drawable/ic_baseline_keyboard_arrow_left_24"
+                                app:tint="?attr/colorOnSurface" />
+
+                            <RelativeLayout
+                                android:id="@+id/place_month"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:layout_marginRight="10dp"
+                                android:layout_marginBottom="10dp"
+                                android:layout_toStartOf="@id/btn_next"
+                                android:layout_toEndOf="@id/btn_prev">
+
+                                <TextView
+                                    android:id="@+id/txt_month"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="?attr/selectableItemBackground"
+                                    android:fontFamily="@font/ubuntu_r"
+                                    android:padding="16dp"
+                                    android:text="Month"
+                                    android:textAlignment="center"
+                                    android:textColor="?android:attr/textColorPrimary"
+                                    android:textSize="17sp" />
+
+
+                            </RelativeLayout>
+
+                            <ImageButton
+                                android:id="@+id/btn_next"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_marginEnd="10dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:padding="9dp"
+                                android:layout_marginTop="6dp"
+                                android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                                app:tint="?attr/colorOnSurface" />
+
+                        </RelativeLayout>
                         <TextView
+                            android:layout_below="@id/place_date_month"
                             android:id="@+id/txt_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -48,7 +102,7 @@
                             android:fontFamily="@font/ubuntu_b"
                             android:text="Good morning, Jackson!"
                             android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="15sp" />
+                            android:textSize="20sp" />
 
                         <TextView
                             android:id="@+id/txt_type_account"
@@ -61,7 +115,7 @@
                             android:fontFamily="@font/ubuntu_r"
                             android:text="Bisnis"
                             android:textColor="@color/blueColorLight"
-                            android:textSize="13sp" />
+                            android:textSize="18sp" />
 
                         <include
                             android:id="@+id/layout_finance_journal"
@@ -74,60 +128,7 @@
                     </RelativeLayout>
                 </androidx.cardview.widget.CardView>
 
-                <RelativeLayout
-                    android:id="@+id/place_date_month"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
 
-                    <ImageButton
-                        android:id="@+id/btn_prev"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:padding="9dp"
-                        android:layout_marginTop="6dp"
-                        android:src="@drawable/ic_baseline_keyboard_arrow_left_24"
-                        app:tint="@color/white" />
-
-                    <RelativeLayout
-                        android:id="@+id/place_month"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:layout_toStartOf="@id/btn_next"
-                        android:layout_toEndOf="@id/btn_prev">
-
-                        <TextView
-                            android:id="@+id/txt_month"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="?attr/selectableItemBackground"
-                            android:fontFamily="@font/ubuntu_r"
-                            android:padding="16dp"
-                            android:text="Month"
-                            android:textAlignment="center"
-                            android:textColor="@color/white"
-                            android:textSize="17sp" />
-
-
-                    </RelativeLayout>
-
-                    <ImageButton
-                        android:id="@+id/btn_next"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_marginEnd="10dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:padding="9dp"
-                        android:layout_marginTop="6dp"
-                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                        app:tint="@color/white" />
-
-                </RelativeLayout>
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/btn_toggle"
