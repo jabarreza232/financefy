@@ -50,7 +50,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.activity.UpdateSavingsActivity;
-import id.co.evolution.financefy.adapter.AdapterAnalysisFinance;
+import id.co.evolution.financefy.adapter.AdapterAnalysisFinanceAccount;
 import id.co.evolution.financefy.adapter.AdapterAnalysisSavings;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAccountBinding;
@@ -117,7 +117,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     CallbackOnActivityResult mCallbackOnActivityResult;
     Locale locale;
     HelperNotification helperNotification;
-    AdapterAnalysisFinance adapterIncome,adapterExpense;
+    AdapterAnalysisFinanceAccount adapterIncome,adapterExpense;
 
     //TODO NOTE SAVINGS : Menabung, FINANCE : JURNAL KEUANGAN
 
@@ -235,9 +235,9 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             dataIncome.add(income2);
             dataIncome.add(income3);
         }
-        adapterIncome = new AdapterAnalysisFinance(getActivity(), dataIncome);
+        adapterIncome = new AdapterAnalysisFinanceAccount(getActivity(), dataIncome);
         adapterIncome.setLocale(locale);
-        adapterIncome.setLayoutAnalysis(AdapterAnalysisFinance.LAYOUT_ANALYSIS.FROM_ACCOUNT);
+        adapterIncome.setLayoutAnalysis(AdapterAnalysisFinanceAccount.LAYOUT_ANALYSIS.FROM_ACCOUNT);
         binding.layoutAccountFinanceJournal.rvIncome.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.layoutAccountFinanceJournal.rvIncome.setAdapter(adapterIncome);
         binding.layoutAccountFinanceJournal.rvIncome.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -303,9 +303,9 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             dataExpense.add(expense6);
         }
 
-        adapterExpense = new AdapterAnalysisFinance(getActivity(), dataExpense);
+        adapterExpense = new AdapterAnalysisFinanceAccount(getActivity(), dataExpense);
         adapterExpense.setLocale(locale);
-        adapterExpense.setLayoutAnalysis(AdapterAnalysisFinance.LAYOUT_ANALYSIS.FROM_ACCOUNT);
+        adapterExpense.setLayoutAnalysis(AdapterAnalysisFinanceAccount.LAYOUT_ANALYSIS.FROM_ACCOUNT);
         binding.layoutAccountFinanceJournal.rvExpense.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.layoutAccountFinanceJournal.rvExpense.setAdapter(adapterExpense);
         binding.layoutAccountFinanceJournal.rvExpense.addOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -605,16 +605,19 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
 
             switch (menuItem.getItemId()) {
                 case R.id.all:
-                    binding.layoutAccountFinanceJournal.cardExpense.setVisibility(View.VISIBLE);
-                    binding.layoutAccountFinanceJournal.cardIncome.setVisibility(View.VISIBLE);
+                    binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pengeluaran dan pemasukan");
+                    binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.VISIBLE);
+                    binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.VISIBLE);
                     break;
                 case R.id.expense:
-                    binding.layoutAccountFinanceJournal.cardExpense.setVisibility(View.VISIBLE);
-                    binding.layoutAccountFinanceJournal.cardIncome.setVisibility(View.GONE);
+                    binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pengeluaran");
+                    binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.VISIBLE);
+                    binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.GONE);
                     break;
                 case R.id.income:
-                    binding.layoutAccountFinanceJournal.cardExpense.setVisibility(View.GONE);
-                    binding.layoutAccountFinanceJournal.cardIncome.setVisibility(View.VISIBLE);
+                    binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pemasukan");
+                    binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.GONE);
+                    binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.VISIBLE);
                     break;
             }
             return true;
