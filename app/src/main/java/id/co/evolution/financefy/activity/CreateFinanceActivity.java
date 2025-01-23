@@ -64,8 +64,9 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
-
+        if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+            modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+        }
 
         Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
 

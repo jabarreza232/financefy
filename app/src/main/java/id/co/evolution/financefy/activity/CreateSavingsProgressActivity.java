@@ -47,7 +47,7 @@ import id.co.evolution.financefy.viewmodel.ViewModelSavings;
 import id.co.evolution.financefy.viewmodel.ViewModelSavingsProgress;
 
 @AndroidEntryPoint
-public class CreateSavingsProgressActivity extends AppCompatActivity implements View.OnClickListener {
+public class CreateSavingsProgressActivity extends BaseFinanceActivity implements View.OnClickListener {
     String date = "";
     private String jumlah = "";
     String month = "";
@@ -60,7 +60,6 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
 
     @Inject
     TinyDb tinyDb;
-    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
 
 
     @Inject
@@ -145,7 +144,9 @@ public class CreateSavingsProgressActivity extends AppCompatActivity implements 
     }
 
 
-    private void showDatePickerDialog() {
+    public void showDatePickerDialog() {
+        if(modelPrimaryColor==null) modelPrimaryColor= Tools.modelPrimaryColor;
+
         DatePickerDialog datePickerDialog = DatePickerDialog.newInstance((view, year, monthOfYear, dayOfMonth) -> {
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.YEAR, year);

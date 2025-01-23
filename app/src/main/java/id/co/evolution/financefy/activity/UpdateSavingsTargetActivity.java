@@ -149,6 +149,8 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
         binding.etAmount.setText(jumlah);
     }
     private void showDatePickerDialog() {
+        if(modelPrimaryColor==null) modelPrimaryColor= Tools.modelPrimaryColor;
+
         DatePickerDialog datePickerDialog = DatePickerDialog.newInstance((view, year, monthOfYear, dayOfMonth) -> {
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.YEAR, year);

@@ -162,6 +162,8 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
     }
 
     private void showDatePickerDialog() {
+        if(modelPrimaryColor==null) modelPrimaryColor= Tools.modelPrimaryColor;
+
         DatePickerDialog datePickerDialog = DatePickerDialog.newInstance((view, year, monthOfYear, dayOfMonth) -> {
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.YEAR, year);

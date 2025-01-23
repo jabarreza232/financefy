@@ -47,6 +47,7 @@ public class SavingsFilter {
 
         return list;
     }
+
     public List<ModelSavingsProgress> filterPeriodSavingProgress(@NonNull String filterPeriod, List<ModelSavingsProgress> list) {
         if (filterPeriod.equalsIgnoreCase("terlama")) {
             Collections.sort(list, ModelSavingsProgress.shortedPeriodLongestToLatest);
@@ -110,7 +111,7 @@ public class SavingsFilter {
     public long totalValueByType(List<ModelSavingsProgress> data) {
         long value = 0;
         for (ModelSavingsProgress modelFinance : data)
-                value += (long) modelFinance.getProcessValue();
+            value += (long) modelFinance.getProcessValue();
 
         return value;
     }
