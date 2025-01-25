@@ -239,7 +239,7 @@ private void adRequest(){
     AdRequest adRequest = new AdRequest.Builder().build();
     //official ad unit id = ca-app-pub-5068422046187558/6331529776
     //example ad unit id = ca-app-pub-3940256099942544/1033173712
-    InterstitialAd.load(getContext(),"ca-app-pub-3940256099942544/1033173712", adRequest,
+    InterstitialAd.load(getContext(),"ca-app-pub-5068422046187558/6331529776", adRequest,
             new InterstitialAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
