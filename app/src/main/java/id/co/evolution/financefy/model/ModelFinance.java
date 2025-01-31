@@ -22,6 +22,8 @@ public class ModelFinance implements Serializable {
     String kategori;
     @ColumnInfo(name = "description")
     String keterangan;
+    @ColumnInfo(name = "photo")
+    String photo;
     @ColumnInfo(name = "date")
     String date;
     @ColumnInfo(name = "type")
@@ -146,6 +148,13 @@ public class ModelFinance implements Serializable {
         this.totalValue = totalValue;
     }
 
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
+    }
 
     public static Comparator<ModelFinance> shortedNominalMinToMax = (jc1, jc2) -> {
         double min = jc1.getJumlah();

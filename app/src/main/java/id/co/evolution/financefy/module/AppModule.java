@@ -17,6 +17,7 @@ import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.db.SavingsDao;
 import id.co.evolution.financefy.db.SavingsProgressDao;
 import id.co.evolution.financefy.db.UserDao;
+import id.co.evolution.financefy.dialog.DialogLoading;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.LocalizedWeekHelper;
 import id.co.evolution.financefy.helper.SavingsFilter;
@@ -66,6 +67,10 @@ public class AppModule {
     @Provides
     TinyDb tinyDb(@ApplicationContext Context context){
         return new TinyDb(context);
+    }
+    @Provides
+    DialogLoading dialogLoading(@ApplicationContext Context context){
+        return new DialogLoading(context);
     }
 
     @Provides

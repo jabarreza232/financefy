@@ -251,7 +251,7 @@ binding.btnToggle.setOnClickListener(v->{
 
                 binding.btnNext.setEnabled(nextWeekEnabled);
                 binding.txtMonth.setText(getTextWeek());
-                binding.txtMonth.setEnabled(false);
+//                binding.txtMonth.setEnabled(false);
 
                 loadDataByWeek();
             }
@@ -277,7 +277,7 @@ binding.btnToggle.setOnClickListener(v->{
                     binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
 
                 binding.txtMonth.setText(getTextWeek());
-                binding.txtMonth.setEnabled(false);
+//                binding.txtMonth.setEnabled(false);
 
                 loadDataByWeek();
             }

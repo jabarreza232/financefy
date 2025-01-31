@@ -1,30 +1,35 @@
 package id.co.evolution.financefy.activity;
 
-import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_FINANCE;
+import static id.co.evolution.financefy.helper.Tools.getFileFromUri;
+import static id.co.evolution.financefy.helper.Tools.getFileName;
 import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
+import static id.co.evolution.financefy.helper.Tools.getRealPathFromURI;
+import static id.co.evolution.financefy.helper.Tools.saveBitmapToFile;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
-
-import java.text.NumberFormat;
+import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -33,10 +38,9 @@ import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
 import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.dialog.DialogConfirm;
-import id.co.evolution.financefy.dialog.DialogFinance;
+import id.co.evolution.financefy.dialog.DialogPreviewImage;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
@@ -59,7 +63,9 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
 
     Locale locale;
     ModelUser modelUser;
-
+    File filePhoto;
+    DialogPreviewImage dialogPreviewImage;
+    Uri imageUri;
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +77,7 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
-
+        dialogPreviewImage = new DialogPreviewImage(this);
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
         Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
         //TODO HIDE STATUS BAR
@@ -130,6 +136,15 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         binding.imgBack.setOnClickListener(this);
         binding.placeSubmit.setOnClickListener(this);
         binding.btnCalculator.setOnClickListener(this);
+
+        // Handler untuk Kamera
+        binding.btnCamera.setOnClickListener(this);
+
+        // Handler untuk Galeri
+        binding.btnGallery.setOnClickListener(this);
+        binding.tvFileName.setOnClickListener(this);
+        binding.btnClose.setOnClickListener(this);
+
     }
 
 
@@ -140,6 +155,27 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.tvFileName:
+                dialogPreviewImage.show(filePhoto.getPath());
+                break;
+            case R.id.btnCamera:
+                if (checkCameraPermission()) {
+                    openCamera();
+                } else {
+                    requestCameraPermission.launch(android.Manifest.permission.CAMERA);
+                }
+                break;
+            case R.id.btnClose:
+                binding.rlPreviewImage.setVisibility(View.GONE);
+                filePhoto = null;
+                break;
+            case R.id.btnGallery:
+                if (checkGalleryPermission()) {
+                    openGallery();
+                } else {
+                    requestGalleryPermission.launch(getGalleryPermission());
+                }
+                break;
             case R.id.place_category:
                 if (!type.isEmpty()) {
                     showDialogCategory();
@@ -190,6 +226,8 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
                                model.setMonth(month);
                                model.setId_finance_user(modelUser.getId());
                                model.setType_currency(modelUser.getType_currency());
+                               if(filePhoto!=null)
+                                   model.setPhoto(filePhoto.getPath());
 
                                CreateFinanceActivity.this.onSubmit(model);
                                Intent intent = new Intent();
@@ -229,5 +267,99 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         else
             viewModelFinance.inputUpdateFinance("Create", model);
 
+    }
+
+    // 🔹 Cek Izin Kamera
+    private boolean checkCameraPermission() {
+        return ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    // 🔹 Cek Izin Galeri
+    private boolean checkGalleryPermission() {
+        return ContextCompat.checkSelfPermission(this, getGalleryPermission()) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    // 🔹 Mendapatkan permission sesuai Android Version
+    private String getGalleryPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+            return android.Manifest.permission.READ_MEDIA_IMAGES;
+        } else {
+            return android.Manifest.permission.READ_EXTERNAL_STORAGE;
+        }
+    }
+
+    // 🔹 Activity Result untuk Izin Kamera
+    private final ActivityResultLauncher<String> requestCameraPermission =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    openCamera();
+                } else {
+                    Toast.makeText(this, "Izin Kamera Ditolak", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    // 🔹 Activity Result untuk Izin Galeri
+    private final ActivityResultLauncher<String> requestGalleryPermission =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    openGallery();
+                } else {
+                    Toast.makeText(this, "Izin Akses Galeri Ditolak", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    // 🔹 Activity Result untuk Kamera
+    private final ActivityResultLauncher<Intent> cameraLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK) {
+                    filePhoto= getFileFromUri(this,imageUri);
+
+                    String filePath = new File(filePhoto.getPath()).getAbsolutePath();
+                    String fileName = new File(filePath).getName();
+                    binding.rlPreviewImage.setVisibility(View.VISIBLE);
+                    binding.tvFileName.setText(fileName);
+                }
+            });
+
+    // 🔹 Activity Result untuk Galeri
+    private final ActivityResultLauncher<Intent> galleryLauncher =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Uri imageUri = result.getData().getData();
+                    binding.rlPreviewImage.setVisibility(View.VISIBLE);
+                    // Mendapatkan Nama File
+                    String fileName = getFileName(this, imageUri);
+                    filePhoto = getFileFromUri(this,imageUri);
+                    // Mendapatkan Path (Jika memungkinkan)
+                    String filePath = getRealPathFromURI(this, imageUri);
+                    binding.tvFileName.setText(fileName);
+                }
+            });
+
+    // 🔹 Fungsi Membuka Kamera
+    private void openCamera() {
+
+        // Buat file untuk menyimpan gambar
+        File photoFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "photo_" + System.currentTimeMillis() + ".jpg");
+
+        // Dapatkan Uri menggunakan FileProvider
+        imageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider", photoFile);
+
+        // Buat intent kamera
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        cameraLauncher.launch(intent);
+    }
+
+    // 🔹 Fungsi Membuka Galeri
+    private void openGallery() {
+        Intent intent;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+            intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
+        } else {
+            intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        }
+        galleryLauncher.launch(intent);
     }
 }

@@ -3,8 +3,15 @@ package id.co.evolution.financefy.helper;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -17,6 +24,11 @@ import androidx.core.content.ContextCompat;
 import id.co.evolution.financefy.dummy.DummyPrimaryColor.PRIMARY_COLOR;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -59,6 +71,98 @@ public class Tools {
         REMOVED
     }
    public static ModelPrimaryColor modelPrimaryColor=new ModelPrimaryColor("purple",R.color.colorPrimary,R.color.colorPrimaryDark);
+    public static Bitmap convertFileToBitmap(String filePath) {
+        Bitmap bitmap = null;
+        try {
+            // Membaca file sebagai InputStream
+            FileInputStream fileInputStream = new FileInputStream(new File(filePath));
+
+            // Mengonversi InputStream menjadi Bitmap
+            bitmap = BitmapFactory.decodeStream(fileInputStream);
+
+            // Menutup InputStream setelah selesai
+            fileInputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bitmap;
+    }
+
+    public static File saveBitmapToFile(Context context, Bitmap bitmap) {
+        // Buat nama file berdasarkan timestamp
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String fileName = "IMG_" + timeStamp + ".jpg";
+
+        // Buat file di dalam direktori penyimpanan aplikasi
+        File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName);
+
+        try {
+            // Simpan Bitmap ke dalam file
+            FileOutputStream outputStream = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
+            Log.d("File Path", "Saved file: " + file.getAbsolutePath());
+            return file;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static File getFileFromUri(Context context, Uri uri) {
+        File file = new File(context.getCacheDir(), getFileName(context, uri));
+        try (InputStream inputStream = context.getContentResolver().openInputStream(uri);
+             OutputStream outputStream = new FileOutputStream(file)) {
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return file;
+    }
+    public static String getRealPathFromURI(Context context, Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
+        if (cursor != null) {
+            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            String filePath = cursor.getString(columnIndex);
+            cursor.close();
+            return filePath;
+        }
+        return null;
+    }
+
+    public static String getFileName(Context context, Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    result = cursor.getString(index);
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
+    }
 
     public static void setThemeActivity(Resources.Theme theme,ModelPrimaryColor modelPrimaryColor){
         if(modelPrimaryColor!=null){

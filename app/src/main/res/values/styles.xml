@@ -9,7 +9,9 @@
         <item name="colorControlNormal">@color/colorPrimary</item>
         <item name="colorControlActivated">@color/colorPrimary</item>
         <item name="boxStrokeColor">@color/colorPrimary</item>
+
     </style>
+
     <style name="AppThemeNoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -18,6 +20,7 @@
         <item name="colorControlNormal">@color/colorPrimary</item>
         <item name="colorControlActivated">@color/colorPrimary</item>
         <item name="boxStrokeColor">@color/colorPrimary</item>
+
     </style>
 
     <style name="AppTheme.NoActionBar">

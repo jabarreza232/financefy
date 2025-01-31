@@ -59,6 +59,7 @@ import id.co.evolution.financefy.activity.NotificationActivity;
 import id.co.evolution.financefy.activity.SwitchThemeActivity;
 import id.co.evolution.financefy.databinding.FragmentSettingsBinding;
 import id.co.evolution.financefy.dialog.DialogConfirm;
+import id.co.evolution.financefy.dialog.DialogLoading;
 import id.co.evolution.financefy.dialog.DialogSettingPin;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
@@ -84,14 +85,21 @@ public class FragmentSettings extends Fragment {
     FinanceRepository financeRepository;
     @Inject
     SavingsProgressRepository savingsProgressRepository;
+    DialogLoading dialogLoading;
     public List<ModelFinance> dataFinance = new ArrayList<>();
     public List<ModelSavingsProgress> dataSaving = new ArrayList<>();
 
     public ModelUser user;
     private InterstitialAd mInterstitialAd;
+
     private static final String TAG = "FragmentSettings";
     private Locale locale;
+    public enum MENU{
 
+        FROM_SWITCH_THEME,
+        FROM_EXPORT_EXCEL
+    }
+    MENU menuSettings;
     public FragmentSettings() {
         // Required empty public constructor
     }
@@ -113,51 +121,10 @@ public class FragmentSettings extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_settings, container, false);
         user = tinyDb.getObject("user", ModelUser.class);
         locale =user.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
-
+        dialogLoading = new DialogLoading(getActivity());
         binding.cvSwitchTheme.setOnClickListener(v -> {
-            if (mInterstitialAd != null) {
-                mInterstitialAd.show(getActivity());
-
-                mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
-                    @Override
-                    public void onAdClicked() {
-                        // Called when a click is recorded for an ad.
-                        Log.d(TAG, "Ad was clicked.");
-                    }
-
-                    @Override
-                    public void onAdDismissedFullScreenContent() {
-                        // Called when ad is dismissed.
-                        // Set the ad reference to null so you don't show the ad a second time.
-                        Log.d(TAG, "Ad dismissed fullscreen content.");
-                        Intent i = new Intent(getContext(), SwitchThemeActivity.class);
-                        startActivity(i);
-                        getActivity().finish();
-                    }
-
-                    @Override
-                    public void onAdFailedToShowFullScreenContent(AdError adError) {
-                        // Called when ad fails to show.
-                        Log.e(TAG, "Ad failed to show fullscreen content.");
-                        mInterstitialAd = null;
-                    }
-
-                    @Override
-                    public void onAdImpression() {
-                        // Called when an impression is recorded for an ad.
-                        Log.d(TAG, "Ad recorded an impression.");
-                    }
-
-                    @Override
-                    public void onAdShowedFullScreenContent() {
-                        // Called when ad is shown.
-                        Log.d(TAG, "Ad showed fullscreen content.");
-                    }
-                });
-            } else {
-                Log.d("TAG", "The interstitial ad wasn't ready yet.");
-                adRequest();
-            }
+            menuSettings = MENU.FROM_SWITCH_THEME;
+            adRequest();
 
         });
 
@@ -217,6 +184,7 @@ public class FragmentSettings extends Fragment {
         });
 
         binding.txtExportExcel.setOnClickListener(v -> {
+            menuSettings = MENU.FROM_EXPORT_EXCEL;
             if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.S){
                 exportToExcelWithCondition();
 
@@ -239,7 +207,8 @@ private void adRequest(){
     AdRequest adRequest = new AdRequest.Builder().build();
     //official ad unit id = ca-app-pub-5068422046187558/6331529776
     //example ad unit id = ca-app-pub-3940256099942544/1033173712
-    InterstitialAd.load(getContext(),"ca-app-pub-5068422046187558/6331529776", adRequest,
+    dialogLoading.show("Silahkan Tunggu...");
+    InterstitialAd.load(getContext(),"ca-app-pub-3940256099942544/1033173712", adRequest,
             new InterstitialAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
@@ -247,6 +216,70 @@ private void adRequest(){
                     // an ad is loaded.
                     mInterstitialAd = interstitialAd;
                     Log.i(TAG, "onAdLoaded");
+                    mInterstitialAd.show(getActivity());
+
+                    mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
+                        @Override
+                        public void onAdClicked() {
+                            // Called when a click is recorded for an ad.
+                            Log.d(TAG, "Ad was clicked.");
+                            dialogLoading.show("Silahkan Tunggu...");
+                        }
+
+                        @Override
+                        public void onAdDismissedFullScreenContent() {
+                            // Called when ad is dismissed.
+                            // Set the ad reference to null so you don't show the ad a second time.
+                            Log.d(TAG, "Ad dismissed fullscreen content.");
+                            dialogLoading.dismiss();
+                            if(menuSettings == MENU.FROM_SWITCH_THEME){
+                                Intent i = new Intent(getContext(), SwitchThemeActivity.class);
+                                startActivity(i);
+                                getActivity().finish();
+                            }else{
+                                if(user.getCategory().equalsIgnoreCase(getString(R.string.menabung))){
+                                    viewModelSavingsProgress.findAllSavingsByIdSavings(mainActivity.modelSavings.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+                                        dataSaving = modelFinances;
+                                        exportExcelByData(new ArrayList<>(dataSaving));
+                                    });
+
+                                }else{
+                                    viewModelFinance.getFinanceByUserId(user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+                                        dataFinance = modelFinances;
+                                        exportExcelByData(new ArrayList<>(dataFinance));
+                                    });
+
+                                }
+                            }
+
+                        }
+
+                        @Override
+                        public void onAdFailedToShowFullScreenContent(AdError adError) {
+                            // Called when ad fails to show.
+                            Log.e(TAG, "Ad failed to show fullscreen content.");
+                            mInterstitialAd = null;
+                            dialogLoading.dismiss();
+
+                        }
+
+                        @Override
+                        public void onAdImpression() {
+                            // Called when an impression is recorded for an ad.
+                            Log.d(TAG, "Ad recorded an impression.");
+                            dialogLoading.show("Silahkan Tunggu...");
+
+                        }
+
+                        @Override
+                        public void onAdShowedFullScreenContent() {
+                            // Called when ad is shown.
+                            Log.d(TAG, "Ad showed fullscreen content.");
+                            dialogLoading.dismiss();
+
+                        }
+                    });
+
                 }
 
                 @Override
@@ -254,6 +287,7 @@ private void adRequest(){
                     // Handle the error
                     Log.d(TAG, loadAdError.toString());
                     mInterstitialAd = null;
+                    dialogLoading.dismiss();
                 }
             });
 
@@ -344,61 +378,7 @@ private void adRequest(){
     public void exportToExcelWithCondition() {
         // Buat Workbook baru
 
-        // Contoh data
-        if (mInterstitialAd != null) {
-            mInterstitialAd.show(getActivity());
-
-            mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback(){
-                @Override
-                public void onAdClicked() {
-                    // Called when a click is recorded for an ad.
-                    Log.d(TAG, "Ad was clicked.");
-                }
-
-                @Override
-                public void onAdDismissedFullScreenContent() {
-                    // Called when ad is dismissed.
-                    // Set the ad reference to null so you don't show the ad a second time.
-                    Log.d(TAG, "Ad dismissed fullscreen content.");
-                    mInterstitialAd = null;
-                    if(user.getCategory().equalsIgnoreCase(getString(R.string.menabung))){
-                        viewModelSavingsProgress.findAllSavingsByIdSavings(mainActivity.modelSavings.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
-                            dataSaving = modelFinances;
-                            exportExcelByData(new ArrayList<>(dataSaving));
-                        });
-
-                    }else{
-                        viewModelFinance.getFinanceByUserId(user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
-                            dataFinance = modelFinances;
-                            exportExcelByData(new ArrayList<>(dataFinance));
-                        });
-
-                    }
-                }
-
-                @Override
-                public void onAdFailedToShowFullScreenContent(AdError adError) {
-                    // Called when ad fails to show.
-                    Log.e(TAG, "Ad failed to show fullscreen content.");
-                    mInterstitialAd = null;
-                }
-
-                @Override
-                public void onAdImpression() {
-                    // Called when an impression is recorded for an ad.
-                    Log.d(TAG, "Ad recorded an impression.");
-                }
-
-                @Override
-                public void onAdShowedFullScreenContent() {
-                    // Called when ad is shown.
-                    Log.d(TAG, "Ad showed fullscreen content.");
-                }
-            });
-        } else {
-            Log.d("TAG", "The interstitial ad wasn't ready yet.");
-            adRequest();
-        }
+        adRequest();
     }
     public static <T> boolean isOfType(Object input) {
         return input != null; // won't compile

@@ -30,6 +30,8 @@ public class ModelSavingsProgress implements Serializable {
     String month;
     @ColumnInfo(name = "type_currency")
     String type_currency;
+    @ColumnInfo(name = "photo")
+    String photo;
 
     @Ignore
     int totalValue;
@@ -89,6 +91,14 @@ public class ModelSavingsProgress implements Serializable {
 
     public void setProcessValue(long processValue) {
         this.processValue = processValue;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 
     public int getId_savings() {

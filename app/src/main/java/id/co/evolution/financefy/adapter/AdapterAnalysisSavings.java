@@ -2,7 +2,6 @@ package id.co.evolution.financefy.adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +15,8 @@ import java.util.List;
 import java.util.Locale;
 
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.callback.MethodCallback;
 import id.co.evolution.financefy.databinding.ListAnalysisBinding;
 import id.co.evolution.financefy.helper.Tools;
-import id.co.evolution.financefy.model.ModelFinance;
-import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
 
 public class AdapterAnalysisSavings extends RecyclerView.Adapter<AdapterAnalysisSavings.ViewHolder> {

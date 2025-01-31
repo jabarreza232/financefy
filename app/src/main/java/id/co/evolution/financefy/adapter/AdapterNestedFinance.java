@@ -21,6 +21,7 @@ import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.callback.MethodCallback;
 import id.co.evolution.financefy.databinding.ListFinanceBinding;
 import id.co.evolution.financefy.databinding.ListNestedFinanceBinding;
+import id.co.evolution.financefy.dialog.DialogPreviewImage;
 import id.co.evolution.financefy.model.ModelFinance;
 
 public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFinance.ViewHolder> {
@@ -28,11 +29,12 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
     List<ModelFinance> data;
     MethodCallback methodCallback;
     Locale locale;
-
+    DialogPreviewImage dialogPreviewImage;
     public AdapterNestedFinance(Context context, List<ModelFinance> data, MethodCallback methodCallback) {
         this.context = context;
         this.data = data;
         this.methodCallback = methodCallback;
+        dialogPreviewImage = new DialogPreviewImage(context);
     }
 
     public void setLocale(Locale locale) {
@@ -58,7 +60,14 @@ public class AdapterNestedFinance extends RecyclerView.Adapter<AdapterNestedFina
         holder.binding.txtJudul.setText(data.get(i).getKategori());
         holder.binding.keterangan.setText(data.get(i).getKeterangan().isEmpty()||data.get(i).getKeterangan()==null?"Tidak ada deskripsi":data.get(i).getKeterangan());
         holder.binding.jumlah.setText(data.get(i).getJumlahDesc(locale));
-
+        if(data.get(i).getPhoto()!=null){
+            holder.binding.btnCamera.setVisibility(View.VISIBLE);
+            holder.binding.btnCamera.setOnClickListener(v->{
+                dialogPreviewImage.show(data.get(i).getPhoto());
+            });
+        }else{
+            holder.binding.btnCamera.setVisibility(View.GONE);
+        }
         if (data.get(i).getTipe().equalsIgnoreCase("pengeluaran")) {
             holder.binding.jumlah.setTextColor(ContextCompat.getColor(context, R.color.red));
 

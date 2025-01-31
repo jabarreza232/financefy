@@ -29,7 +29,16 @@ public class ModelSavings implements Serializable {
     String date_target;
     @ColumnInfo(name = "type_currency")
     String type_currency;
+    @ColumnInfo(name = "photo")
+    String photo;
 
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
+    }
 
     public ModelSavings(int id) {
         this.id = id;

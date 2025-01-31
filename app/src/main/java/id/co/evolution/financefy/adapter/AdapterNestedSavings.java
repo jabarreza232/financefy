@@ -18,6 +18,7 @@ import java.util.Locale;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.callback.MethodCallback;
 import id.co.evolution.financefy.databinding.ListNestedSavingsBinding;
+import id.co.evolution.financefy.dialog.DialogPreviewImage;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
 
@@ -27,11 +28,12 @@ public class AdapterNestedSavings extends RecyclerView.Adapter<AdapterNestedSavi
     MethodCallback methodCallback;
     int total_value;
     Locale locale;
-
+    DialogPreviewImage dialogPreviewImage;
     public AdapterNestedSavings(int total_value, List<ModelSavingsProgress> data, MethodCallback methodCallback) {
         this.total_value = total_value;
         this.data = data;
         this.methodCallback = methodCallback;
+
     }
 
     public void setLocale(Locale locale) {
@@ -41,6 +43,7 @@ public class AdapterNestedSavings extends RecyclerView.Adapter<AdapterNestedSavi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        dialogPreviewImage = new DialogPreviewImage(viewGroup.getContext());
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_nested_savings, viewGroup, false);
         return new ViewHolder(view);
     }
@@ -57,7 +60,14 @@ public class AdapterNestedSavings extends RecyclerView.Adapter<AdapterNestedSavi
         holder.binding.keterangan.setVisibility(!data.get(i).getDescription().isEmpty() ? View.VISIBLE : View.GONE);
         holder.binding.keterangan.setText(data.get(i).getDescription());
         holder.binding.jumlah.setText(Tools.convertToCurrency(data.get(i).getProcessValue(),locale));
-
+        if(data.get(i).getPhoto()!=null){
+            holder.binding.btnCamera.setVisibility(View.VISIBLE);
+            holder.binding.btnCamera.setOnClickListener(v->{
+                dialogPreviewImage.show(data.get(i).getPhoto());
+            });
+        }else{
+            holder.binding.btnCamera.setVisibility(View.GONE);
+        }
         holder.binding.txtPercentage.setText(data.get(i).getPercentage(total_value)+"%");
         Log.e("TAG", "onBindViewHolder: "+total_value);
 
