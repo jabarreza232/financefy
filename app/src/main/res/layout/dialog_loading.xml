@@ -31,7 +31,7 @@ android:background="#3A000000">
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:text="Loading..."
-                android:textColor="@color/blackTextColor"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>

@@ -40,12 +40,19 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.Text;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.TextRecognizer;
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -90,6 +97,8 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
     File filePhoto;
     DialogPreviewImage dialogPreviewImage;
     Uri imageUri;
+    boolean isFromScanImage;
+
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,6 +171,7 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         binding.btnGallery.setOnClickListener(this);
         binding.tvFileName.setOnClickListener(this);
         binding.btnClose.setOnClickListener(this);
+        binding.btnScan.setOnClickListener(this);
     }
 
     private void loadData() {
@@ -202,6 +212,7 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
                 dialogPreviewImage.show(filePhoto.getPath());
                 break;
             case R.id.btnCamera:
+                isFromScanImage= false;
                 if (checkCameraPermission()) {
                     openCamera();
                 } else {
@@ -212,7 +223,14 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
                 binding.rlPreviewImage.setVisibility(View.GONE);
                 filePhoto = null;
                 break;
+            case R.id.btn_scan:
+                isFromScanImage = true;
+                showDialogChoosePicture();
+
+                break;
             case R.id.btnGallery:
+                isFromScanImage= false;
+
                 if (checkGalleryPermission()) {
                     openGallery();
                 } else {
@@ -325,12 +343,35 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
     private final ActivityResultLauncher<Intent> cameraLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK) {
-                    filePhoto= getFileFromUri(this,imageUri);
+                    if(isFromScanImage){
+                        InputImage image;
+                        try {
+                            // When using Latin script library
+                            TextRecognizer recognizer =
+                                    TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+                            image = InputImage.fromFilePath(this, imageUri);
 
-                    String filePath = new File(filePhoto.getPath()).getAbsolutePath();
-                    String fileName = new File(filePath).getName();
-                    binding.rlPreviewImage.setVisibility(View.VISIBLE);
-                    binding.tvFileName.setText(fileName);
+                            recognizer.process(image).addOnSuccessListener(new OnSuccessListener<>() {
+                                @Override
+                                public void onSuccess(Text text) {
+
+                                    binding.etDescription.setText(text.getText());
+                                }
+                            });
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }else{
+                        filePhoto= getFileFromUri(this,imageUri);
+
+                        String filePath = new File(filePhoto.getPath()).getAbsolutePath();
+                        String fileName = new File(filePath).getName();
+                        binding.rlPreviewImage.setVisibility(View.VISIBLE);
+                        binding.tvFileName.setText(fileName);
+                    }
+
                 }
             });
 
@@ -339,13 +380,35 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Uri imageUri = result.getData().getData();
-                    binding.rlPreviewImage.setVisibility(View.VISIBLE);
-                    // Mendapatkan Nama File
-                    String fileName = getFileName(this, imageUri);
-                    filePhoto = getFileFromUri(this,imageUri);
-                    // Mendapatkan Path (Jika memungkinkan)
-                    String filePath = getRealPathFromURI(this, imageUri);
-                    binding.tvFileName.setText(fileName);
+                    if(isFromScanImage){
+                        InputImage image;
+                        try {
+                            // When using Latin script library
+                            TextRecognizer recognizer =
+                                    TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+                            image = InputImage.fromFilePath(this, imageUri);
+
+                            recognizer.process(image).addOnSuccessListener(new OnSuccessListener<>() {
+                                @Override
+                                public void onSuccess(Text text) {
+                                    binding.etDescription.setText(text.getText());
+                                }
+                            });
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                    }else{
+                        binding.rlPreviewImage.setVisibility(View.VISIBLE);
+                        // Mendapatkan Nama File
+                        String fileName = getFileName(this, imageUri);
+                        filePhoto = getFileFromUri(this,imageUri);
+                        // Mendapatkan Path (Jika memungkinkan)
+                        String filePath = getRealPathFromURI(this, imageUri);
+                        binding.tvFileName.setText(fileName);
+                    }
+
                 }
             });
 
@@ -375,5 +438,33 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         }
         galleryLauncher.launch(intent);
     }
+    private void showDialogChoosePicture() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Pilih Opsi");
 
+        final String[] tipe =  new String[]{"Ambil Gambar", "Pilih Galeri"} ;
+
+
+        builder.setItems(tipe, (dialog, which) -> {
+            switch (tipe[which]) {
+                case "Ambil Gambar":
+
+                    if (checkCameraPermission()) {
+                        openCamera();
+                    } else {
+                        requestCameraPermission.launch(android.Manifest.permission.CAMERA);
+                    }
+                    break;
+                case "Pilih Galeri":
+                    if (checkGalleryPermission()) {
+                        openGallery();
+                    } else {
+                        requestGalleryPermission.launch(getGalleryPermission());
+                    }
+                    break;
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 }

@@ -11,8 +11,8 @@ android {
         applicationId "id.co.evolution.financefy"
         minSdkVersion 26
         targetSdkVersion 34
-        versionCode 9
-        versionName "2.1.4"
+        versionCode 11
+        versionName "2.1.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -46,7 +46,21 @@ android {
 
 dependencies {
     implementation "com.google.android.gms:play-services-ads:22.2.0"
+    implementation 'com.applandeo:material-calendar-view:1.9.2'
+    // To recognize Latin script
+    implementation 'com.google.mlkit:text-recognition:16.0.1'
 
+    // To recognize Chinese script
+    implementation 'com.google.mlkit:text-recognition-chinese:16.0.1'
+
+    // To recognize Devanagari script
+    implementation 'com.google.mlkit:text-recognition-devanagari:16.0.1'
+
+    // To recognize Japanese script
+    implementation 'com.google.mlkit:text-recognition-japanese:16.0.1'
+
+    // To recognize Korean script
+    implementation 'com.google.mlkit:text-recognition-korean:16.0.1'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.3'

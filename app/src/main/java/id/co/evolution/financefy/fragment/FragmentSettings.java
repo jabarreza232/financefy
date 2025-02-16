@@ -24,6 +24,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.util.Pair;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,6 +35,9 @@ import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.DateValidatorPointForward;
+import com.google.android.material.datepicker.MaterialDatePicker;
 
 import org.apache.commons.compress.utils.Lists;
 import org.apache.poi.ss.usermodel.Row;
@@ -44,8 +48,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -58,6 +65,7 @@ import id.co.evolution.financefy.activity.AboutActivity;
 import id.co.evolution.financefy.activity.NotificationActivity;
 import id.co.evolution.financefy.activity.SwitchThemeActivity;
 import id.co.evolution.financefy.databinding.FragmentSettingsBinding;
+import id.co.evolution.financefy.dialog.DateRangeDialog;
 import id.co.evolution.financefy.dialog.DialogConfirm;
 import id.co.evolution.financefy.dialog.DialogLoading;
 import id.co.evolution.financefy.dialog.DialogSettingPin;
@@ -237,19 +245,7 @@ private void adRequest(){
                                 startActivity(i);
                                 getActivity().finish();
                             }else{
-                                if(user.getCategory().equalsIgnoreCase(getString(R.string.menabung))){
-                                    viewModelSavingsProgress.findAllSavingsByIdSavings(mainActivity.modelSavings.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
-                                        dataSaving = modelFinances;
-                                        exportExcelByData(new ArrayList<>(dataSaving));
-                                    });
-
-                                }else{
-                                    viewModelFinance.getFinanceByUserId(user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
-                                        dataFinance = modelFinances;
-                                        exportExcelByData(new ArrayList<>(dataFinance));
-                                    });
-
-                                }
+                                openDateRangePicker();
                             }
 
                         }
@@ -292,6 +288,28 @@ private void adRequest(){
             });
 
 }
+
+    private void openDateRangePicker() {
+        DateRangeDialog dateRangeDialog = new DateRangeDialog(getActivity(), (startDate, endDate,datesList) -> {
+            Log.e("cek:",startDate +" : "+endDate);
+
+            if(user.getCategory().equalsIgnoreCase(getString(R.string.menabung))){
+                viewModelSavingsProgress.getSavingsByWeek(datesList,mainActivity.modelSavings.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+                    dataSaving = modelFinances;
+                    exportExcelByData(new ArrayList<>(dataSaving));
+                });
+
+            }else{
+                viewModelFinance.getFinanceByWeek(datesList,user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
+                    dataFinance = modelFinances;
+                    exportExcelByData(new ArrayList<>(dataFinance));
+                });
+
+            }
+        });
+
+        dateRangeDialog.show();
+    }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -479,7 +497,7 @@ private void adRequest(){
 
         // Simpan file Excel ke Penyimpanan
 
-        String fileName = user.getCategory() + ".xlsx";
+        String fileName = user.getCategory()+"_"+Calendar.getInstance().getTimeInMillis() + ".xlsx";
 
         File file;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -504,12 +522,13 @@ private void adRequest(){
 //// Tambahkan flag untuk memberikan izin kepada aplikasi penerima untuk mengakses file
 //            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setDataAndType(fileUri, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(intent);
             Toast.makeText(getContext(), "File berhasil disimpan di: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setDataAndType(fileUri, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            intent.putExtra(Intent.EXTRA_STREAM, fileUri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(Intent.createChooser(intent, "Share Excel File"));
 
         } catch (IOException e) {
             Toast.makeText(getContext(), "Gagal menyimpan file: " + e.getMessage(), Toast.LENGTH_LONG).show();

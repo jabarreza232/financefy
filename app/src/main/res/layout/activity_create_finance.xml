@@ -204,26 +204,42 @@
                             app:tint="@color/colorPrimary" />
 
                     </RelativeLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/til_description"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Catatan"
-                        app:errorEnabled="true">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_description"
+                        android:layout_height="wrap_content">
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/til_description"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="top|start"
-                            android:inputType="text|textMultiLine"
-                            android:lines="3"
-                            android:maxLines="6"
-                            android:textColor="?android:attr/textColorPrimary" />
+                            android:hint="Catatan"
+                            app:errorEnabled="true">
 
-                    </com.google.android.material.textfield.TextInputLayout>
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_description"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="top|start"
+                                android:inputType="text|textMultiLine"
+                                android:lines="6"
+                                android:maxLines="6"
+                                android:textColor="?android:attr/textColorPrimary" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <ImageView
+                            android:id="@+id/btn_scan"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginEnd="5dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/baseline_document_scanner_24"
+                            app:tint="@color/colorPrimary"
+                            />
+
+                    </RelativeLayout>
 
 
                     <RelativeLayout

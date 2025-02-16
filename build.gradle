@@ -29,7 +29,7 @@ allprojects {
     }
 }
 ext {
-    appVersionName = '2.1.4'
+    appVersionName = '2.1.6'
     roomVersion = '1.1.1'
 }
 task clean(type: Delete) {

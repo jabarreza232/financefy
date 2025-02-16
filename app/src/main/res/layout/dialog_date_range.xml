@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="@android:color/white"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:paddingTop="32dp">
+
+    <TextView
+        android:id="@+id/tvSelectedRange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pilih rentang tanggal"
+        android:textColor="#333333"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:padding="10dp"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"/>
+
+    <com.applandeo.materialcalendarview.CalendarView
+        android:id="@+id/calendarView"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginBottom="20dp"
+        android:elevation="8dp"
+        app:selectionColor="@color/colorAccent"
+        app:todayLabelColor="#FF4081"
+        app:type="range_picker" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:paddingTop="12dp"
+        android:layout_marginBottom="20dp">
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/gray_button_background"
+            android:elevation="4dp"
+            android:paddingStart="20dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="12dp"
+            android:text="Batal"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:layout_marginEnd="12dp"
+            android:layout_gravity="end"/>
+
+        <Button
+            android:id="@+id/btnSelect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:background="@color/colorAccent"
+            android:elevation="8dp"
+            android:paddingStart="20dp"
+            android:paddingTop="12dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="12dp"
+            android:text="Pilih"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:layout_gravity="end"/>
+    </LinearLayout>
+
+</LinearLayout>
