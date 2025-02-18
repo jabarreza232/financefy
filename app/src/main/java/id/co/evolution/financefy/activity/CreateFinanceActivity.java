@@ -96,6 +96,7 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         dialogPreviewImage = new DialogPreviewImage(this);
         Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
         Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
+        Tools.setImageTintView(binding.btnScan,modelPrimaryColor);
         //TODO HIDE STATUS BAR
 
         cur_calendar.get(Calendar.YEAR);
@@ -436,32 +437,37 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
     }
 
     private void showDialogChoosePicture() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Pilih Opsi");
-
-        final String[] tipe =  new String[]{"Ambil Gambar", "Pilih Galeri"} ;
-
-
-        builder.setItems(tipe, (dialog, which) -> {
-            switch (tipe[which]) {
-                case "Ambil Gambar":
-
-                    if (checkCameraPermission()) {
-                        openCamera();
-                    } else {
-                        requestCameraPermission.launch(android.Manifest.permission.CAMERA);
-                    }
-                    break;
-                case "Pilih Galeri":
-                    if (checkGalleryPermission()) {
-                        openGallery();
-                    } else {
-                        requestGalleryPermission.launch(getGalleryPermission());
-                    }
-                    break;
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        if (checkCameraPermission()) {
+            openCamera();
+        } else {
+            requestCameraPermission.launch(android.Manifest.permission.CAMERA);
+        }
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("Pilih Opsi");
+//
+//        final String[] tipe =  new String[]{"Ambil Gambar", "Pilih Galeri"} ;
+//
+//
+//        builder.setItems(tipe, (dialog, which) -> {
+//            switch (tipe[which]) {
+//                case "Ambil Gambar":
+//
+//                    if (checkCameraPermission()) {
+//                        openCamera();
+//                    } else {
+//                        requestCameraPermission.launch(android.Manifest.permission.CAMERA);
+//                    }
+//                    break;
+//                case "Pilih Galeri":
+//                    if (checkGalleryPermission()) {
+//                        openGallery();
+//                    } else {
+//                        requestGalleryPermission.launch(getGalleryPermission());
+//                    }
+//                    break;
+//            }
+//        });
+//        AlertDialog dialog = builder.create();
+//        dialog.show();
     }
 }

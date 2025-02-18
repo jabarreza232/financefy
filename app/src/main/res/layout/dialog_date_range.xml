@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:background="@android:color/white"
+    android:background="?attr/colorSurface"
     android:orientation="vertical"
     android:padding="24dp"
     android:paddingTop="32dp">
@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Pilih rentang tanggal"
-        android:textColor="#333333"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="20sp"
         android:textStyle="bold"
         android:padding="10dp"
@@ -24,11 +24,17 @@
     <com.applandeo.materialcalendarview.CalendarView
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="400dp"
         android:layout_marginBottom="20dp"
         android:elevation="8dp"
         app:selectionColor="@color/colorAccent"
         app:todayLabelColor="#FF4081"
+        app:abbreviationsBarColor="?attr/colorSurface"
+        app:abbreviationsLabelsColor="?android:attr/textColorPrimary"
+        app:highlightedDaysLabelsColor="?attr/colorSurface"
+        app:anotherMonthsDaysLabelsColor="?android:attr/textColorPrimary"
+        app:daysLabelsColor="?android:attr/textColorPrimary"
+        app:pagesColor="?attr/colorSurface"
         app:type="range_picker" />
 
     <LinearLayout
@@ -43,7 +49,7 @@
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/gray_button_background"
+            android:background="@color/gray_btn_bg_color"
             android:elevation="4dp"
             android:paddingStart="20dp"
             android:paddingTop="12dp"

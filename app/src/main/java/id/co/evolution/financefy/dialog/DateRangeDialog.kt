@@ -37,10 +37,10 @@ class DateRangeDialog:Dialog{
             android.view.WindowManager.LayoutParams.MATCH_PARENT,
             android.view.WindowManager.LayoutParams.WRAP_CONTENT
         )
-        calendarView = findViewById<CalendarView>(R.id.calendarView)
-        btnSelect = findViewById<Button>(R.id.btnSelect)
-        btnCancel = findViewById<Button>(R.id.btnCancel)
-        tvSelectedRange = findViewById<TextView>(R.id.tvSelectedRange)
+        calendarView = findViewById(R.id.calendarView)
+        btnSelect = findViewById(R.id.btnSelect)
+        btnCancel = findViewById(R.id.btnCancel)
+        tvSelectedRange = findViewById(R.id.tvSelectedRange)
 
 //        // Mengatur listener untuk rentang tanggal
 //        calendarView.setOnSelectRangeListener(object : OnSelectRangeListener {
@@ -59,7 +59,7 @@ class DateRangeDialog:Dialog{
 
 
 
-            if (selectedDates.size > 1) {
+            if (selectedDates.isNotEmpty()) {
                 for (i in calendarView!!.selectedDates){
                     datesList.add(Tools.getFormattedDateSimple(i.timeInMillis))
                 }

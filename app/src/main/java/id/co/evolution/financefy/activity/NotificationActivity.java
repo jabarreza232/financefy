@@ -4,13 +4,17 @@ import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -79,6 +83,7 @@ public class NotificationActivity extends AppCompatActivity {
     String descriptionFinance, descriptionSavings;
     boolean isCheckedFinance;
     boolean isCheckedSavings;
+    private static final int NOTIFICATION_PERMISSION_CODE = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +109,7 @@ public class NotificationActivity extends AppCompatActivity {
         isCheckedFinance= tinyDb.getBoolean("isCheckedFinance");
         isCheckedSavings= tinyDb.getBoolean("isCheckedSavings");
         mBinding.switchNotificationFinance.setOnClickListener(view -> {
-          boolean  isCheckedSavings = tinyDb.getBoolean("isCheckedSavings");
+            boolean  isCheckedSavings = tinyDb.getBoolean("isCheckedSavings");
             boolean isChecked = mBinding.switchNotificationFinance.isChecked();
             tinyDb.putBoolean("isCheckedFinance", isChecked);
             ModelNotification modelNotification = new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), descriptionFinance);
@@ -121,7 +126,7 @@ public class NotificationActivity extends AppCompatActivity {
 
 
         mBinding.switchNotificationSavings.setOnClickListener(view -> {
-           boolean isCheckedFinance = tinyDb.getBoolean("isCheckedFinance");
+            boolean isCheckedFinance = tinyDb.getBoolean("isCheckedFinance");
             boolean isChecked = mBinding.switchNotificationSavings.isChecked();
             tinyDb.putBoolean("isCheckedSavings", isChecked);
             ModelNotification modelNotification = new ModelNotification("Pengingat Progress Menabung: " + user.getName(), descriptionSavings);
@@ -183,6 +188,33 @@ public class NotificationActivity extends AppCompatActivity {
         }else{
             mBinding.switchNotificationFinance.setEnabled(false);
             mBinding.switchNotificationSavings.setEnabled(false);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        NOTIFICATION_PERMISSION_CODE);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == NOTIFICATION_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Izin diberikan, lanjutkan dengan menampilkan notifikasi
+
+            } else {
+                // Izin ditolak, beri tahu pengguna
+            }
         }
     }
 

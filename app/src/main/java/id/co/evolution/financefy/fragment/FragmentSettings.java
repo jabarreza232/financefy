@@ -40,6 +40,8 @@ import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 
 import org.apache.commons.compress.utils.Lists;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -437,8 +439,17 @@ private void adRequest(){
                 sheet.setColumnWidth(1, (modelFinance.getJumlahDesc(locale).length() * 400));
                 dataRow.createCell(2).setCellValue(modelFinance.getKategori());
                 sheet.setColumnWidth(2, (modelFinance.getKategori().length() * 400));
-                dataRow.createCell(3).setCellValue(modelFinance.getKeterangan());
-                sheet.setColumnWidth(3, (modelFinance.getKeterangan().length() * 400));
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setWrapText(true); // Mengaktifkan pembungkusan teks
+
+
+                Cell cell = dataRow.createCell(3);
+                cell.setCellStyle(cellStyle);
+
+                cell.setCellValue(modelFinance.getKeterangan());
+                dataRow.setHeightInPoints(((float) modelFinance.getKeterangan().length() / 20) * sheet.getDefaultRowHeightInPoints()); // Sesuaikan tinggi baris
+
+                sheet.setColumnWidth(3, Math.min((modelFinance.getKeterangan().length() + 2) * 256, 20000)); // 20000 adalah batas maksimum width
 
                 dataRow.createCell(4).setCellValue(modelFinance.getDate());
                 sheet.setColumnWidth(4, (modelFinance.getDate().length() * 400));
@@ -454,11 +465,11 @@ private void adRequest(){
 
         }else{
             Row headerSavingsNameRow = sheet.createRow(2);
-            headerSavingsNameRow.createCell(0).setCellValue("Nama target: " + mainActivity.modelSavings.getTitle());
+            headerSavingsNameRow.createCell(0).setCellValue("Target: " + mainActivity.modelSavings.getTitle());
             sheet.setColumnWidth(0, (mainActivity.modelSavings.getTitle().length() * 400));
 
             Row headerSavingsTargetRow = sheet.createRow(3);
-            headerSavingsTargetRow.createCell(0).setCellValue("Target: " + Tools.convertToCurrency(mainActivity.modelSavings.getTargetValue(),locale));
+            headerSavingsTargetRow.createCell(0).setCellValue("Jumlah: " + Tools.convertToCurrency(mainActivity.modelSavings.getTargetValue(),locale));
             sheet.setColumnWidth(0, (Tools.convertToCurrency(mainActivity.modelSavings.getTargetValue(),locale).length() * 400));
 
             List<ModelSavingsProgress> dataSavings  = new ArrayList<>();
@@ -479,8 +490,19 @@ private void adRequest(){
                 dataRow.createCell(0).setCellValue(modelSavingsProgress.getId());
                 dataRow.createCell(1).setCellValue(modelSavingsProgress.getTitle());
                 sheet.setColumnWidth(1, (modelSavingsProgress.getTitle().length() * 400));
-                dataRow.createCell(2).setCellValue(modelSavingsProgress.getDescription());
-                sheet.setColumnWidth(2, (modelSavingsProgress.getDescription().length() * 400));
+                CellStyle cellStyle = workbook.createCellStyle();
+                cellStyle.setWrapText(true); // Mengaktifkan pembungkusan teks
+
+
+                Cell cell = dataRow.createCell(2);
+                cell.setCellStyle(cellStyle);
+
+                cell.setCellValue(modelSavingsProgress.getDescription());
+                dataRow.setHeightInPoints(((float) modelSavingsProgress.getDescription().length() / 20) * sheet.getDefaultRowHeightInPoints()); // Sesuaikan tinggi baris
+
+                sheet.setColumnWidth(2, Math.min((modelSavingsProgress.getDescription().length() + 2) * 256, 20000)); // 20000 adalah batas maksimum width
+
+
                 dataRow.createCell(3).setCellValue(Tools.convertToCurrency(modelSavingsProgress.getProcessValue(),locale));
                 sheet.setColumnWidth(3, (Tools.convertToCurrency(modelSavingsProgress.getProcessValue(),locale).length() * 400));
 
