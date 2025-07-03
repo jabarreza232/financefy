@@ -108,12 +108,6 @@
                             android:src="@drawable/ic_date_range"
                             app:tint="?attr/colorOnSurface" />
 
-                        <ImageView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:alpha="0.5"
-                            android:scaleType="centerCrop"
-                            android:src="@drawable/bg_ilustration" />
 
 
                     </RelativeLayout>

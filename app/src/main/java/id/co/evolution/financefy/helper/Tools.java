@@ -365,6 +365,7 @@ public class Tools {
         Matcher m = p.matcher(value);
         return m.find();
     }
+    public static final int REQUEST_CODE = 100;
 
     public static String replaceStringNumberFormat(String value) {
 

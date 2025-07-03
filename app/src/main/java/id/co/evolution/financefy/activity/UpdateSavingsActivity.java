@@ -1,6 +1,7 @@
 package id.co.evolution.financefy.activity;
 
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
+import static id.co.evolution.financefy.helper.Tools.REQUEST_CODE;
 import static id.co.evolution.financefy.helper.Tools.getFileFromUri;
 import static id.co.evolution.financefy.helper.Tools.getFileName;
 import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
@@ -28,6 +29,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.databinding.DataBindingUtil;
@@ -252,11 +254,11 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
                 break;
             case R.id.btnGallery:
                 isFromScanImage= false;
-
-                if (checkGalleryPermission()) {
-                    openGallery();
+                String permission = getGalleryPermission();
+                if (permission != null && ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_CODE);
                 } else {
-                    requestGalleryPermission.launch(getGalleryPermission());
+                    openGallery();
                 }
                 break;
             case R.id.place_date:
@@ -336,16 +338,15 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
         return ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
-    // 🔹 Cek Izin Galeri
-    private boolean checkGalleryPermission() {
-        return ContextCompat.checkSelfPermission(this, getGalleryPermission()) == PackageManager.PERMISSION_GRANTED;
-    }
+
 
     // 🔹 Mendapatkan permission sesuai Android Version
     private String getGalleryPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
-            return android.Manifest.permission.READ_MEDIA_IMAGES;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ pakai Photo Picker, tidak perlu permission
+            return null;
         } else {
+            // Android 12 ke bawah tetap perlu izin
             return android.Manifest.permission.READ_EXTERNAL_STORAGE;
         }
     }
