@@ -1,90 +1,131 @@
-<?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        >
+        android:background="?android:attr/colorBackground"
+        android:gravity="center">
 
-
-         <TextView
-            android:layout_marginTop="48dp"
-            android:id="@+id/txt_header"
+        <!-- Header Section -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="@font/ubuntu_b"
-            android:padding="10dp"
-            android:textAlignment="center"
-            android:text="Masukkan PIN"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="17sp" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/ubuntu_r"
-            android:textAlignment="center"
-            android:paddingBottom="10dp"
-            android:text="Silahkan masukkan PIN anda"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="15sp" />
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="2dp"
-            android:layout_marginBottom="10dp"
-            android:background="@color/colorGrey50" />
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:layout_marginBottom="32dp">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/txt_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/ubuntu_b"
+                android:text="Masukkan PIN"
+                android:textAlignment="center"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="24sp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/ubuntu_r"
+                android:text="Silahkan masukkan PIN anda"
+                android:textAlignment="center"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+        <!-- PIN Display Section -->
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:background="@drawable/shape_input_form_calculator">
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="48dp">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/til_amount"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
                 app:passwordToggleEnabled="true"
-                app:passwordToggleTint="@color/white"
-                android:layout_toStartOf="@id/btn_delete"
+                app:passwordToggleTint="?android:attr/textColorSecondary"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
                 app:errorEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_amount"
-                    android:inputType="numberPassword"
-                    android:layout_width="match_parent"
+                    android:layout_width="220dp"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="@color/white"
+                    android:inputType="numberPassword"
+                    android:background="@android:color/transparent"
                     android:enabled="false"
                     android:maxLength="6"
                     android:textAlignment="center"
-                    android:textColor="@color/white"
-                    android:textSize="36sp" />
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="32sp"
+                    android:letterSpacing="0.3"
+                    android:paddingVertical="16dp" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
+        </LinearLayout>
 
-            <ImageView
-                android:id="@+id/btn_delete"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="10dp"
-                android:src="@drawable/ic_baseline_backspace_24" />
-        </RelativeLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_calculator"
+        <!-- Calculator Section -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            />
+            android:orientation="vertical"
+            android:paddingHorizontal="32dp">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_calculator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:overScrollMode="never"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="3"
+                tools:listitem="@layout/list_number_pin" />
+
+            <!-- Delete Button Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="8dp">
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/btn_delete"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:src="@drawable/ic_baseline_backspace_24"
+                    android:padding="16dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:tint="?android:attr/textColorSecondary"
+                    android:contentDescription="@string/delete"
+                    />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 </layout>

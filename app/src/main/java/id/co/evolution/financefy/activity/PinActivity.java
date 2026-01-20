@@ -21,6 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.adapter.AdapterCalculator;
+import id.co.evolution.financefy.adapter.AdapterPinNumber;
 import id.co.evolution.financefy.databinding.ActivityPinBinding;
 import id.co.evolution.financefy.dummy.DummyNumberPin;
 import id.co.evolution.financefy.helper.TinyDb;
@@ -33,20 +34,20 @@ public class PinActivity extends AppCompatActivity {
     String result = "";
     @Inject
     TinyDb tinyDb;
-    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
+    public ModelPrimaryColor modelPrimaryColor = Tools.modelPrimaryColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(tinyDb.getObject("model_primary_color", ModelPrimaryColor.class)!=null){
-            modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
-            Tools.setThemeActivity(getTheme(),modelPrimaryColor);
+        if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+            modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+            Tools.setThemeActivity(getTheme(), modelPrimaryColor);
             getSupportActionBar().hide();
         }
 
-        binding = DataBindingUtil.setContentView(this,R.layout.activity_pin);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_pin);
 
-        AdapterCalculator adapterCalculator = new AdapterCalculator(this, DummyNumberPin.getNumberPinConfirm(), (data, position) -> {
+        AdapterPinNumber adapterPin = new AdapterPinNumber(this, DummyNumberPin.getNumberPinConfirm(), (data, position) -> {
             List<String> dataList = (List<String>) data;
 
 
@@ -69,7 +70,7 @@ public class PinActivity extends AppCompatActivity {
                     }
 
                     Intent intent = new Intent(this, MainActivity.class);
-                    intent.putExtra("isInputPin",true);
+                    intent.putExtra("isInputPin", true);
 
                     startActivity(intent);
                     break;
@@ -81,7 +82,7 @@ public class PinActivity extends AppCompatActivity {
             resultText();
         });
         binding.rvCalculator.setLayoutManager(new GridLayoutManager(this, 3));
-        binding.rvCalculator.setAdapter(adapterCalculator);
+        binding.rvCalculator.setAdapter(adapterPin);
         binding.rvCalculator.setClickable(true);
         binding.rvCalculator.setFocusable(true);
         binding.rvCalculator.setFocusableInTouchMode(true);
