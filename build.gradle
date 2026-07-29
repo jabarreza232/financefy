@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-ext.kotlin_version = '1.8.0'
+ext.kotlin_version = '1.9.20'
     repositories {
         google()
         jcenter()
@@ -9,11 +9,11 @@ ext.kotlin_version = '1.8.0'
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.6.0'
+        classpath 'com.android.tools.build:gradle:8.8.2'
         classpath 'com.google.gms:google-services:4.3.14'
-        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.40.1'
+        classpath 'com.google.dagger:hilt-android-gradle-plugin:2.50'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
+        classpath "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin:1.9.20-1.0.14"
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -30,7 +30,7 @@ allprojects {
 }
 ext {
     appVersionName = '2.1.7'
-    roomVersion = '1.1.1'
+    roomVersion = '2.6.1'
 }
 task clean(type: Delete) {
     delete rootProject.buildDir
