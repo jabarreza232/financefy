@@ -11,8 +11,8 @@ android {
         applicationId "id.co.evolution.financefy"
         minSdkVersion 26
         targetSdkVersion 36
-        versionCode 14
-        versionName "2.1.9"
+        versionCode 15
+        versionName "2.1.10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
