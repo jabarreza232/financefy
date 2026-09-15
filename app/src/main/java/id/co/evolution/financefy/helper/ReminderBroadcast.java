@@ -50,9 +50,11 @@ public class ReminderBroadcast extends BroadcastReceiver {
             String keyNotif = intent.getStringExtra("key");
 
             ModelNotification modelNotification = tinyDb.getObject(keyNotif,ModelNotification.class);
-            String title = modelNotification.title;
-            String description = modelNotification.description;
-            pushNotification(context,title,description, modelNotification.requestCode);
+            if(modelNotification!=null){
+                String title = modelNotification.title;
+                String description = modelNotification.description;
+                pushNotification(context,title,description, modelNotification.requestCode);
+            }
         }
     }
     private void pushNotification(Context context,String title,String description,int requestCode){

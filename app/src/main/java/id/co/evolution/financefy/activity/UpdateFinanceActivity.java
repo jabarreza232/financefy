@@ -207,101 +207,88 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
 
 
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.tvFileName:
-                dialogPreviewImage.show(filePhoto.getPath());
-                break;
-            case R.id.btnCamera:
-                isFromScanImage= false;
-                if (checkCameraPermission()) {
-                    openCamera();
-                } else {
-                    requestCameraPermission.launch(android.Manifest.permission.CAMERA);
-                }
-                break;
-            case R.id.btnClose:
-                binding.rlPreviewImage.setVisibility(View.GONE);
-                filePhoto = null;
-                break;
-            case R.id.btn_scan:
-                isFromScanImage = true;
-                showDialogChoosePicture();
+        int id = v.getId();
+        if (id == R.id.tvFileName) {
+            dialogPreviewImage.show(filePhoto.getPath());
+        } else if (id == R.id.btnCamera) {
+            isFromScanImage= false;
+            if (checkCameraPermission()) {
+                openCamera();
+            } else {
+                requestCameraPermission.launch(android.Manifest.permission.CAMERA);
+            }
+        } else if (id == R.id.btnClose) {
+            binding.rlPreviewImage.setVisibility(View.GONE);
+            filePhoto = null;
+        } else if (id == R.id.btn_scan) {
+            isFromScanImage = true;
+            showDialogChoosePicture();
+        } else if (id == R.id.btnGallery) {
+            isFromScanImage= false;
 
-                break;
-            case R.id.btnGallery:
-                isFromScanImage= false;
+            String permission = getGalleryPermission();
+            if (permission != null && ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_CODE);
+            } else {
+                openGallery();
+            }
+        } else if (id == R.id.place_category) {
+            showDialogCategory();
+        } else if (id == R.id.place_type) {
+            showDialogType();
+        } else if (id == R.id.btn_calculator) {
+            dialogCalculator = new DialogCalculator(this, getLayoutInflater(), Tools.convertCurrencyToValue(jumlah), result -> {
+                jumlah = Tools.convertToCurrency(result,locale);
+                binding.etAmount.setText(jumlah);
+            });
+            dialogCalculator.show();
+        } else if (id == R.id.place_date) {
+            showDatePickerDialog();
+        } else if (id == R.id.img_back) {
+            finish();
+        } else if (id == R.id.place_submit) {
+            if (type.isEmpty()) {
+                Toast.makeText(this, "Silahkan Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
+            } else if (binding.etAmount.getText().toString().isEmpty()) {
+                binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
+            } else if (!binding.etAmount.getText().toString().isEmpty()) {
+                binding.tilAmount.setError(null);
+            }
 
-                String permission = getGalleryPermission();
-                if (permission != null && ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_CODE);
-                } else {
-                    openGallery();
-                }
-                break;
-            case R.id.place_category:
-                showDialogCategory();
-                break;
-            case R.id.place_type:
-                showDialogType();
-                break;
-            case R.id.btn_calculator:
-                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), Tools.convertCurrencyToValue(jumlah), result -> {
-                    jumlah = Tools.convertToCurrency(result,locale);
-                    binding.etAmount.setText(jumlah);
-                });
-                dialogCalculator.show();
-                break;
-            case R.id.place_date:
-                showDatePickerDialog();
-                break;
-            case R.id.img_back:
-                finish();
-                break;
-            case R.id.place_submit:
-                if (type.isEmpty()) {
-                    Toast.makeText(this, "Silahkan Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
-                } else if (binding.etAmount.getText().toString().isEmpty()) {
-                    binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
-                } else if (!binding.etAmount.getText().toString().isEmpty()) {
-                    binding.tilAmount.setError(null);
-                }
+            if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty()) {
+                DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                    @Override
+                    public void onSubmit(@NonNull String result) {
+                        if(result.equalsIgnoreCase("yes")){
+                            ModelFinance model = new ModelFinance();
+                            model.setId(modelFinance.getId());
+                            model.setDate(date);
+                            model.setJumlah(Tools.replaceCurrencyStringToDouble(jumlah));
+                            model.setTipe(type);
+                            model.setType_currency(modelUser.getType_currency());
+                            model.setKategori(category);
+                            model.setKeterangan(binding.etDescription.getText().toString().trim());
+                            model.setMonth(month);
+                            model.setId_finance_user(modelUser.getId());
+                            if(filePhoto!=null)
+                                model.setPhoto(filePhoto.getPath());
 
-                if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty()) {
-                    DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
-                        @Override
-                        public void onSubmit(@NonNull String result) {
-                            if(result.equalsIgnoreCase("yes")){
-                                ModelFinance model = new ModelFinance();
-                                model.setId(modelFinance.getId());
-                                model.setDate(date);
-                                model.setJumlah(Tools.replaceCurrencyStringToDouble(jumlah));
-                                model.setTipe(type);
-                                model.setType_currency(modelUser.getType_currency());
-                                model.setKategori(category);
-                                model.setKeterangan(binding.etDescription.getText().toString().trim());
-                                model.setMonth(month);
-                                model.setId_finance_user(modelUser.getId());
-                                if(filePhoto!=null)
-                                    model.setPhoto(filePhoto.getPath());
+                            viewModelFinance.inputUpdateFinance("Update", model);
+                            Intent intent = new Intent();
+                            intent.putExtra("finance", model);
+                            intent.putExtra("position", position);
+                            setResult(REQUEST_CODE_FINANCE, intent);
+                            finish();
+                            Toast.makeText(UpdateFinanceActivity.this, "Catatan "+type+" berhasil di ubah !", Toast.LENGTH_SHORT).show();
 
-                                viewModelFinance.inputUpdateFinance("Update", model);
-                                Intent intent = new Intent();
-                                intent.putExtra("finance", model);
-                                intent.putExtra("position", position);
-                                setResult(REQUEST_CODE_FINANCE, intent);
-                                finish();
-                                Toast.makeText(UpdateFinanceActivity.this, "Catatan "+type+" berhasil di ubah !", Toast.LENGTH_SHORT).show();
-
-                            }
                         }
-                    });
-                    dialogConfirm.showDialogConfirm("Update","Apakah anda yakin ingin update data ?");
+                    }
+                });
+                dialogConfirm.showDialogConfirm("Update","Apakah anda yakin ingin update data ?");
 
-                }
-                break;
+            }
         }
     }
 

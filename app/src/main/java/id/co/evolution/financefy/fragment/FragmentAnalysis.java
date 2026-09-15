@@ -339,31 +339,25 @@ public class FragmentAnalysis extends Fragment {
     }
 
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.filter:
-                showDialogFilter();
-                // Not implemented here
-                break;
-            case R.id.view_list:
-                if (typeChart == TYPE_CHART.PIE_CHART) {
-                    item.setIcon(R.drawable.ic_baseline_bar_chart_24);
-                    typeChart = TYPE_CHART.BAR_CHART;
-                    if (finances.size() > 0) new BarChartAsyncTask(finances).execute();
-                } else if (typeChart == TYPE_CHART.BAR_CHART) {
-                    item.setIcon(R.drawable.ic_baseline_pie_chart_24);
-                    typeChart = TYPE_CHART.PIE_CHART;
-                    if (finances.size() > 0)
-                        new PieChartAsyncTask(financeFilter.listAnalysis(finances, filterType)).execute();
-                }
-                binding.barChartAnalysis.setVisibility(finances.size() > 0 && typeChart == TYPE_CHART.BAR_CHART ? View.VISIBLE : View.GONE);
-                binding.pieChartAnalysis.setVisibility(finances.size() > 0 && typeChart == TYPE_CHART.PIE_CHART ? View.VISIBLE : View.GONE);
-                return true;
-
-            default:
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.filter) {
+            showDialogFilter();
+        } else if (itemId == R.id.view_list) {
+            if (typeChart == TYPE_CHART.PIE_CHART) {
+                item.setIcon(R.drawable.ic_baseline_bar_chart_24);
+                typeChart = TYPE_CHART.BAR_CHART;
+                if (finances.size() > 0) new BarChartAsyncTask(finances).execute();
+            } else if (typeChart == TYPE_CHART.BAR_CHART) {
+                item.setIcon(R.drawable.ic_baseline_pie_chart_24);
+                typeChart = TYPE_CHART.PIE_CHART;
+                if (finances.size() > 0)
+                    new PieChartAsyncTask(financeFilter.listAnalysis(finances, filterType)).execute();
+            }
+            binding.barChartAnalysis.setVisibility(finances.size() > 0 && typeChart == TYPE_CHART.BAR_CHART ? View.VISIBLE : View.GONE);
+            binding.pieChartAnalysis.setVisibility(finances.size() > 0 && typeChart == TYPE_CHART.PIE_CHART ? View.VISIBLE : View.GONE);
+            return true;
         }
         return true;
     }

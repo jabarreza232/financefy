@@ -228,96 +228,84 @@ public class UpdateSavingsActivity extends AppCompatActivity implements View.OnC
 
 
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.tvFileName:
-                dialogPreviewImage.show(filePhoto.getPath());
-                break;
-            case R.id.btnCamera:
-                isFromScanImage= false;
-                if (checkCameraPermission()) {
-                    openCamera();
-                } else {
-                    requestCameraPermission.launch(android.Manifest.permission.CAMERA);
-                }
-                break;
-            case R.id.btnClose:
-                binding.rlPreviewImage.setVisibility(View.GONE);
-                filePhoto = null;
-                break;
-            case R.id.btn_scan:
-                isFromScanImage = true;
-                showDialogChoosePicture();
+        int id = v.getId();
+        if (id == R.id.tvFileName) {
+            dialogPreviewImage.show(filePhoto.getPath());
+        } else if (id == R.id.btnCamera) {
+            isFromScanImage= false;
+            if (checkCameraPermission()) {
+                openCamera();
+            } else {
+                requestCameraPermission.launch(android.Manifest.permission.CAMERA);
+            }
+        } else if (id == R.id.btnClose) {
+            binding.rlPreviewImage.setVisibility(View.GONE);
+            filePhoto = null;
+        } else if (id == R.id.btn_scan) {
+            isFromScanImage = true;
+            showDialogChoosePicture();
+        } else if (id == R.id.btnGallery) {
+            isFromScanImage= false;
+            String permission = getGalleryPermission();
+            if (permission != null && ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_CODE);
+            } else {
+                openGallery();
+            }
+        } else if (id == R.id.place_date) {
+            showDatePickerDialog();
+        } else if (id == R.id.img_back) {
+            finish();
+        } else if (id == R.id.btn_calculator) {
+            dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
+                jumlah = result;
+                binding.etAmount.setText(Tools.convertToCurrency(result,locale));
+            });
+            dialogCalculator.show();
+        } else if (id == R.id.place_submit) {
+            if (binding.etTitle.getText().toString().isEmpty()) {
+                binding.tilTitle.setError("Silahkan input judul terlebih dahulu");
+            } else {
+                binding.tilTitle.setError(null);
+            }
 
-                break;
-            case R.id.btnGallery:
-                isFromScanImage= false;
-                String permission = getGalleryPermission();
-                if (permission != null && ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_CODE);
-                } else {
-                    openGallery();
-                }
-                break;
-            case R.id.place_date:
-                showDatePickerDialog();
-                break;
-            case R.id.img_back:
-                finish();
-                break;
+            if (binding.etAmount.getText().toString().isEmpty()) {
+                binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
+            } else {
+                binding.tilAmount.setError(null);
+            }
 
-            case R.id.btn_calculator:
-                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
-                    jumlah = result;
-                    binding.etAmount.setText(Tools.convertToCurrency(result,locale));
-                });
-                dialogCalculator.show();
-                break;
-            case R.id.place_submit:
-                if (binding.etTitle.getText().toString().isEmpty()) {
-                    binding.tilTitle.setError("Silahkan input judul terlebih dahulu");
-                } else {
-                    binding.tilTitle.setError(null);
-                }
+            if (!binding.etAmount.getText().toString().isEmpty()) {
+                DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                    @Override
+                    public void onSubmit(@NonNull String result) {
+                        if(result.equalsIgnoreCase("yes")){
+                            ModelSavingsProgress model = new ModelSavingsProgress();
+                            model.setId(getIntent().getIntExtra("id", 0));
+                            model.setDate_progress_savings(date);
+                            model.setMonth(month);
+                            model.setProcessValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
+                            model.setDescription(binding.etDescription.getText().toString().trim());
+                            model.setTitle(binding.etTitle.getText().toString().trim());
+                            model.setId_savings(modelSavings.getId());
+                            model.setType_currency(tinyDb.getString("currency"));
+                            if(filePhoto!=null)
+                                model.setPhoto(filePhoto.getPath());
+                            UpdateSavingsActivity.this.onSubmit(model);
+                            Intent intent = new Intent();
+                            intent.putExtra("savings_progress",model);
+                            intent.putExtra("position", position);
+                            setResult(REQUEST_CODE_SAVINGS, intent);
+                            finish();
+                            Toast.makeText(UpdateSavingsActivity.this, "Catatan progress menabung berhasil di ubah !", Toast.LENGTH_SHORT).show();
 
-                if (binding.etAmount.getText().toString().isEmpty()) {
-                    binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
-                } else {
-                    binding.tilAmount.setError(null);
-                }
-
-                if (!binding.etAmount.getText().toString().isEmpty()) {
-                    DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
-                        @Override
-                        public void onSubmit(@NonNull String result) {
-                            if(result.equalsIgnoreCase("yes")){
-                                ModelSavingsProgress model = new ModelSavingsProgress();
-                                model.setId(getIntent().getIntExtra("id", 0));
-                                model.setDate_progress_savings(date);
-                                model.setMonth(month);
-                                model.setProcessValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
-                                model.setDescription(binding.etDescription.getText().toString().trim());
-                                model.setTitle(binding.etTitle.getText().toString().trim());
-                                model.setId_savings(modelSavings.getId());
-                                model.setType_currency(tinyDb.getString("currency"));
-                                if(filePhoto!=null)
-                                    model.setPhoto(filePhoto.getPath());
-                                UpdateSavingsActivity.this.onSubmit(model);
-                                Intent intent = new Intent();
-                                intent.putExtra("savings_progress",model);
-                                intent.putExtra("position", position);
-                                setResult(REQUEST_CODE_SAVINGS, intent);
-                                finish();
-                                Toast.makeText(UpdateSavingsActivity.this, "Catatan progress menabung berhasil di ubah !", Toast.LENGTH_SHORT).show();
-
-                            }
                         }
-                    });
-                    dialogConfirm.showDialogConfirm("Update","Apakah anda yakin ingin update data ?");
-                }
-                break;
+                    }
+                });
+                dialogConfirm.showDialogConfirm("Update","Apakah anda yakin ingin update data ?");
+            }
         }
     }
 

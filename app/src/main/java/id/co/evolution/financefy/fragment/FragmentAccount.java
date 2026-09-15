@@ -449,16 +449,10 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     }
 
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.add_account:
-                showDialogAddAccount(true);
-                // Not implemented here
-                break;
-            default:
-                break;
+        if (item.getItemId() == R.id.add_account) {
+            showDialogAddAccount(true);
         }
         return true;
     }
@@ -602,23 +596,19 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         popupMenu.getMenuInflater().inflate(R.menu.menu_type_finance, popupMenu.getMenu());
 
         popupMenu.setOnMenuItemClickListener(menuItem -> {
-
-            switch (menuItem.getItemId()) {
-                case R.id.all:
-                    binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pengeluaran dan pemasukan");
-                    binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.VISIBLE);
-                    binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.VISIBLE);
-                    break;
-                case R.id.expense:
-                    binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pengeluaran");
-                    binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.VISIBLE);
-                    binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.GONE);
-                    break;
-                case R.id.income:
-                    binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pemasukan");
-                    binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.GONE);
-                    binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.VISIBLE);
-                    break;
+            int itemId = menuItem.getItemId();
+            if (itemId == R.id.all) {
+                binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pengeluaran dan pemasukan");
+                binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.VISIBLE);
+                binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.VISIBLE);
+            } else if (itemId == R.id.expense) {
+                binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pengeluaran");
+                binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.VISIBLE);
+                binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.GONE);
+            } else if (itemId == R.id.income) {
+                binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pemasukan");
+                binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.GONE);
+                binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.VISIBLE);
             }
             return true;
         });

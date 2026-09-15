@@ -247,22 +247,19 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             long recommendationSavings = 0;
             long recommendationSavingsDay = Tools.calculateRecommendationDay(modelSavings.getTargetValue(), restOfTheDay);
 
-            switch (menuItem.getItemId()) {
-                case R.id.year:
-                    recommendationSavings = Tools.calculateRecommendationYear(recommendationSavingsDay);
-                    setTextRecommendationSavings("pertahun", recommendationSavings);
-                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.YEAR;
-                    break;
-                case R.id.month:
-                    recommendationSavings = Tools.calculateRecommendationMonth(recommendationSavingsDay);
-                    setTextRecommendationSavings("perbulan", recommendationSavings);
-                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.MONTH;
-                    break;
-                case R.id.day:
-                    recommendationSavings = recommendationSavingsDay;
-                    setTextRecommendationSavings("perhari", recommendationSavings);
-                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
-                    break;
+            int itemId = menuItem.getItemId();
+            if (itemId == R.id.year) {
+                recommendationSavings = Tools.calculateRecommendationYear(recommendationSavingsDay);
+                setTextRecommendationSavings("pertahun", recommendationSavings);
+                typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.YEAR;
+            } else if (itemId == R.id.month) {
+                recommendationSavings = Tools.calculateRecommendationMonth(recommendationSavingsDay);
+                setTextRecommendationSavings("perbulan", recommendationSavings);
+                typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.MONTH;
+            } else if (itemId == R.id.day) {
+                recommendationSavings = recommendationSavingsDay;
+                setTextRecommendationSavings("perhari", recommendationSavings);
+                typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
             }
             return true;
         });
@@ -402,31 +399,25 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
     }
 
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.filter:
-                showDialogFilterSavings();
-                // Not implemented here
-                break;
-            case R.id.view_list:
-                if (typeChart == TYPE_CHART.PIE_CHART) {
-                    item.setIcon(R.drawable.ic_baseline_bar_chart_24);
-                    typeChart = TYPE_CHART.BAR_CHART;
-                    if (savingsData.size() > 0) new FragmentAnalysisSavings.BarChartAsyncTask(savingsData).execute();
-                } else if (typeChart == TYPE_CHART.BAR_CHART) {
-                    item.setIcon(R.drawable.ic_baseline_pie_chart_24);
-                    typeChart = TYPE_CHART.PIE_CHART;
-                    if (savingsData.size() > 0)
-                        new FragmentAnalysisSavings.PieChartAsyncTask(savingsFilter.listAnalysis(savingsData)).execute();
-                }
-                binding.barChartAnalysis.setVisibility(savingsData.size() > 0 && typeChart == TYPE_CHART.BAR_CHART ? View.VISIBLE : View.GONE);
-                binding.pieChartAnalysis.setVisibility(savingsData.size() > 0 && typeChart == TYPE_CHART.PIE_CHART ? View.VISIBLE : View.GONE);
-                return true;
-
-            default:
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.filter) {
+            showDialogFilterSavings();
+        } else if (itemId == R.id.view_list) {
+            if (typeChart == TYPE_CHART.PIE_CHART) {
+                item.setIcon(R.drawable.ic_baseline_bar_chart_24);
+                typeChart = TYPE_CHART.BAR_CHART;
+                if (savingsData.size() > 0) new FragmentAnalysisSavings.BarChartAsyncTask(savingsData).execute();
+            } else if (typeChart == TYPE_CHART.BAR_CHART) {
+                item.setIcon(R.drawable.ic_baseline_pie_chart_24);
+                typeChart = TYPE_CHART.PIE_CHART;
+                if (savingsData.size() > 0)
+                    new FragmentAnalysisSavings.PieChartAsyncTask(savingsFilter.listAnalysis(savingsData)).execute();
+            }
+            binding.barChartAnalysis.setVisibility(savingsData.size() > 0 && typeChart == TYPE_CHART.BAR_CHART ? View.VISIBLE : View.GONE);
+            binding.pieChartAnalysis.setVisibility(savingsData.size() > 0 && typeChart == TYPE_CHART.PIE_CHART ? View.VISIBLE : View.GONE);
+            return true;
         }
         return true;
     }

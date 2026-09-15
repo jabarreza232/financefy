@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="?attr/colorSurface"> <!-- Gunakan background bawaan Anda atau hapus baris ini agar default -->
+
+    <TextView
+        android:id="@+id/txt_dialog_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Unduh Model AI"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <TextView
+        android:id="@+id/txt_dialog_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pilih model kecerdasan buatan (LLM) untuk memproses struk belanja secara lokal tanpa internet. Pastikan kuota dan ruang penyimpanan Anda mencukupi."
+        android:textColor="?android:textColorSecondary"
+        android:textSize="14sp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- RadioGroup untuk pilihan Model -->
+    <RadioGroup
+        android:id="@+id/rg_llm_models"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp">
+
+        <!-- Saat ini hanya ada 1 pilihan, otomatis terpilih (checked="true") -->
+        <RadioButton
+            android:id="@+id/rb_qwen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Qwen2 0.5B Instruct (LiteRT)\nUkuran: ~1.6GB"
+            android:checked="true"
+            android:padding="8dp"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="15sp"
+            app:buttonTint="?attr/colorPrimary" />
+
+    </RadioGroup>
+
+    <!-- Baris Tombol Aksi -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end">
+
+        <TextView
+            android:id="@+id/btn_cancel_dialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BATAL"
+            android:padding="12dp"
+            android:textColor="?android:textColorSecondary"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"/>
+
+        <TextView
+            android:id="@+id/btn_download_dialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UNDUH"
+            android:padding="12dp"
+            android:layout_marginStart="16dp"
+            android:textColor="?attr/colorPrimary"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"/>
+    </LinearLayout>
+
+</LinearLayout>

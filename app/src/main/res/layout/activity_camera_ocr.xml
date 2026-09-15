@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:background="#000000">
+
+    <!-- 1. Camera Preview -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/viewFinder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- 2. Kotak Pembatas (Area Scan) -->
+    <!-- Vertical bias dinaikkan sedikit ke 0.35 agar UI bawah tidak terlalu sempit -->
+    <View
+        android:id="@+id/scanFrame"
+        android:layout_width="300dp"
+        android:layout_height="450dp"
+        android:background="@drawable/bg_scan_frame"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.35" />
+
+    <!-- Garis Laser Scan -->
+    <View
+        android:id="@+id/scanLine"
+        android:layout_width="300dp"
+        android:layout_height="3dp"
+        android:background="#00BFFF"
+        android:elevation="4dp"
+        app:layout_constraintEnd_toEndOf="@+id/scanFrame"
+        app:layout_constraintStart_toStartOf="@+id/scanFrame"
+        app:layout_constraintTop_toTopOf="@+id/scanFrame" />
+
+    <!-- 3. Teks Petunjuk (Standar Industri UX) -->
+    <!-- Menggunakan efek bayangan (shadow) agar teks tetap terbaca walau kamera menyorot kertas putih -->
+    <TextView
+        android:id="@+id/tvScanHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Posisikan struk di dalam bingkai"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:letterSpacing="0.03"
+        android:shadowColor="#80000000"
+        android:shadowDx="1"
+        android:shadowDy="1"
+        android:shadowRadius="6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scanFrame" />
+
+    <!-- 4. Area Kontrol Bawah (Digelapkan agar tombol selalu kontras) -->
+    <!-- Menggunakan 60% opacity hitam (#99000000) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="140dp"
+        android:background="#99000000"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- 5. Tombol Close/Back (Kiri Bawah - Sebagai penyeimbang Gallery) -->
+    <ImageButton
+        android:id="@+id/btnClose"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Tutup Kamera"
+        android:padding="14dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_close"
+    app:tint="#FFFFFF"
+    app:layout_constraintBottom_toBottomOf="@+id/btnScan"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="@+id/btnScan" />
+
+    <!-- 6. Tombol Scan Utama (Tengah Bawah) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnScan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        app:backgroundTint="#FFFFFF"
+        app:borderWidth="0dp"
+        app:elevation="8dp"
+        app:fabCustomSize="80dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:maxImageSize="36dp"
+        app:srcCompat="@drawable/outline_document_scanner_24"
+        app:tint="#000000" />
+
+    <!-- 7. Tombol Gallery (Kanan Bawah) -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnGallery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        app:backgroundTint="#2C2C2C"
+    app:borderWidth="0dp"
+    app:elevation="4dp"
+    app:fabCustomSize="56dp"
+    app:layout_constraintBottom_toBottomOf="@+id/btnScan"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="@+id/btnScan"
+    app:maxImageSize="24dp"
+    app:srcCompat="@drawable/ic_galery"
+    app:tint="#FFFFFF" />
+
+    <!-- 8. Tombol Flash (Kanan Atas) -->
+    <ImageButton
+        android:id="@+id/btnFlash"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="32dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Nyalakan Flash"
+        android:padding="10dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/ic_outline_flashlight_off_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="#FFFFFF" />
+
+    <!-- 9. Loading Overlay (Lebih sinematik saat diproses) -->
+    <View
+        android:id="@+id/loadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#B3000000"
+        android:clickable="true"
+        android:elevation="10dp"
+        android:focusable="true"
+        android:visibility="gone" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:elevation="11dp"
+        android:indeterminateTint="#FFFFFF"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

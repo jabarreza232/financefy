@@ -5,17 +5,22 @@ import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -74,11 +79,15 @@ import id.co.evolution.financefy.dialog.DialogSettingPin;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
+import id.co.evolution.financefy.model.ModelRepository;
 import id.co.evolution.financefy.model.ModelSavingsProgress;
 import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.FinanceRepository;
 import id.co.evolution.financefy.repository.SavingsProgressRepository;
 import id.co.evolution.financefy.repository.SavingsRepository;
+import id.co.evolution.financefy.repository.WorkManagerModelRepository;
+import id.co.evolution.financefy.state.DownloadState;
+import id.co.evolution.financefy.viewmodel.LlmViewModel;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 import id.co.evolution.financefy.viewmodel.ViewModelSavingsProgress;
 
@@ -101,7 +110,8 @@ public class FragmentSettings extends Fragment {
 
     public ModelUser user;
     private InterstitialAd mInterstitialAd;
-
+    private long currentDownloadId = -1; // Menyimpan ID proses unduhan
+    private boolean isDownloading = false; // Mencegah dialog muncul saat sedang unduh
     private static final String TAG = "FragmentSettings";
     private Locale locale;
     public enum MENU{
@@ -122,7 +132,8 @@ public class FragmentSettings extends Fragment {
     }
 
     FragmentSettingsBinding binding;
-
+    File modelFile;
+    private LlmViewModel viewModel;
     @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -148,7 +159,30 @@ public class FragmentSettings extends Fragment {
 //                requestPermission();
 //            }
 //        });
+         modelFile = new File(requireContext().getExternalFilesDir(null), "Qwen2_0.5B_Instruct.litertlm");
+ // 2. Aksi ketika CardView ditekan (Tampilkan Dialog)
+        binding.cvDownloadLlm.setOnClickListener(v -> {
+           processDownload();
+        });
+        binding.imgCancelLlm.setOnClickListener(v -> {
+            if (isDownloading && currentDownloadId != -1) {
+                DownloadManager manager = (DownloadManager) requireContext().getSystemService(Context.DOWNLOAD_SERVICE);
 
+                // MEMBATALKAN UNDUHAN DAN MENGHAPUS FILE SEMENTARA
+                manager.remove(currentDownloadId);
+
+                // Kembalikan status UI ke semula
+                isDownloading = false;
+                currentDownloadId = -1;
+
+                binding.progressBarLlm.setVisibility(View.GONE);
+                binding.imgCancelLlm.setVisibility(View.GONE); // Sembunyikan X
+                binding.imgArrowLlm.setVisibility(View.VISIBLE); // Munculkan panah lagi
+
+                binding.txtStatusLlm.setText("Dibatalkan");
+                // binding.txtStatusLlm.setTextColor(getResources().getColor(R.color.red));
+            }
+        });
         binding.txtNotification.setOnClickListener(v -> {
             Intent i = new Intent(getContext(), NotificationActivity.class);
             startActivity(i);
@@ -213,7 +247,130 @@ public class FragmentSettings extends Fragment {
 //        changeColorThemeSettings(mainActivity.modelPrimaryColor);
         return binding.getRoot();
     }
-private void adRequest(){
+
+    private void processDownload() {
+        if (modelFile.exists()) {
+            Toast.makeText(getContext(), "Model Telah Berhasil Terunduh!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        showDownloadDialog();
+    }
+
+    private void showDownloadDialog() {
+        View dialogView = requireActivity().getLayoutInflater().inflate(R.layout.dialog_llm, null);
+        AlertDialog dialog = new AlertDialog.Builder(requireContext()).setView(dialogView).create();
+
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        dialogView.findViewById(R.id.btn_cancel_dialog).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btn_download_dialog).setOnClickListener(v -> {
+            dialog.dismiss();
+            executeDownload();
+        });
+
+        dialog.show();
+    }
+
+    private void executeDownload() {
+        String url = "https://huggingface.co/litert-community/Qwen2.5-1.5B-Instruct/resolve/main/Qwen2.5-1.5B-Instruct_multi-prefill-seq_q8_ekv4096.litertlm?download=true";
+        String fileName = "Qwen2_0.5B_Instruct.litertlm";
+
+        // Set UI awal
+        binding.progressBarLlm.setVisibility(View.VISIBLE);
+        binding.imgArrowLlm.setVisibility(View.INVISIBLE);
+        binding.imgCancelLlm.setVisibility(View.VISIBLE);
+
+        binding.imgCancelLlm.setOnClickListener(v -> viewModel.cancelDownload());
+
+        // Observasi status dari ViewModel
+        viewModel.startDownload(url, fileName).observe(getViewLifecycleOwner(), state -> {
+            switch (state.status) {
+                case DownloadState.RUNNING:
+                    binding.progressBarLlm.setProgress(state.progress);
+                    binding.txtStatusLlm.setText(String.format("%d%% (%.1f MB/s)", state.progress, state.speedMb));
+                    break;
+
+                case DownloadState.SUCCESS:
+                    binding.progressBarLlm.setVisibility(View.GONE);
+                    binding.imgCancelLlm.setVisibility(View.GONE);
+                    binding.imgArrowLlm.setVisibility(View.VISIBLE);
+                    binding.txtStatusLlm.setText("Terunduh");
+                    binding.txtStatusLlm.setTextColor(ContextCompat.getColor(getContext(), R.color.colorTextGreen));
+                    break;
+
+                case DownloadState.FAILED:
+                    binding.progressBarLlm.setVisibility(View.GONE);
+                    binding.imgCancelLlm.setVisibility(View.GONE);
+                    binding.imgArrowLlm.setVisibility(View.VISIBLE);
+                    binding.txtStatusLlm.setText("Dibatalkan / Gagal");
+                    binding.txtStatusLlm.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+                    break;
+            }
+        });
+    }
+    private void setupViewModel() {
+        // Inisialisasi manual (Jika belum memakai Hilt/Dagger)
+        ModelRepository repository = new WorkManagerModelRepository(requireContext());
+        viewModel = new LlmViewModel(repository);
+        observeDownloadStatus();
+    }
+
+    private void observeDownloadStatus() {
+        viewModel.getDownloadState().observe(getViewLifecycleOwner(), state -> {
+            switch (state.status) {
+                case DownloadState.IDLE:
+                    // Cek ketersediaan file seperti kode awal Anda
+                    File modelFile = new File(requireContext().getExternalFilesDir(null), "Qwen2_0.5B_Instruct.litertlm");
+                    if (modelFile.exists()) {
+                        setUITerunduh();
+                    } else {
+                        setUIBelumTerunduh();
+                    }
+                    break;
+
+                case DownloadState.RUNNING:
+                    // Jika user pindah Activity lalu kembali, UI langsung menyesuaikan!
+                    binding.progressBarLlm.setVisibility(View.VISIBLE);
+                    binding.imgArrowLlm.setVisibility(View.INVISIBLE);
+                    binding.imgCancelLlm.setVisibility(View.VISIBLE);
+
+                    binding.progressBarLlm.setProgress(state.progress);
+                    binding.txtStatusLlm.setText(String.format("%d%% (%.1f MB/s)", state.progress, state.speedMb));
+                    binding.txtStatusLlm.setTextColor(ContextCompat.getColor(getContext(), R.color.colorTextYellow)); // Atau warna progress
+                    break;
+
+                case DownloadState.SUCCESS:
+                    setUITerunduh();
+                    break;
+
+                case DownloadState.FAILED:
+                    setUIBelumTerunduh(); // Atau tampilkan pesan gagal
+                    break;
+            }
+        });
+    }
+
+    // Method Helper untuk UI
+    private void setUITerunduh() {
+        binding.progressBarLlm.setVisibility(View.GONE);
+        binding.imgCancelLlm.setVisibility(View.GONE);
+        binding.imgArrowLlm.setVisibility(View.VISIBLE);
+
+        binding.txtStatusLlm.setText("Terunduh");
+        binding.txtStatusLlm.setTextColor(ContextCompat.getColor(getContext(), R.color.colorTextGreen));
+    }
+
+    private void setUIBelumTerunduh() {
+        binding.progressBarLlm.setVisibility(View.GONE);
+        binding.imgCancelLlm.setVisibility(View.GONE);
+        binding.imgArrowLlm.setVisibility(View.VISIBLE);
+
+        binding.txtStatusLlm.setText("Belum Terunduh");
+        binding.txtStatusLlm.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+    }
+    private void adRequest(){
     AdRequest adRequest = new AdRequest.Builder().build();
     //official ad unit id = ca-app-pub-5068422046187558/6331529776
     //example ad unit id = ca-app-pub-3940256099942544/1033173712
@@ -322,7 +479,7 @@ private void adRequest(){
 
         viewModelFinance.init(financeRepository);
         viewModelSavingsProgress.init(savingsProgressRepository);
-
+        setupViewModel();
         viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
             dataFinance = modelFinances;
         });
@@ -559,27 +716,5 @@ private void adRequest(){
         }
     }
 
-    class DataModel {
-        private int id;
-        private String nama;
-        private int nilai;
 
-        public DataModel(int id, String nama, int nilai) {
-            this.id = id;
-            this.nama = nama;
-            this.nilai = nilai;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public String getNama() {
-            return nama;
-        }
-
-        public int getNilai() {
-            return nilai;
-        }
-    }
 }

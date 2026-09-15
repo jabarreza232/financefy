@@ -334,22 +334,19 @@ binding.btnToggle.setOnClickListener(v->{
             long recommendationSavings = 0;
             long recommendationSavingsDay = Tools.calculateRecommendationDay(modelSavings.getTargetValue(), restOfTheDay);
 
-            switch (menuItem.getItemId()) {
-                case R.id.year:
-                    recommendationSavings = Tools.calculateRecommendationYear(recommendationSavingsDay);
-                    setTextRecommendationSavings("pertahun", recommendationSavings);
-                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.YEAR;
-                    break;
-                case R.id.month:
-                    recommendationSavings = Tools.calculateRecommendationMonth(recommendationSavingsDay);
-                    setTextRecommendationSavings("perbulan", recommendationSavings);
-                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.MONTH;
-                    break;
-                case R.id.day:
-                    recommendationSavings = recommendationSavingsDay;
-                    setTextRecommendationSavings("perhari", recommendationSavings);
-                    typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
-                    break;
+            int itemId = menuItem.getItemId();
+            if (itemId == R.id.year) {
+                recommendationSavings = Tools.calculateRecommendationYear(recommendationSavingsDay);
+                setTextRecommendationSavings("pertahun", recommendationSavings);
+                typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.YEAR;
+            } else if (itemId == R.id.month) {
+                recommendationSavings = Tools.calculateRecommendationMonth(recommendationSavingsDay);
+                setTextRecommendationSavings("perbulan", recommendationSavings);
+                typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.MONTH;
+            } else if (itemId == R.id.day) {
+                recommendationSavings = recommendationSavingsDay;
+                setTextRecommendationSavings("perhari", recommendationSavings);
+                typeRecommendationSavings = TYPE_RECOMMENDATION_SAVINGS.DAY;
             }
             return true;
         });
@@ -471,38 +468,15 @@ binding.btnToggle.setOnClickListener(v->{
     }
 
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.filter:
-                if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
-                    showDialogFilterFinance();
-                } else {
-                    showDialogFilterSavings();
-                }
-                // Not implemented here
-                break;
-//            case R.id.view_list:
-//                if (type_layout_manager == TYPE_LAYOUT_MANAGER.GRID) {
-//                    item.setIcon(R.drawable.ic_baseline_grid_view_24);
-//                    type_layout_manager = TYPE_LAYOUT_MANAGER.VERTICAL;
-//                } else if (type_layout_manager == TYPE_LAYOUT_MANAGER.VERTICAL) {
-//                    item.setIcon(R.drawable.ic_baseline_format_list_bulleted_24);
-//                    type_layout_manager = TYPE_LAYOUT_MANAGER.GRID;
-//                }
-//
-//                if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan)) && adapter != null) {
-//                    adapter.setType(TYPE_LAYOUT_MANAGER.VERTICAL);
-//                    adapter.notifyDataSetChanged();
-//                } else {
-//                    adapterSavings.setType(TYPE_LAYOUT_MANAGER.VERTICAL);
-//                    adapterSavings.notifyDataSetChanged();
-//                }
-//                return true;
-
-            default:
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.filter) {
+            if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
+                showDialogFilterFinance();
+            } else {
+                showDialogFilterSavings();
+            }
         }
         return true;
     }

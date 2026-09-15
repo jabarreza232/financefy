@@ -155,61 +155,55 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
 
 
 
-    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.place_date:
-                showDatePickerDialog();
-                break;
-            case R.id.img_back:
-                finish();
-                break;
+        int id = v.getId();
+        if (id == R.id.place_date) {
+            showDatePickerDialog();
+        } else if (id == R.id.img_back) {
+            finish();
+        } else if (id == R.id.btn_calculator) {
+            dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
+                jumlah = result;
+                binding.etAmount.setText(Tools.convertToCurrency(result,locale));
+            });
+            dialogCalculator.show();
+        } else if (id == R.id.place_submit) {
+            if (binding.etTitle.getText().toString().isEmpty()) {
+                binding.tilTitle.setError("Silahkan input judul terlebih dahulu");
+            } else {
+                binding.tilTitle.setError(null);
+            }
 
-            case R.id.btn_calculator:
-                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
-                    jumlah = result;
-                    binding.etAmount.setText(Tools.convertToCurrency(result,locale));
+            if (binding.etAmount.getText().toString().isEmpty()) {
+                binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
+            } else {
+                binding.tilAmount.setError(null);
+            }
+
+            if (!binding.etAmount.getText().toString().isEmpty()) {
+                DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                    @Override
+                    public void onSubmit(@NonNull String result) {
+                        ModelSavings model = new ModelSavings();
+                        model.setDate_target(date);
+                        model.setId_savings_user(modelUser.getId());
+                        model.setType_currency(modelUser.getType_currency());
+                        model.setTargetValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
+                        model.setTitle(binding.etTitle.getText().toString().trim());
+                        viewModelSaving.inputUpdateSavings("Create", model);
+
+                        Intent intent = new Intent();
+                        intent.putExtra("savings", modelSavings);
+                        setResult(RESULT_OK, intent);
+                        Toast.makeText(CreateSavingsTargetActivity.this, "Catatan target menabung berhasil di tambahkan !", Toast.LENGTH_SHORT).show();
+                        finish();
+
+                    }
                 });
-                dialogCalculator.show();
-                break;
-            case R.id.place_submit:
-                if (binding.etTitle.getText().toString().isEmpty()) {
-                    binding.tilTitle.setError("Silahkan input judul terlebih dahulu");
-                } else {
-                    binding.tilTitle.setError(null);
-                }
+                dialogConfirm.showDialogConfirm("Submit","Apakah anda yakin ingin submit data ?");
 
-                if (binding.etAmount.getText().toString().isEmpty()) {
-                    binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
-                } else {
-                    binding.tilAmount.setError(null);
-                }
-
-                if (!binding.etAmount.getText().toString().isEmpty()) {
-                    DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
-                        @Override
-                        public void onSubmit(@NonNull String result) {
-                            ModelSavings model = new ModelSavings();
-                            model.setDate_target(date);
-                            model.setId_savings_user(modelUser.getId());
-                            model.setType_currency(modelUser.getType_currency());
-                            model.setTargetValue(Long.parseLong(Tools.convertCurrencyToValue(jumlah)));
-                            model.setTitle(binding.etTitle.getText().toString().trim());
-                            viewModelSaving.inputUpdateSavings("Create", model);
-
-                            Intent intent = new Intent();
-                            intent.putExtra("savings", modelSavings);
-                            setResult(RESULT_OK, intent);
-                            Toast.makeText(CreateSavingsTargetActivity.this, "Catatan target menabung berhasil di tambahkan !", Toast.LENGTH_SHORT).show();
-                            finish();
-
-                        }
-                    });
-                    dialogConfirm.showDialogConfirm("Submit","Apakah anda yakin ingin submit data ?");
-
-                }
-                break;
+            }
         }
     }
 }
