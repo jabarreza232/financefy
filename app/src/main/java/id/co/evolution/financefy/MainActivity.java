@@ -11,6 +11,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
+import android.app.ComponentCaller;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -28,6 +29,7 @@ import android.view.View;
 
 import androidx.annotation.AttrRes;
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        changeUINightMode();
+
 
         String type_currency = tinyDb.getString("currency");
          isPinSetting = tinyDb.getBoolean("isSettingPin");
@@ -190,6 +192,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 })
                 .start();
 
+    }
+
+
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent); // Perbarui intent
+
+        if ( intent.getBooleanExtra("GO_TO_SETTINGS", false)) {
+            // Pastikan nama ID-nya sesuai dengan yang ada di XML menu Anda
+            binding.layout.bnMain.setSelectedItemId(R.id.settings);
+        }
     }
 
     private void createNotificationChannel() {

@@ -43,6 +43,7 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.apache.commons.compress.utils.Lists;
 import org.apache.poi.ss.usermodel.Cell;
@@ -164,6 +165,26 @@ public class FragmentSettings extends Fragment {
         binding.cvDownloadLlm.setOnClickListener(v -> {
            processDownload();
         });
+        boolean isLlmActive = tinyDb.getBoolean("isSwitchLLM",true);
+        binding.switchLlm.setChecked(isLlmActive);
+        binding.switchLlm.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Simpan ke TinyDB
+            tinyDb.putBoolean("isSwitchLLM", isChecked);
+
+            String pesan = isChecked ?
+                    "Scan AI aktif. Privasi data Anda terjaga." :
+                    "Mode Scan AI dinonaktifkan.";
+
+            // Membuat Snackbar (menggunakan requireView() karena ini di dalam Fragment)
+            Snackbar snackbar = Snackbar.make(requireView(), pesan, Snackbar.LENGTH_SHORT);
+
+            // (PENTING) Jika Snackbar tertutup oleh Bottom Navigation, gunakan Anchor View:
+             View bottomNav = requireActivity().findViewById(R.id.bn_main);
+             snackbar.setAnchorView(bottomNav);
+
+            snackbar.show();
+        });
+
         binding.imgCancelLlm.setOnClickListener(v -> {
             if (isDownloading && currentDownloadId != -1) {
                 DownloadManager manager = (DownloadManager) requireContext().getSystemService(Context.DOWNLOAD_SERVICE);
@@ -375,7 +396,7 @@ public class FragmentSettings extends Fragment {
     //official ad unit id = ca-app-pub-5068422046187558/6331529776
     //example ad unit id = ca-app-pub-3940256099942544/1033173712
     dialogLoading.show("Silahkan Tunggu...");
-    InterstitialAd.load(getContext(),"ca-app-pub-5068422046187558/6331529776", adRequest,
+    InterstitialAd.load(getContext(),"ca-app-pub-3940256099942544/1033173712", adRequest,
             new InterstitialAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {

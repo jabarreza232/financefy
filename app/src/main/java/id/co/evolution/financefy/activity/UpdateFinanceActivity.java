@@ -1,97 +1,82 @@
 package id.co.evolution.financefy.activity;
 
 import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_FINANCE;
-import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_SAVINGS;
-import static id.co.evolution.financefy.callback.CallbackOnActivityResult.REQUEST_CODE_UPDATE_SAVINGS_TARGET;
 import static id.co.evolution.financefy.helper.Tools.REQUEST_CODE;
 import static id.co.evolution.financefy.helper.Tools.getFileFromUri;
 import static id.co.evolution.financefy.helper.Tools.getFileName;
 import static id.co.evolution.financefy.helper.Tools.getRealPathFromURI;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
-import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.camera.core.ExperimentalGetImage;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.google.ai.edge.litertlm.Conversation;
+import com.google.ai.edge.litertlm.ConversationConfig;
+import com.google.ai.edge.litertlm.Engine;
+import com.google.ai.edge.litertlm.Message;
+import com.google.ai.edge.litertlm.MessageCallback;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.mlkit.vision.common.InputImage;
-import com.google.mlkit.vision.text.Text;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
-import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+
+import org.opencv.android.OpenCVLoader;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Locale;
-
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
-import id.co.evolution.financefy.App;
 import id.co.evolution.financefy.R;
-import id.co.evolution.financefy.databinding.ActivityCreateFinanceBinding;
-import id.co.evolution.financefy.db.FinanceDB;
-import id.co.evolution.financefy.db.FinanceDao;
 import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.dialog.DialogConfirm;
-import id.co.evolution.financefy.dialog.DialogFinance;
 import id.co.evolution.financefy.dialog.DialogPreviewImage;
+import id.co.evolution.financefy.helper.HelperResultLLM;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelFinance;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
-import id.co.evolution.financefy.model.ModelSavings;
 import id.co.evolution.financefy.model.ModelUser;
 import id.co.evolution.financefy.repository.FinanceRepository;
-import id.co.evolution.financefy.viewmodel.ViewModelFactory;
 import id.co.evolution.financefy.viewmodel.ViewModelFinance;
 
-@AndroidEntryPoint
+@ExperimentalGetImage @AndroidEntryPoint
 public class UpdateFinanceActivity extends BaseFinanceActivity implements View.OnClickListener {
 
-
+    private BottomSheetDialog loadingOcrDialog;
     ModelFinance modelFinance;
     ModelUser modelUser;
-    int position,id_user;
+    int position, id_user;
     @Inject
     TinyDb tinyDb;
-    public ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
+    public ModelPrimaryColor modelPrimaryColor = Tools.modelPrimaryColor;
 
     @Inject
     FinanceRepository financeRepository;
@@ -101,35 +86,58 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
     Uri imageUri;
     boolean isFromScanImage;
 
+    private Engine litertEngine;
+    private Conversation litertConversation;
+    private String currentOcrText = "";
+
+    private HelperResultLLM helperResultLLM;
+
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+        modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
         Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_create_finance);
-        binding.txtHeader.setText("Ubah Data Keuangan");
-        binding.txtDescription.setText("Silakan ubah data keuangan Anda pada form yang tersedia.");
+        binding.txtHeader.setText("Edit Transaksi");
 
-        Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
-        Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
-        Tools.setImageTintView(binding.btnScan,modelPrimaryColor);
+        Tools.setBackgroundColorView(binding.rlBackground, modelPrimaryColor);
+        Tools.setImageTintView(binding.btnCalculator, modelPrimaryColor);
+        Tools.setImageTintView(binding.imgExpandType, modelPrimaryColor);
+        Tools.setImageTintView(binding.imgExpandCategory, modelPrimaryColor);
+        Tools.setImageTintView(binding.imgScanStruk, modelPrimaryColor);
+        Tools.setImageTintView(binding.imgBack, modelPrimaryColor);
+        Tools.setBackgroundTintView(binding.placeSubmit, modelPrimaryColor);
 
-        //TODO HIDE STATUS BAR
+        Tools.setTextColorView(binding.txtHeader, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtDetail, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtScanStruk, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtInformation, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtEvidence, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtCamera, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtGallery, modelPrimaryColor);
+        Tools.setImageTintView(binding.imgCamera, modelPrimaryColor);
+        Tools.setImageTintView(binding.imgGallery, modelPrimaryColor);
+        Tools.setImageTintView(binding.imgCalendar, modelPrimaryColor);
 
         dialogPreviewImage = new DialogPreviewImage(this);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
         position = getIntent().getIntExtra("position", 0);
         modelUser = (ModelUser) getIntent().getSerializableExtra("user");
-        locale =modelUser.getType_currency().equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
+        locale = modelUser.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
 
-        viewModelFinance.getFinanceById(getIntent().getIntExtra("id",0), modelUser.getType_currency()).observe(this, modelFinance -> {
+        helperResultLLM = new HelperResultLLM(map -> {
+            binding.etAmount.setText(map.get("total"));
+            binding.txtDate.setText(map.get("tanggal"));
+            binding.etDescription.setText(map.get("description"));
+        });
+
+        viewModelFinance.getFinanceById(getIntent().getIntExtra("id", 0), modelUser.getType_currency()).observe(this, modelFinance -> {
             this.modelFinance = modelFinance;
             loadData();
         });
-
 
         binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
@@ -145,9 +153,9 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
                     if (!cleanString.isEmpty()) {
                         double parsed = Double.parseDouble(cleanString);
 
-                        jumlah = Tools.convertToCurrency(parsed,locale);
-                        binding.etAmount.setText(Tools.convertToCurrency(parsed,locale));
-                        binding.etAmount.setSelection(Tools.convertToCurrency(parsed,locale).length());
+                        jumlah = Tools.convertToCurrency(parsed, locale);
+                        binding.etAmount.setText(Tools.convertToCurrency(parsed, locale));
+                        binding.etAmount.setSelection(Tools.convertToCurrency(parsed, locale).length());
                     }
 
                     binding.etAmount.addTextChangedListener(this);
@@ -175,6 +183,28 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         binding.tvFileName.setOnClickListener(this);
         binding.btnClose.setOnClickListener(this);
         binding.btnScan.setOnClickListener(this);
+
+        new Thread(() -> {
+            helperResultLLM.initLlmInference(this);
+
+            runOnUiThread(() -> {
+                litertEngine = helperResultLLM.getLitertEngine();
+
+                if (litertEngine != null) {
+                    binding.btnScan.setEnabled(true);
+                    Toast.makeText(this, "AI Siap Digunakan!", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "AI Belum Terunduh", Toast.LENGTH_SHORT).show();
+                    binding.btnScan.setEnabled(true);
+                }
+            });
+        }).start();
+
+        if (!OpenCVLoader.initDebug()) {
+            Log.e("OpenCV", "Gagal load OpenCV");
+        } else {
+            Toast.makeText(this, "Berhasil load opencv", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void loadData() {
@@ -188,7 +218,6 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         date = modelFinance.getDate();
         month = modelFinance.getMonth();
 
-        binding.txtHeader.setText("Update data");
         binding.txtDate.setText(date);
         binding.txtType.setText(type);
         binding.txtKategori.setText(category);
@@ -196,7 +225,7 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         binding.etDescription.setText(modelFinance.getKeterangan());
         binding.txtSubmit.setText("Ubah");
 
-        if(modelFinance.getPhoto()!=null){
+        if (modelFinance.getPhoto() != null) {
             filePhoto = new File(modelFinance.getPhoto());
             String filePath = new File(filePhoto.getPath()).getAbsolutePath();
             String fileName = new File(filePath).getName();
@@ -205,90 +234,106 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         }
     }
 
-
-
     @Override
     public void onClick(View v) {
-        int id = v.getId();
-        if (id == R.id.tvFileName) {
-            dialogPreviewImage.show(filePhoto.getPath());
-        } else if (id == R.id.btnCamera) {
-            isFromScanImage= false;
-            if (checkCameraPermission()) {
-                openCamera();
-            } else {
-                requestCameraPermission.launch(android.Manifest.permission.CAMERA);
-            }
-        } else if (id == R.id.btnClose) {
-            binding.rlPreviewImage.setVisibility(View.GONE);
-            filePhoto = null;
-        } else if (id == R.id.btn_scan) {
-            isFromScanImage = true;
-            showDialogChoosePicture();
-        } else if (id == R.id.btnGallery) {
-            isFromScanImage= false;
+        String resourceName = getResources().getResourceEntryName(v.getId());
+        switch (resourceName) {
+            case "tvFileName":
+                dialogPreviewImage.show(filePhoto.getPath());
+                break;
+            case "btnCamera":
+                isFromScanImage = false;
+                if (checkCameraPermission()) {
+                    openCamera();
+                } else {
+                    requestCameraPermission.launch(android.Manifest.permission.CAMERA);
+                }
+                break;
+            case "btnClose":
+                binding.rlPreviewImage.setVisibility(View.GONE);
+                filePhoto = null;
+                break;
+            case "btn_scan":
+                isFromScanImage = true;
+                boolean isLlmActive = tinyDb.getBoolean("isSwitchLLM", true);
+                if (isLlmActive) {
+                    // Mode AI MATI -> Tampilkan Dialog Edukasi & Blokir Kamera
+                    showDialogChoosePicture();
 
-            String permission = getGalleryPermission();
-            if (permission != null && ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_CODE);
-            } else {
-                openGallery();
-            }
-        } else if (id == R.id.place_category) {
-            showDialogCategory();
-        } else if (id == R.id.place_type) {
-            showDialogType();
-        } else if (id == R.id.btn_calculator) {
-            dialogCalculator = new DialogCalculator(this, getLayoutInflater(), Tools.convertCurrencyToValue(jumlah), result -> {
-                jumlah = Tools.convertToCurrency(result,locale);
-                binding.etAmount.setText(jumlah);
-            });
-            dialogCalculator.show();
-        } else if (id == R.id.place_date) {
-            showDatePickerDialog();
-        } else if (id == R.id.img_back) {
-            finish();
-        } else if (id == R.id.place_submit) {
-            if (type.isEmpty()) {
-                Toast.makeText(this, "Silahkan Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
-            } else if (binding.etAmount.getText().toString().isEmpty()) {
-                binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
-            } else if (!binding.etAmount.getText().toString().isEmpty()) {
-                binding.tilAmount.setError(null);
-            }
-
-            if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty()) {
-                DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
-                    @Override
-                    public void onSubmit(@NonNull String result) {
-                        if(result.equalsIgnoreCase("yes")){
-                            ModelFinance model = new ModelFinance();
-                            model.setId(modelFinance.getId());
-                            model.setDate(date);
-                            model.setJumlah(Tools.replaceCurrencyStringToDouble(jumlah));
-                            model.setTipe(type);
-                            model.setType_currency(modelUser.getType_currency());
-                            model.setKategori(category);
-                            model.setKeterangan(binding.etDescription.getText().toString().trim());
-                            model.setMonth(month);
-                            model.setId_finance_user(modelUser.getId());
-                            if(filePhoto!=null)
-                                model.setPhoto(filePhoto.getPath());
-
-                            viewModelFinance.inputUpdateFinance("Update", model);
-                            Intent intent = new Intent();
-                            intent.putExtra("finance", model);
-                            intent.putExtra("position", position);
-                            setResult(REQUEST_CODE_FINANCE, intent);
-                            finish();
-                            Toast.makeText(UpdateFinanceActivity.this, "Catatan "+type+" berhasil di ubah !", Toast.LENGTH_SHORT).show();
-
-                        }
-                    }
+                } else {
+                    helperResultLLM.showLlmDisabledBottomSheet(this,getLayoutInflater(), modelPrimaryColor);
+                }
+                break;
+            case "btnGallery":
+                isFromScanImage = false;
+                String permission = getGalleryPermission();
+                if (permission != null && ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{permission}, REQUEST_CODE);
+                } else {
+                    openGallery();
+                }
+                break;
+            case "place_category":
+                showDialogCategory();
+                break;
+            case "place_type":
+                showDialogType();
+                break;
+            case "btn_calculator":
+                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), Tools.convertCurrencyToValue(jumlah), result -> {
+                    jumlah = Tools.convertToCurrency(result, locale);
+                    binding.etAmount.setText(jumlah);
                 });
-                dialogConfirm.showDialogConfirm("Update","Apakah anda yakin ingin update data ?");
+                dialogCalculator.show();
+                break;
+            case "place_date":
+                showDatePickerDialog();
+                break;
+            case "img_back":
+                finish();
+                break;
+            case "place_submit":
+                if (type.isEmpty()) {
+                    Toast.makeText(this, "Silahkan Pilih tipe terlebih dahulu", Toast.LENGTH_SHORT).show();
+                } else if (binding.etAmount.getText().toString().isEmpty()) {
+                    binding.tilAmount.setError("Silahkan input jumlah mata uang anda terlebih dahulu");
+                } else if (!binding.etAmount.getText().toString().isEmpty()) {
+                    binding.tilAmount.setError(null);
+                }
 
-            }
+                if (!type.isEmpty() && !binding.etAmount.getText().toString().isEmpty()) {
+                    DialogConfirm dialogConfirm = new DialogConfirm(this, getLayoutInflater(), new DialogConfirm.DialogConfirm() {
+                        @Override
+                        public void onSubmit(@NonNull String result) {
+                            if (result.equalsIgnoreCase("yes")) {
+                                ModelFinance model = new ModelFinance();
+                                model.setId(modelFinance.getId());
+                                model.setDate(date);
+                                model.setJumlah(Tools.replaceCurrencyStringToDouble(jumlah));
+                                model.setTipe(type);
+                                model.setType_currency(modelUser.getType_currency());
+                                model.setKategori(category);
+                                model.setKeterangan(binding.etDescription.getText().toString().trim());
+                                model.setMonth(month);
+                                model.setId_finance_user(modelUser.getId());
+                                if (filePhoto != null)
+                                    model.setPhoto(filePhoto.getPath());
+
+                                viewModelFinance.inputUpdateFinance("Update", model);
+                                Intent intent = new Intent();
+                                intent.putExtra("finance", model);
+                                intent.putExtra("position", position);
+                                setResult(REQUEST_CODE_FINANCE, intent);
+                                finish();
+                                Toast.makeText(UpdateFinanceActivity.this, "Catatan " + type + " berhasil di ubah !", Toast.LENGTH_SHORT).show();
+
+                            }
+                        }
+                    });
+                    dialogConfirm.showDialogConfirm("Update", "Apakah anda yakin ingin update data ?");
+
+                }
+                break;
         }
     }
 
@@ -296,18 +341,14 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         return ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
     }
 
-
-// 🔹 Mendapatkan permission sesuai Android Version
     private String getGalleryPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ pakai Photo Picker, tidak perlu permission
             return null;
         } else {
-            // Android 12 ke bawah tetap perlu izin
             return android.Manifest.permission.READ_EXTERNAL_STORAGE;
         }
     }
-    // 🔹 Activity Result untuk Izin Kamera
+
     private final ActivityResultLauncher<String> requestCameraPermission =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
@@ -317,147 +358,219 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
                 }
             });
 
-    // 🔹 Activity Result untuk Izin Galeri
-    private final ActivityResultLauncher<String> requestGalleryPermission =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    openGallery();
-                } else {
-                    Toast.makeText(this, "Izin Akses Galeri Ditolak", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-    // 🔹 Activity Result untuk Kamera
+    @SuppressLint("SuspiciousIndentation")
     private final ActivityResultLauncher<Intent> cameraLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK) {
-                    if(isFromScanImage){
-                        InputImage image;
-                        try {
-                            // When using Latin script library
-                            TextRecognizer recognizer =
-                                    TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
-                            image = InputImage.fromFilePath(this, imageUri);
-
-                            recognizer.process(image).addOnSuccessListener(new OnSuccessListener<>() {
-                                @Override
-                                public void onSuccess(Text text) {
-
-                                    binding.etDescription.setText(text.getText());
-                                }
-                            });
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                    }else{
-                        filePhoto= getFileFromUri(this,imageUri);
+                    if (isFromScanImage) {
+                        String ocrResult = result.getData().getStringExtra(CameraOcrActivity.EXTRA_OCR_RESULT);
+                        Uri imageUri = result.getData().getParcelableExtra(CameraOcrActivity.IMAGE_RESULT);
+                        loadingOcrDialog = helperResultLLM.showLoadingOcrBottomSheet(this,getLayoutInflater(),imageUri,modelPrimaryColor);
+                        processReceiptWithLlm(ocrResult);
+                    } else {
+                        filePhoto = getFileFromUri(this, imageUri);
 
                         String filePath = new File(filePhoto.getPath()).getAbsolutePath();
                         String fileName = new File(filePath).getName();
                         binding.rlPreviewImage.setVisibility(View.VISIBLE);
                         binding.tvFileName.setText(fileName);
                     }
-
                 }
             });
 
-    // 🔹 Activity Result untuk Galeri
     private final ActivityResultLauncher<Intent> galleryLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Uri imageUri = result.getData().getData();
-                    if(isFromScanImage){
-                        InputImage image;
+                    if (isFromScanImage) {
                         try {
-                            // When using Latin script library
-                            TextRecognizer recognizer =
-                                    TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
-                            image = InputImage.fromFilePath(this, imageUri);
+                            Bitmap originalBitmap = Tools.getBitmapFromUri(this.getContentResolver(), imageUri);
 
-                            recognizer.process(image).addOnSuccessListener(new OnSuccessListener<>() {
-                                @Override
-                                public void onSuccess(Text text) {
-                                    binding.etDescription.setText(text.getText());
-                                }
+                            Bitmap processedBitmap = helperResultLLM.preprocessReceipt(originalBitmap);
+
+                            InputImage image = InputImage.fromBitmap(processedBitmap, 0);
+
+                            TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+
+                            recognizer.process(image).addOnSuccessListener(text -> {
+                                String rawOcrText = text.getText();
+                                binding.etDescription.setText(rawOcrText);
+                                processReceiptWithLlm(rawOcrText);
+                            }).addOnFailureListener(e -> {
+                                Log.e("OCR_ERROR", "Gagal mengekstrak teks", e);
+                                binding.etDescription.setText("Gagal membaca teks dari gambar.");
                             });
 
                         } catch (IOException e) {
                             e.printStackTrace();
+                            Log.e("IMAGE_ERROR", "Gagal memuat gambar dari Uri", e);
+                            binding.etDescription.setText("Gagal memuat gambar dari galeri.");
                         }
 
-                    }else{
+                    } else {
                         binding.rlPreviewImage.setVisibility(View.VISIBLE);
-                        // Mendapatkan Nama File
                         String fileName = getFileName(this, imageUri);
-                        filePhoto = getFileFromUri(this,imageUri);
-                        // Mendapatkan Path (Jika memungkinkan)
+                        filePhoto = getFileFromUri(this, imageUri);
                         String filePath = getRealPathFromURI(this, imageUri);
                         binding.tvFileName.setText(fileName);
                     }
-
                 }
             });
 
-    // 🔹 Fungsi Membuka Kamera
     private void openCamera() {
+        if (isFromScanImage) {
+            Intent intent = new Intent(this, CameraOcrActivity.class);
+            cameraLauncher.launch(intent);
+        } else {
+            File photoFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "photo_" + System.currentTimeMillis() + ".jpg");
 
-        // Buat file untuk menyimpan gambar
-        File photoFile = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "photo_" + System.currentTimeMillis() + ".jpg");
+            imageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider", photoFile);
 
-        // Dapatkan Uri menggunakan FileProvider
-        imageUri = FileProvider.getUriForFile(this, getPackageName() + ".provider", photoFile);
-
-        // Buat intent kamera
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        cameraLauncher.launch(intent);
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+            intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            cameraLauncher.launch(intent);
+        }
     }
 
-    // 🔹 Fungsi Membuka Galeri
     private void openGallery() {
         Intent intent;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
         } else {
             intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         }
         galleryLauncher.launch(intent);
     }
+
+    private void processReceiptWithLlm(String ocrText) {
+        if (litertConversation == null) {
+            binding.etDescription.setText("Error: Engine LiteRT belum siap atau belum diinisialisasi.");
+            return;
+        }
+
+        currentOcrText = ocrText;
+
+        String cleanedOcr = currentOcrText
+                .replaceAll("(?m)^[ \t]*\r?\n", "")
+                .replaceAll("Rp\\s*", "")
+                .replaceAll("TOTAL", "Total");
+
+        try {
+            StringBuilder llmResponseBuilder = new StringBuilder();
+            Map<String, Object> extraContext = new HashMap<>();
+            litertConversation.sendMessageAsync(getPrompt(ocrText), new MessageCallback() {
+                @Override
+                public void onMessage(@NonNull Message message) {
+                    String chunk = message.toString();
+                    llmResponseBuilder.append(chunk);
+                }
+
+                @Override
+                public void onDone() {
+                    String fullTextResponse = llmResponseBuilder.toString();
+                    loadingOcrDialog.dismiss();
+
+                    runOnUiThread(() -> {
+                        helperResultLLM.showBottomSheetOcr(UpdateFinanceActivity.this, getResources(), getLayoutInflater(), fullTextResponse,modelPrimaryColor);
+                    });
+                }
+
+                @Override
+                public void onError(@NonNull Throwable throwable) {
+                    loadingOcrDialog.dismiss();
+
+                    Log.e("LLM_ERROR", "Gagal memproses AI", throwable);
+                    runOnUiThread(() -> {
+                        binding.etDescription.setText("Gagal memproses AI: " + throwable.getMessage());
+                    });
+                }
+            }, extraContext);
+
+        } catch (Exception e) {
+            loadingOcrDialog.dismiss();
+
+            runOnUiThread(() -> {
+                binding.etDescription.setText("Error Kirim Pesan AI: " + e.getMessage());
+            });
+        }
+    }
+
     private void showDialogChoosePicture() {
+        if (litertEngine == null) {
+            Toast.makeText(this, "AI Belum Terunduh", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            litertConversation = helperResultLLM.getLitertConversation();
+            if (litertConversation != null) {
+                litertConversation.close();
+            }
+
+            litertConversation = litertEngine.createConversation(new ConversationConfig());
+
+        } catch (Exception e) {
+            binding.etDescription.setText("Gagal mereset sesi AI: " + e.getMessage());
+            return;
+        }
+
         if (checkCameraPermission()) {
             openCamera();
         } else {
             requestCameraPermission.launch(android.Manifest.permission.CAMERA);
         }
-//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//        builder.setTitle("Pilih Opsi");
-//
-//        final String[] tipe =  new String[]{"Ambil Gambar", "Pilih Galeri"} ;
-//
-//
-//        builder.setItems(tipe, (dialog, which) -> {
-//            switch (tipe[which]) {
-//                case "Ambil Gambar":
-//
-//                    if (checkCameraPermission()) {
-//                        openCamera();
-//                    } else {
-//                        requestCameraPermission.launch(android.Manifest.permission.CAMERA);
-//                    }
-//                    break;
-//                case "Pilih Galeri":
-//                    if (checkGalleryPermission()) {
-//                        openGallery();
-//                    } else {
-//                        requestGalleryPermission.launch(getGalleryPermission());
-//                    }
-//                    break;
-//            }
-//        });
-//        AlertDialog dialog = builder.create();
-//        dialog.show();
+    }
+
+    private String getPrompt(String ocrText) {
+        return "You are a universal data extraction system for BOTH physical receipts and digital transactions (e-wallet/m-banking). Extract data into pure JSON.\n" +
+                "STRICT RULES:\n" +
+                "1. NO HALLUCINATION: Only use numbers present in the OCR. If missing, write '0'.\n" +
+                "2. EXACT NAMES: Do not abbreviate. Keep merchant names, item names, or recipient names exactly as printed.\n" +
+                "3. AMOUNT MATCHING: DO NOT confuse numbers inside product names (e.g., '77', '200ml', '500g') with the actual price. Prices are the final cost, usually located at the end of the line or near a quantity multiplier (e.g., '6,500 X 1'). For digital transactions, look for 'Nominal' or 'Transfer' amounts.\n" +
+                "4. FINANCIALS: 'subtotal' = amount before tax/admin fee. 'other_fee' = tax/admin fee. 'total' = final paid amount.\n" +
+                "5. CASHLESS = 0: If it is a digital wallet (GoPay, OVO), m-banking, QRIS, or Card, 'cash' MUST be '0'.\n" +
+                "6. ITEM FORMAT: 'daftar_produk' MUST follow this format: [Item/Transaction Name] harga [Price]. For digital transactions, use the transfer destination or payment purpose as the item name.\n\n" +
+                "=== EXAMPLE 1 (Physical Receipt with Numbers in Product Names) ===\n" +
+                "OCR INPUT:\n" +
+                "Ramen Ya\n" +
+                "15/02/2026\n" +
+                "Tori Miso Rmn 77 45.000\n" +
+                "Ocha 200ml 10.000\n" +
+                "Pajak 5.500\n" +
+                "Total 60.500\n" +
+                "Tunai 100.000\n" +
+                "JSON OUTPUT:\n" +
+                "{\n" +
+                "  \"nama_toko\": \"Ramen Ya\",\n" +
+                "  \"tanggal\": \"15/02/2026\",\n" +
+                "  \"total\": \"60500\",\n" +
+                "  \"subtotal\": \"55000\",\n" +
+                "  \"other_fee\": \"5500\",\n" +
+                "  \"cash\": \"100000\",\n" +
+                "  \"daftar_produk\": \"Tori Miso Rmn 77 harga 45000, Ocha 200ml harga 10000\"\n" +
+                "}\n\n" +
+                "=== EXAMPLE 2 (Digital M-Banking/E-Wallet) ===\n" +
+                "OCR INPUT:\n" +
+                "GoPay\n" +
+                "16/09/2026 10:45\n" +
+                "Transfer Berhasil\n" +
+                "Ke: Budi Santoso\n" +
+                "Nominal Rp 150.000\n" +
+                "Biaya Admin Rp 1.000\n" +
+                "Total Keluar Rp 151.000\n" +
+                "JSON OUTPUT:\n" +
+                "{\n" +
+                "  \"nama_toko\": \"GoPay\",\n" +
+                "  \"tanggal\": \"16/09/2026\",\n" +
+                "  \"total\": \"151000\",\n" +
+                "  \"subtotal\": \"150000\",\n" +
+                "  \"other_fee\": \"1000\",\n" +
+                "  \"cash\": \"0\",\n" +
+                "  \"daftar_produk\": \"Transfer ke Budi Santoso harga 150000\"\n" +
+                "}\n\n" +
+                "=== ACTUAL TASK ===\n" +
+                "OCR INPUT:\n" +
+                ocrText + "\n" +
+                "JSON OUTPUT:\n";
     }
 }

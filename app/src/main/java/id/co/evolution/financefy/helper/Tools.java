@@ -1,12 +1,14 @@
 package id.co.evolution.financefy.helper;
 
 import android.animation.ObjectAnimator;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -18,6 +20,7 @@ import android.util.Log;
 import android.util.Property;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
@@ -87,7 +90,30 @@ public class Tools {
         }
         return bitmap;
     }
+    public static Uri bitmapToUri(Context context, Bitmap bitmap) {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String fileName = "IMG_" + timeStamp + ".jpg";
 
+        File tempFile = new File(context.getCacheDir(), fileName);
+
+        try {
+            tempFile.createNewFile();
+            FileOutputStream fos = new FileOutputStream(tempFile);
+
+            // 3. Kompres bitmap menjadi JPEG dengan kualitas 100% (bisa diturunkan jika file kebesaran)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+
+            fos.flush();
+            fos.close();
+
+            // 4. Ubah file fisik tersebut menjadi URI
+            return Uri.fromFile(tempFile);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null; // Jika gagal membuat file
+        }
+    }
     public static File saveBitmapToFile(Context context, Bitmap bitmap) {
         // Buat nama file berdasarkan timestamp
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
@@ -197,6 +223,11 @@ public class Tools {
     public static void setBackgroundColorView(View view,ModelPrimaryColor modelPrimaryColor){
         if(modelPrimaryColor!=null){
             view.setBackgroundColor(ContextCompat.getColor(view.getContext(),modelPrimaryColor.getColorPrimary()));
+        }
+    }
+      public static void setTextColorView(TextView view, ModelPrimaryColor modelPrimaryColor){
+        if(modelPrimaryColor!=null){
+            view.setTextColor(ContextCompat.getColor(view.getContext(),modelPrimaryColor.getColorPrimary()));
         }
     }
 
@@ -355,6 +386,7 @@ public class Tools {
         return newFormat.format(new Date(dateTime));
     }
 
+
     public static String getFormattedDateDefault(Long dateTime) {
         SimpleDateFormat newFormat = new SimpleDateFormat("yyyy-MM-dd");
         return newFormat.format(new Date(dateTime));
@@ -405,7 +437,45 @@ public class Tools {
     public static String getLastDateChar(String s) {
         return s.substring(s.length() - 2);
     }
+    public static String convertFormatDateAi(String rawTanggal){
+        String finalTanggal = rawTanggal;
+        try {
+            // 1. Baca format asli dari AI
+            SimpleDateFormat aiFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            java.util.Date dateObj = aiFormat.parse(rawTanggal);
 
+            if (dateObj != null) {
+                // 2. Ambil nilai Long (Timestamp)
+                Long timestamp = dateObj.getTime();
+
+                // 3. Masukkan ke fungsi milikmu
+                finalTanggal = getFormattedDateSimple(timestamp);
+            }
+        } catch (java.text.ParseException e) {
+            Log.e("OCR_DATE", "Gagal mengkonversi tanggal: " + rawTanggal);
+        }
+
+        return finalTanggal;
+    }
+    public static Bitmap getBitmapFromUri(ContentResolver contentResolver,Uri uri) throws IOException {
+        Bitmap bitmap;
+
+        // Untuk Android 9 (API 28) ke atas
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            ImageDecoder.Source source = ImageDecoder.createSource(contentResolver, uri);
+            bitmap = ImageDecoder.decodeBitmap(source, (decoder, info, src) -> {
+                // Memastikan bitmap menggunakan alokasi memori software agar bisa dikonversi OpenCV
+                decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+                decoder.setMutableRequired(true);
+            });
+        } else {
+            // Untuk Android 8 ke bawah
+            bitmap = MediaStore.Images.Media.getBitmap(contentResolver, uri);
+        }
+
+        // Garansi format ARGB_8888 agar Utils.bitmapToMat() milik OpenCV tidak crash
+        return bitmap.copy(Bitmap.Config.ARGB_8888, true);
+    }
     public static int getFirstLastDate(String date, boolean isFirst) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date convertedDate = null;

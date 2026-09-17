@@ -73,11 +73,14 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
 
         binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_target);
 
-        Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
-        Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
+        Tools.setBackgroundColorView(binding.rlBackground, modelPrimaryColor);
+        Tools.setImageTintView(binding.btnCalculator, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtHeader, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtDetail, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtInformation, modelPrimaryColor);
+        Tools.setImageTintView(binding.imgCalendar, modelPrimaryColor);
 
-        binding.txtHeader.setText("Ubah Data Target Menabung");
-        binding.txtDescription.setText("Silakan ubah data target menabung Anda pada form yang tersedia.");
+        binding.txtHeader.setText("Edit Target Menabung");
 
         //TODO HIDE STATUS BAR
 
@@ -88,7 +91,6 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
         viewModelSaving = new ViewModelProvider(this).get(ViewModelSavings.class);
         viewModelSaving.init(savingsRepository);
 
-        binding.txtHeader.setText("Input data");
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
         month = getFormattedMonthSimple(date_ship_milis);
@@ -143,7 +145,6 @@ public class UpdateSavingsTargetActivity extends AppCompatActivity implements Vi
         jumlah = Tools.convertToCurrency(modelSavings.getTargetValue(),locale);
         date = modelSavings.getDate_target();
 
-        binding.txtHeader.setText("Update data");
         binding.txtDate.setText(date);
         binding.etTitle.setText(modelSavings.getTitle());
         binding.etAmount.setText(jumlah);

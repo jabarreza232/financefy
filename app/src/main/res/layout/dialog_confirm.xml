@@ -1,82 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <!-- Gunakan wrap_content agar dialog tampil cantik di tengah layar -->
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        app:cardBackgroundColor="?attr/colorSurface"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/shape_line_black"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="24dp"> <!-- Ruang napas (padding) diperbesar -->
 
-            <RelativeLayout
+
+            <!-- Judul Dialog -->
+            <TextView
+                android:id="@+id/txt_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="1dp"
-                android:background="@color/blueColor">
+                android:fontFamily="@font/ubuntu_b"
+                android:text="Konfirmasi PIN"
+                android:textAlignment="center"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/txt_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:text="Konfirmasi PIN"
-                    android:textAlignment="center"
-                    android:textAllCaps="true"
-                    android:textColor="@color/white"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-            </RelativeLayout>
-
+            <!-- Deskripsi Dialog -->
             <TextView
                 android:id="@+id/txt_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="10dp"
-                android:text="Apakah anda yakin ingin mengatur PIN anda ?"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/ubuntu_r"
+                android:lineSpacingExtra="4dp"
+                android:text="Apakah Anda yakin ingin mengatur PIN pengaman untuk aplikasi ini?"
                 android:textAlignment="center"
-                android:textColor="?android:textColorPrimary"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="15sp" />
 
+            <!-- Container Tombol 50:50 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="30dp"
-                android:gravity="end"
+                android:layout_marginTop="32dp"
                 android:orientation="horizontal">
 
-                <Button
+                <!-- Tombol Tidak (Outlined/Garis Luar) -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_no"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/ubuntu_b"
+                    android:text="Batal"
+                    android:textColor="?android:attr/textColorPrimary"
+                    app:cornerRadius="12dp"
+                    app:strokeColor="?android:attr/textColorSecondary" />
+
+                <!-- Tombol Ya (Solid) -->
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_yes"
-                    android:layout_width="90dp"
-                    android:layout_height="36dp"
-                    android:layout_below="@id/place_filter"
-                    android:layout_gravity="end"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/shape_selected_calculator"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_marginStart="8dp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_weight="1"
                     android:fontFamily="@font/ubuntu_b"
                     android:text="Ya"
-                    android:textAllCaps="false"
-                    android:textColor="@color/colorAccent"
-                    android:textSize="13sp" />
-
-                <Button
-                    android:id="@+id/btn_no"
-                    android:layout_width="90dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="end"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/shape_selected_calculator"
-                    android:fontFamily="@font/ubuntu_b"
-                    android:text="Tidak"
-                    android:textAllCaps="false"
-                    android:textColor="@color/colorAccent"
-                    android:textSize="13sp" />
+                    android:textColor="@color/white"
+                    app:backgroundTint="@color/blueColor"
+                    app:cornerRadius="12dp" />
             </LinearLayout>
+
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>

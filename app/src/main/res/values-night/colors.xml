@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_action_light">#1E293B</color> <!-- Biru keabu-abuan gelap (Dark Surface) -->
+    <color name="bg_preview_card">#331A00</color> <!-- Coklat/Oranye sangat gelap -->
+    <color name="text_preview_card">#FFB74D</color> <!-- Oranye terang (pastel) agar kontras di latar gelap -->
+    <!-- Color Purple (Soft Violet untuk kontras di latar gelap) -->
+    <color name="colorPrimary">#CE93D8</color>
+    <color name="colorPrimaryDark">#1D1126</color>
+<!--    <color name="blueColor">#90CAF9</color>-->
+    <color name="colorAccent">#82B1FF</color>
+    <!-- Color Orange (Pastel Orange) -->
+    <color name="colorPrimaryOrange">#FFCC80</color>
+    <color name="colorPrimaryDarkOrange">#261700</color>
+
+    <!-- Color Teal (Soft Cyan/Teal) -->
+    <color name="colorPrimaryGreen">#80CBC4</color>
+    <color name="colorPrimaryDarkGreen">#001A17</color>
+
+    <!-- Color Brown (Mocca / Soft Brown) -->
+    <color name="colorPrimaryBrown">#BCAAA4</color>
+    <color name="colorPrimaryDarkBrown">#1F1714</color>
+
+    <!-- Color Red Grape (Soft Red / Coral) -->
+    <color name="colorPrimaryRed">#EF9A9A</color>
+    <color name="colorPrimaryDarkRed">#260000</color>
+</resources>

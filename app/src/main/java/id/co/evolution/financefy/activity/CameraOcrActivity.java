@@ -53,12 +53,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCameraOcrBinding;
+import id.co.evolution.financefy.helper.Tools;
+
 @ExperimentalGetImage
 public class CameraOcrActivity extends AppCompatActivity {
 
@@ -69,6 +72,7 @@ public class CameraOcrActivity extends AppCompatActivity {
     private ObjectAnimator scanAnimator;
     private static final int REQUEST_CODE_PERMISSIONS = 10;
     public static final String EXTRA_OCR_RESULT = "ocr_result_text";
+    public static final String IMAGE_RESULT = "image_result";
     private Camera camera;
     private boolean isFlashOn = false;
     public ActivityCameraOcrBinding binding;
@@ -186,6 +190,7 @@ public class CameraOcrActivity extends AppCompatActivity {
 
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra(EXTRA_OCR_RESULT, cleanedText);
+                        resultIntent.putExtra(IMAGE_RESULT,imageUri);
                         setResult(RESULT_OK, resultIntent);
                         finish();
                     })
@@ -276,23 +281,20 @@ public class CameraOcrActivity extends AppCompatActivity {
             matrix.postRotate(rotationDegrees);
             Bitmap rotatedBitmap = Bitmap.createBitmap(rawBitmap, 0, 0, rawBitmap.getWidth(), rawBitmap.getHeight(), matrix, true);
             Bitmap croppedBitmap = cropBitmapToFrame(rotatedBitmap);
-            // 3. PROSES AJAIB: Cuci gambar pakai OpenCV
             Bitmap finalCleanBitmap = preprocessReceipt(rotatedBitmap);
-            // 4. Lempar gambar yang sudah putih bersih ke ML Kit
-            // Gunakan rotasi 0 karena gambarnya sudah kita putar secara manual di atas
+
             InputImage image = InputImage.fromBitmap(finalCleanBitmap, 0);
 
             textRecognizer.process(image)
                     .addOnSuccessListener(visionText -> {
-                        // Gunakan algoritma koordinat sumbu-Y yang sudah kita buat sebelumnya
                         String sortedOcrText = extractStructuredText(visionText);
 
-                        // Bersihkan karakter aneh hasil sisa kotoran kertas
                         String cleanedText = sortedOcrText.replaceAll("[^a-zA-Z0-9.,/\\- RpX%]", " ")
                                 .replaceAll(" +", " ");
 
                         Intent resultIntent = new Intent();
                         resultIntent.putExtra(EXTRA_OCR_RESULT, cleanedText);
+                        resultIntent.putExtra(IMAGE_RESULT, Tools.bitmapToUri(this, rawBitmap) );
                         setResult(RESULT_OK, resultIntent);
                         finish();
                     })

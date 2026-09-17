@@ -16,7 +16,9 @@
     <color name="colorPrimaryRed">#C80101</color>
     <color name="colorPrimaryDarkRed">#800000</color>
 
-
+    <color name="bg_action_light">#E8F0FE</color> <!-- Biru muda pastel untuk tombol kalkulator/kamera -->
+    <color name="bg_preview_card">#FFF3E0</color> <!-- Oranye muda pastel untuk preview -->
+    <color name="text_preview_card">#E65100</color>
     <color name="colorAccent">#0960CA</color>
     <color name="colorDefaultText">#808080</color>
     <color name="colorText">#DE595E</color>

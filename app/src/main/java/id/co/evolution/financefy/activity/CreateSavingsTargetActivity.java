@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -72,8 +73,12 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
 
         binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_target);
 
-        Tools.setBackgroundColorView(binding.rlBackground,modelPrimaryColor);
-        Tools.setImageTintView(binding.btnCalculator,modelPrimaryColor);
+        Tools.setBackgroundColorView(binding.rlBackground, modelPrimaryColor);
+        Tools.setImageTintView(binding.btnCalculator, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtHeader, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtDetail, modelPrimaryColor);
+        Tools.setTextColorView(binding.txtInformation, modelPrimaryColor);
+        Tools.setImageTintView(binding.imgCalendar, modelPrimaryColor);
 
         //TODO HIDE STATUS BAR
 
@@ -84,8 +89,7 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
         viewModelSaving = new ViewModelProvider(this).get(ViewModelSavings.class);
         viewModelSaving.init(savingsRepository);
 
-        binding.txtHeader.setText("Masukkan Data Target Menabung");
-        binding.txtDescription.setText("Silakan masukkan data target menabung Anda pada form yang tersedia.");
+        binding.txtHeader.setText("Target Menabung");
 
         binding.txtDate.setText(getFormattedDateSimple(date_ship_milis));
         date = getFormattedDateSimple(date_ship_milis);
