@@ -57,6 +57,7 @@ dependencies {
     implementation "androidx.camera:camera-lifecycle:${camerax_version}"
     implementation "androidx.camera:camera-view:${camerax_version}"
     implementation 'com.google.ai.edge.litertlm:litertlm-android:0.10.0'
+    implementation 'com.github.QuadFlask:colorpicker:0.0.15'
     // Google Play Services & Ads
     implementation 'com.google.android.gms:play-services-ads:22.6.0'
     implementation 'com.quickbirdstudios:opencv:4.5.3.0'

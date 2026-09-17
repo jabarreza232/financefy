@@ -1,116 +1,298 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp"
-    android:background="?attr/colorSurface"
-    tools:context=".activity.SwitchThemeActivity">
+    xmlns:tools="http://schemas.android.com/tools">
 
-
-    <TextView
-        android:id="@+id/txt_select_theme"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:fontFamily="@font/roboto_bold"
-        android:text="Pilih Tema"
-        android:textColor="?android:attr/textColorPrimary" />
-
-    <RadioGroup
-        android:id="@+id/rg_theme"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:orientation="horizontal">
-
-        <RadioButton
-            android:id="@+id/rb_theme_light"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:checked="true"
-            android:text="Terang" />
-
-        <RadioButton
-            android:id="@+id/rb_theme_dark"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Gelap" />
-
-
-    </RadioGroup>
-
-    <TextView
-        android:id="@+id/txt_select_primary_color"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:fontFamily="@font/roboto_bold"
-        android:text="Warna Utama"
-        android:textColor="?android:attr/textColorPrimary" />
-
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_primary_color"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp" />
-
-    <!--    <androidx.cardview.widget.CardView-->
-    <!--        android:layout_width="60dp"-->
-    <!--        android:layout_height="60dp"-->
-    <!--        android:elevation="8dp"-->
-    <!--        android:divider="@android:color/transparent"-->
-    <!--        android:dividerHeight="0.0px"-->
-    <!--        android:clipToPadding="false"-->
-    <!--        android:clipChildren="false"-->
-    <!--        app:cardElevation="10dp"-->
-    <!--        app:cardPreventCornerOverlap="false"-->
-    <!--        />-->
-
-    <RelativeLayout
+    <!-- Gunakan NestedScrollView agar aman di layar kecil -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorGrey50">
+        android:background="?android:attr/colorBackground"
+        android:fillViewport="true"
+        tools:context=".activity.SwitchThemeActivity">
 
-        <View
-            android:id="@+id/v_primary_dark"
-            android:layout_width="match_parent"
-            android:layout_height="38px"
-            android:background="@color/colorPrimaryDark" />
-
-        <View
-            android:id="@+id/v_primary"
-            android:layout_width="match_parent"
-            android:layout_height="?actionBarSize"
-            android:layout_below="@id/v_primary_dark"
-            android:background="@color/colorPrimary" />
-
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/v_primary_dark"
-            android:layout_margin="16dp"
-            android:fontFamily="@font/roboto_bold"
-            android:text="@string/app_name"
-            android:textColor="@color/white"
-            android:textSize="17sp" />
+            android:orientation="vertical"
+            android:padding="24dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Content"
-            android:textColor="@color/white"
-            android:textSize="21sp" />
+            <!-- BAGIAN 1: PILIHAN MODE TERANG / GELAP -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="@font/ubuntu_b"
+                android:text="Mode Tampilan"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp" />
 
-    </RelativeLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:orientation="horizontal">
 
-</LinearLayout>
+                <!-- Kartu Mode Terang -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_theme_light"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorSurface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginTop="2dp"
+                    app:strokeColor="@color/colorPrimary"
+                    app:strokeWidth="2dp"> <!-- Beri border jika aktif -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <ImageView
+                            android:id="@+id/img_terang"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_sun"
+                            app:tint="@color/colorPrimary" />
+                        <TextView
+                            android:id="@+id/txt_terang"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:fontFamily="@font/ubuntu_b"
+                            android:text="Terang"
+                            android:textColor="?android:attr/textColorPrimary" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Kartu Mode Gelap -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_theme_dark"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginBottom="2dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    app:cardBackgroundColor="?attr/colorSurface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+                        <ImageView
+                            android:id="@+id/img_gelap"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:src="@drawable/ic_moon"
+                            app:tint="?colorOnSurface" />
+                        <TextView
+                            android:id="@+id/txt_gelap"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:fontFamily="@font/ubuntu_r"
+                            android:text="Gelap"
+                            android:textColor="?android:attr/textColorPrimary"  />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- BAGIAN 2: PILIHAN WARNA UTAMA (RECYCLERVIEW) -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="@font/ubuntu_b"
+                android:text="Warna Aksen"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_primary_color"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:clipToPadding="false"
+                android:paddingEnd="16dp" />
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_custom_color"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?attr/colorSurface"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#33808080"> <!-- Garis pinggir tipis agar terlihat seperti tombol -->
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <!-- Ikon Palet -->
+                    <!-- Gunakan ikon palet bawaan Android atau ganti src-nya -->
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/ic_lens"
+                        app:tint="@color/colorPrimary" />
+
+                    <!-- Teks Penjelasan -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/ubuntu_b"
+                            android:text="Buat Warna Sendiri"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/ubuntu_r"
+                            android:text="Gunakan roda warna kustom"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <!-- Indikator Warna Kustom Saat Ini (Lingkaran Kecil) -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/indicator_custom_color"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="8dp"
+                        app:cardBackgroundColor="@color/colorGrey"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="?android:attr/textColorSecondary"
+                        app:strokeWidth="1dp" />
+
+                    <!-- Ikon Panah ke Kanan -->
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        app:tint="?android:attr/textColorSecondary" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <!-- BAGIAN 3: PREVIEW APLIKASI -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="@font/ubuntu_b"
+                android:text="Pratinjau Layar"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp" />
+
+            <!-- Bingkai Ponsel Mini -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                app:cardBackgroundColor="?attr/colorSurface"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="4dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <!-- Mockup Toolbar -->
+                    <LinearLayout
+                        android:id="@+id/v_primary"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:background="@color/colorPrimary"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="16dp">
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_arrow_back"
+                            app:tint="@color/white" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:fontFamily="@font/ubuntu_b"
+                            android:text="@string/app_name"
+                            android:textColor="@color/white"
+                            android:textSize="18sp" />
+                    </LinearLayout>
+
+                    <!-- Mockup Konten -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/v_primary"
+                        android:layout_marginTop="24dp"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="16dp">
+
+                        <View
+                            android:layout_width="120dp"
+                            android:layout_height="16dp"
+                            android:layout_marginBottom="12dp"
+                            android:background="@color/colorGrey30" />
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="16dp"
+                            android:background="@color/colorGrey30" />
+                    </LinearLayout>
+
+                    <!-- Mockup FAB -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/v_fab_mockup"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentBottom="true"
+                        android:layout_margin="16dp"
+                        app:cardBackgroundColor="@color/colorAccent"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="4dp">
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_add"
+                            app:tint="@color/white" />
+                    </androidx.cardview.widget.CardView>
+                </RelativeLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </layout>

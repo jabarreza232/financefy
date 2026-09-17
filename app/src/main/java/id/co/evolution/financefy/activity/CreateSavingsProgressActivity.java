@@ -114,11 +114,19 @@ public class CreateSavingsProgressActivity extends BaseFinanceActivity implement
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
 
-        Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
+        if (isCustomActive) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            getWindow().setStatusBarColor(customColor);
+        } else {
+            if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+                modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
+            }
+        }
 
-        binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_progress);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_create_savings_progress);
         dialogPreviewImage = new DialogPreviewImage(this);
 
         Tools.setBackgroundColorView(binding.rlBackground, modelPrimaryColor);

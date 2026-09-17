@@ -102,7 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:background="@drawable/shape_bottom_navigation"
+                android:background="?attr/colorSurface"
                 app:labelVisibilityMode="labeled"
                 app:menu="@menu/menu_bottom_navigation"
                 />

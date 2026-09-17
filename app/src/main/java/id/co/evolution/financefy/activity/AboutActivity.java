@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -32,17 +33,33 @@ public class AboutActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(tinyDb.getObject("model_primary_color", ModelPrimaryColor.class)!=null) {
-            modelPrimaryColor= tinyDb.getObject("model_primary_color",ModelPrimaryColor.class);
-            Tools.setThemeActivity(getTheme(),modelPrimaryColor);
+        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
+
+        if (isCustomActive) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            getWindow().setStatusBarColor(customColor);
+        } else {
+            if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+                modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                Tools.setThemeActivity(getTheme(), modelPrimaryColor);
+            }
         }
-        binding= DataBindingUtil.setContentView(this,R.layout.activity_about);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_about);
+
+        if (isCustomActive) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setBackgroundDrawable(new ColorDrawable(customColor));
+            }
+        }
 
         binding.txtAppVersion.setText(BuildConfig.VERSION_NAME);
         binding.txtSystemVersion.setText(Build.VERSION.RELEASE);
         binding.txtDeviceModel.setText(Build.MODEL);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
     }
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {

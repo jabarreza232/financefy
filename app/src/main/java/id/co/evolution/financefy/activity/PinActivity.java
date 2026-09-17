@@ -39,10 +39,16 @@ public class PinActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
-            modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
-            Tools.setThemeActivity(getTheme(), modelPrimaryColor);
-            getSupportActionBar().hide();
+        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
+
+        if (isCustomActive) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            getWindow().setStatusBarColor(customColor);
+        } else {
+            if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+                modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
+            }
         }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_pin);

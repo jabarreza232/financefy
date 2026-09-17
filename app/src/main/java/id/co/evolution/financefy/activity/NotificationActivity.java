@@ -15,6 +15,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -88,12 +89,29 @@ public class NotificationActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
-            modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
-            Tools.setThemeActivity(getTheme(), modelPrimaryColor);
+        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
+
+        if (isCustomActive) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            getWindow().setStatusBarColor(customColor);
+        } else {
+            if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+                modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                Tools.setThemeActivity(getTheme(), modelPrimaryColor);
+            }
         }
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_notification);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        if (isCustomActive) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setBackgroundDrawable(new ColorDrawable(customColor));
+            }
+        }
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelSavings = new ViewModelProvider(this).get(ViewModelSavings.class);

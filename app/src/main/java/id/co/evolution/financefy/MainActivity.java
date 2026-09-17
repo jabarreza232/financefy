@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -107,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public HelperNotification helperNotification;
     public boolean isCheckedNotifSavings,isCheckedNotifFinance;
    public boolean isPinSetting;
+    boolean isCustomActive;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -120,12 +122,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(new Intent(this, PinActivity.class));
         }
 
-        if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
-            modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
-            Tools.setThemeActivity(getTheme(), modelPrimaryColor);
+         isCustomActive = tinyDb.getBoolean("is_custom_color_active");
+        if (isCustomActive) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            getWindow().setStatusBarColor(customColor);
+        } else {
+            if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+                modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                Tools.setThemeActivity(getTheme(), modelPrimaryColor);
+            }
         }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        if (isCustomActive) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setBackgroundDrawable(new ColorDrawable(customColor));
+            }
+        }
 
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelSavings = new ViewModelProvider(this).get(ViewModelSavings.class);
@@ -246,16 +261,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void changeColorBottomNavigation(ModelPrimaryColor modelPrimaryColor) {
+        // 1. Tentukan warna aktif yang BENAR
+        int activeColor;
+        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
+
+        if (isCustomActive) {
+            activeColor = tinyDb.getInt("custom_color_int");
+        } else {
+            activeColor = ContextCompat.getColor(this, modelPrimaryColor.getColorPrimary());
+        }
+
+        // Warna tidak aktif (abu-abu)
+        int inactiveColor = ContextCompat.getColor(this, R.color.colorGrey50);
+
+        // 2. Definisikan State (Kondisi Tab)
         int[][] states = new int[][]{
-                new int[]{android.R.attr.state_checked}, // state_checked
-                new int[]{}  //
+                new int[]{android.R.attr.state_checked},  // Saat tab ditekan/aktif
+                new int[]{-android.R.attr.state_checked}  // Saat tab TIDAK aktif (Gunakan tanda minus)
         };
 
+        // 3. Definisikan Warna Berdasarkan State
         int[] colors = new int[]{
-                ContextCompat.getColor(this, modelPrimaryColor.getColorPrimary()),
-                ContextCompat.getColor(this, R.color.colorGrey50)};
+                activeColor,    // Warna untuk state_checked
+                inactiveColor   // Warna untuk -state_checked
+        };
+
         ColorStateList dynamicColorList = new ColorStateList(states, colors);
 
+        // 4. Terapkan ke Bottom Navigation
         binding.layout.bnMain.setItemIconTintList(dynamicColorList);
         binding.layout.bnMain.setItemTextColor(dynamicColorList);
     }

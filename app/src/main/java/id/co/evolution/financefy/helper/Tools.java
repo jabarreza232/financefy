@@ -3,6 +3,7 @@ package id.co.evolution.financefy.helper;
 import android.animation.ObjectAnimator;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -190,58 +191,121 @@ public class Tools {
         return result;
     }
 
-    public static void setThemeActivity(Resources.Theme theme,ModelPrimaryColor modelPrimaryColor){
-        if(modelPrimaryColor!=null){
+    public static void setThemeActivity(Resources.Theme theme, ModelPrimaryColor modelPrimaryColor) {
+        if (modelPrimaryColor != null) {
+            String colorName = modelPrimaryColor.getName(); // Disimpan dalam variabel agar lebih rapi
 
-            if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Orange.toString()))
-                theme.applyStyle(R.style.AppThemeOrange,true);
-            else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Brown.toString()))
-                theme.applyStyle(R.style.AppThemeBrown,true);
-            else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Green.toString()))
-                theme.applyStyle(R.style.AppThemeGreen,true);
-            else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Red.toString()))
-                theme.applyStyle(R.style.AppThemeRed,true);
-            else theme.applyStyle(R.style.AppTheme,true);
-
-        }
-    }
-    public static void setThemeNoActionBarActivity(Resources.Theme theme,ModelPrimaryColor modelPrimaryColor){
-        if(modelPrimaryColor!=null){
-
-            if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Orange.toString()))
-                theme.applyStyle(R.style.AppThemeOrangeNoActionBar,true);
-            else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Brown.toString()))
-                theme.applyStyle(R.style.AppThemeBrownNoActionBar,true);
-            else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Green.toString()))
-                theme.applyStyle(R.style.AppThemeGreenNoActionBar,true);
-             else if(modelPrimaryColor.getName().equalsIgnoreCase(PRIMARY_COLOR.Red.toString()))
-                theme.applyStyle(R.style.AppThemeRedNoActionBar,true);
-            else theme.applyStyle(R.style.AppThemeNoActionBar,true);
-
-        }
-    }
-    public static void setBackgroundColorView(View view,ModelPrimaryColor modelPrimaryColor){
-        if(modelPrimaryColor!=null){
-            view.setBackgroundColor(ContextCompat.getColor(view.getContext(),modelPrimaryColor.getColorPrimary()));
-        }
-    }
-      public static void setTextColorView(TextView view, ModelPrimaryColor modelPrimaryColor){
-        if(modelPrimaryColor!=null){
-            view.setTextColor(ContextCompat.getColor(view.getContext(),modelPrimaryColor.getColorPrimary()));
-        }
-    }
-
-    public static void setBackgroundTintView(View view,ModelPrimaryColor modelPrimaryColor){
-        if(modelPrimaryColor!=null){
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                view.setBackgroundTintList(ContextCompat.getColorStateList(view.getContext(),modelPrimaryColor.getColorPrimary()));
+            if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Orange.toString())) {
+                theme.applyStyle(R.style.AppThemeOrange, true);
+            } else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Brown.toString())) {
+                theme.applyStyle(R.style.AppThemeBrown, true);
+            } else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Green.toString())) {
+                theme.applyStyle(R.style.AppThemeGreen, true);
+            } else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Red.toString())) {
+                theme.applyStyle(R.style.AppThemeRed, true);
+            }
+            // PENAMBAHAN WARNA BARU
+            else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Pink.toString())) {
+                theme.applyStyle(R.style.AppThemePink, true);
+            } else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Indigo.toString())) {
+                theme.applyStyle(R.style.AppThemeIndigo, true);
+            } else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Slate.toString())) {
+                theme.applyStyle(R.style.AppThemeSlate, true);
+            }
+            // DEFAULT (Biasanya Ungu/Blue)
+            else {
+                theme.applyStyle(R.style.AppTheme, true);
             }
         }
     }
-    public static void setImageTintView(ImageView view, ModelPrimaryColor modelPrimaryColor){
-        if(modelPrimaryColor!=null){
+
+    public static void setThemeNoActionBarActivity(Resources.Theme theme, ModelPrimaryColor modelPrimaryColor) {
+        if (modelPrimaryColor != null) {
+            String colorName = modelPrimaryColor.getName();
+
+            if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Orange.toString())) {
+                theme.applyStyle(R.style.AppThemeOrangeNoActionBar, true);
+            } else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Brown.toString())) {
+                theme.applyStyle(R.style.AppThemeBrownNoActionBar, true);
+            } else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Green.toString())) {
+                theme.applyStyle(R.style.AppThemeGreenNoActionBar, true);
+            } else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Red.toString())) {
+                theme.applyStyle(R.style.AppThemeRedNoActionBar, true);
+            }
+            // PENAMBAHAN WARNA BARU
+            else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Pink.toString())) {
+                theme.applyStyle(R.style.AppThemePinkNoActionBar, true);
+            } else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Indigo.toString())) {
+                theme.applyStyle(R.style.AppThemeIndigoNoActionBar, true);
+            } else if (colorName.equalsIgnoreCase(PRIMARY_COLOR.Slate.toString())) {
+                theme.applyStyle(R.style.AppThemeSlateNoActionBar, true);
+            }
+            // DEFAULT
+            else {
+                theme.applyStyle(R.style.AppThemeNoActionBar, true);
+            }
+        }
+    }
+    public static void setBackgroundColorView(View view, ModelPrimaryColor modelPrimaryColor) {
+        TinyDb tinyDb = new TinyDb(view.getContext());
+        if (tinyDb.getBoolean("is_custom_color_active")) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            if (customColor != 0) {
+                view.setBackgroundColor(customColor);
+                return;
+            }
+        }
+        if (modelPrimaryColor != null) {
+            view.setBackgroundColor(ContextCompat.getColor(view.getContext(), modelPrimaryColor.getColorPrimary()));
+        }
+    }
+
+    public static void setTextColorView(TextView view, ModelPrimaryColor modelPrimaryColor) {
+        TinyDb tinyDb = new TinyDb(view.getContext());
+        if (tinyDb.getBoolean("is_custom_color_active")) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            if (customColor != 0) {
+                view.setTextColor(customColor);
+                return;
+            }
+        }
+        if (modelPrimaryColor != null) {
+            view.setTextColor(ContextCompat.getColor(view.getContext(), modelPrimaryColor.getColorPrimary()));
+        }
+    }
+
+    public static void setBackgroundTintView(View view, ModelPrimaryColor modelPrimaryColor) {
+        TinyDb tinyDb = new TinyDb(view.getContext());
+        if (tinyDb.getBoolean("is_custom_color_active")) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            if (customColor != 0) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    view.setBackgroundTintList(ColorStateList.valueOf(customColor));
+                }
+                return;
+            }
+        }
+        if (modelPrimaryColor != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                view.setColorFilter(ContextCompat.getColor(view.getContext(),modelPrimaryColor.getColorPrimary()));
+                view.setBackgroundTintList(ContextCompat.getColorStateList(view.getContext(), modelPrimaryColor.getColorPrimary()));
+            }
+        }
+    }
+
+    public static void setImageTintView(ImageView view, ModelPrimaryColor modelPrimaryColor) {
+        TinyDb tinyDb = new TinyDb(view.getContext());
+        if (tinyDb.getBoolean("is_custom_color_active")) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            if (customColor != 0) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    view.setColorFilter(customColor);
+                }
+                return;
+            }
+        }
+        if (modelPrimaryColor != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                view.setColorFilter(ContextCompat.getColor(view.getContext(), modelPrimaryColor.getColorPrimary()));
             }
         }
     }

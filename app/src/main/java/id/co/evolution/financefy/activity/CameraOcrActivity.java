@@ -58,9 +58,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.inject.Inject;
+
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCameraOcrBinding;
+import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
+import id.co.evolution.financefy.model.ModelPrimaryColor;
 
 @ExperimentalGetImage
 public class CameraOcrActivity extends AppCompatActivity {
@@ -76,11 +80,25 @@ public class CameraOcrActivity extends AppCompatActivity {
     private Camera camera;
     private boolean isFlashOn = false;
     public ActivityCameraOcrBinding binding;
+    ModelPrimaryColor modelPrimaryColor=Tools.modelPrimaryColor;
+    @Inject
+    TinyDb tinyDb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding= DataBindingUtil.setContentView(this,R.layout.activity_camera_ocr);
+        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
 
+        if (isCustomActive) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            getWindow().setStatusBarColor(customColor);
+        } else {
+            if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+                modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
+            }
+        }
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_camera_ocr);
 
         cameraExecutor = Executors.newSingleThreadExecutor();
         textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);

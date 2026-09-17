@@ -23,4 +23,15 @@
     <!-- Color Red Grape (Soft Red / Coral) -->
     <color name="colorPrimaryRed">#EF9A9A</color>
     <color name="colorPrimaryDarkRed">#260000</color>
+    <!-- Color Pink (Pastel Pink) -->
+    <color name="colorPrimaryPink">#F48FB1</color>
+    <color name="colorPrimaryDarkPink">#3E001A</color>
+
+    <!-- Color Indigo (Soft Indigo) -->
+    <color name="colorPrimaryIndigo">#9FA8DA</color>
+    <color name="colorPrimaryDarkIndigo">#1A1E40</color>
+
+    <!-- Color Slate (Soft Slate) -->
+    <color name="colorPrimarySlate">#B0BEC5</color>
+    <color name="colorPrimaryDarkSlate">#1C262B</color>
 </resources>

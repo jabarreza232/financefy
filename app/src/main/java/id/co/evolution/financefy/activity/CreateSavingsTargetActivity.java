@@ -68,10 +68,19 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        modelPrimaryColor= tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
-        Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
+        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
 
-        binding = DataBindingUtil.setContentView(this,R.layout.activity_create_savings_target);
+        if (isCustomActive) {
+            int customColor = tinyDb.getInt("custom_color_int");
+            getWindow().setStatusBarColor(customColor);
+        } else {
+            if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
+                modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
+            }
+        }
+
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_create_savings_target);
 
         Tools.setBackgroundColorView(binding.rlBackground, modelPrimaryColor);
         Tools.setImageTintView(binding.btnCalculator, modelPrimaryColor);
