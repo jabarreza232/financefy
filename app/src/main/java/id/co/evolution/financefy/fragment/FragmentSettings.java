@@ -26,6 +26,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -63,6 +65,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -71,6 +74,7 @@ import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.activity.AboutActivity;
 import id.co.evolution.financefy.activity.NotificationActivity;
+import id.co.evolution.financefy.activity.PinActivity;
 import id.co.evolution.financefy.activity.SwitchThemeActivity;
 import id.co.evolution.financefy.databinding.FragmentSettingsBinding;
 import id.co.evolution.financefy.dialog.DateRangeDialog;
@@ -209,36 +213,91 @@ public class FragmentSettings extends Fragment {
             startActivity(i);
         });
         changeStatusPin();
+        boolean isFingerprintActive = tinyDb.getBoolean("is_fingerprint_active");
+        binding.switchFingerprint.setChecked(isFingerprintActive);
+
+        binding.switchFingerprint.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                // Cek apakah HP mendukung sidik jari
+                BiometricManager biometricManager = BiometricManager.from(requireContext());
+                if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS) {
+
+                    // Panggil pop-up sidik jari bawaan HP
+                    Executor executor = ContextCompat.getMainExecutor(requireContext());
+                    BiometricPrompt biometricPrompt = new BiometricPrompt(FragmentSettings.this, executor, new BiometricPrompt.AuthenticationCallback() {
+                        @Override
+                        public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+                            super.onAuthenticationSucceeded(result);
+                            tinyDb.putBoolean("is_fingerprint_active", true);
+                            Toast.makeText(requireContext(), "Sidik Jari berhasil diaktifkan!", Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onAuthenticationError(int errorCode, CharSequence errString) {
+                            super.onAuthenticationError(errorCode, errString);
+                            // Kembalikan switch jika batal/gagal
+                            binding.switchFingerprint.setChecked(false);
+                        }
+
+                        @Override
+                        public void onAuthenticationFailed() {
+                            super.onAuthenticationFailed();
+                            // Gagal scan (jari salah)
+                        }
+                    });
+
+                    BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                            .setTitle("Verifikasi Sidik Jari")
+                            .setSubtitle("Gunakan sidik jari Anda untuk mengaktifkan fitur ini")
+                            .setNegativeButtonText("Batal")
+                            .build();
+
+                    biometricPrompt.authenticate(promptInfo);
+
+                } else {
+                    Toast.makeText(requireContext(), "HP Anda tidak mendukung atau belum mengatur Sidik Jari", Toast.LENGTH_SHORT).show();
+                    binding.switchFingerprint.setChecked(false);
+                }
+            } else {
+                // Matikan fitur
+                tinyDb.putBoolean("is_fingerprint_active", false);
+            }
+        });
         binding.txtPinSetting.setOnClickListener(v -> {
             showDialogSettingPIN();
         });
-        if (mainActivity.isPinSetting) {
-            binding.txtStatusPin.setText("Aktif");
-            binding.txtStatusPin.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
-        } else {
-            binding.txtStatusPin.setText("Tidak Aktif");
-            binding.txtStatusPin.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
-        }
-        binding.txtStatusPin.setOnClickListener(v -> {
-            if (mainActivity.isPinSetting) {
-                DialogConfirm dialogConfirm = new DialogConfirm(getContext(), inflater, result -> {
+        binding.switchPin.setChecked(mainActivity.isPinSetting);
 
+// 2. Logika saat Switch digeser
+        binding.switchPin.setOnCheckedChangeListener((buttonView, isChecked) -> {
+
+
+            if (!buttonView.isPressed()) return;
+
+            if (isChecked) {
+                binding.switchPin.setChecked(false);
+
+                showDialogSettingPIN();
+
+            } else {
+                binding.switchPin.setChecked(true);
+
+                DialogConfirm dialogConfirm = new DialogConfirm(getContext(), inflater, result -> {
                     if (result.equalsIgnoreCase("yes")) {
                         Toast.makeText(getContext(), "PIN telah berhasil di non aktifkan !", Toast.LENGTH_SHORT).show();
+
+                        // Hapus data dari TinyDB dan Activity
                         tinyDb.putString("pin", "");
                         tinyDb.putBoolean("isSettingPin", false);
                         mainActivity.isPinSetting = false;
-                        binding.txtStatusPin.setText("Tidak Aktif");
-                        binding.txtStatusPin.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
 
+                        // Jika pengguna menekan "Yes", matikan switch secara permanen
+                        binding.switchPin.setChecked(false);
                     }
                 });
+
                 dialogConfirm.showDialogConfirm("Menonaktifkan PIN", "Apakah anda yakin ingin menonaktifkan PIN anda ? ");
-
-            } else {
-                showDialogSettingPIN();
             }
-
         });
         binding.txtMoney.setOnClickListener(v -> {
             setCurrencySettings();
@@ -524,29 +583,58 @@ public class FragmentSettings extends Fragment {
     public void onDestroy() {
         super.onDestroy();
     }
+    private void showBiometricPrompt() {
+        BiometricManager biometricManager = BiometricManager.from(getContext());
 
+        // Pastikan HP mendukung biometrik dan sudah ada sidik jari yang terdaftar
+        if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS) {
+
+            Executor executor = ContextCompat.getMainExecutor(getContext());
+            BiometricPrompt biometricPrompt = new BiometricPrompt(getActivity(), executor, new BiometricPrompt.AuthenticationCallback() {
+                @Override
+                public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                    super.onAuthenticationSucceeded(result);
+                    DialogSettingPin dialogSettingPin = new DialogSettingPin(getContext(), getLayoutInflater(), new DialogSettingPin.DialogInterfaceCallback() {
+                        @Override
+                        public void onSubmit(String result) {
+                            tinyDb.putString("pin", result);
+                            tinyDb.putBoolean("isSettingPin", true);
+                            mainActivity.isPinSetting = true;
+                            changeStatusPin();
+                        }
+                    });
+
+                    dialogSettingPin.show();
+                }
+
+                @Override
+                public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                    super.onAuthenticationError(errorCode, errString);
+
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    super.onAuthenticationFailed();
+                    // Sidik jari salah/tidak dikenali (Sistem Android akan mengurus pesannya otomatis)
+                }
+            });
+
+            BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Sidik Jari")
+                    .setSubtitle("Gunakan sidik jari untuk mengubah pin")
+                    .setNegativeButtonText("Batal") // Tombol fallback ke keypad
+                    .build();
+
+            biometricPrompt.authenticate(promptInfo);
+        }
+    }
     private void showDialogSettingPIN() {
-        DialogSettingPin dialogSettingPin = new DialogSettingPin(getContext(), getLayoutInflater(), new DialogSettingPin.DialogInterfaceCallback() {
-            @Override
-            public void onSubmit(String result) {
-                tinyDb.putString("pin", result);
-                tinyDb.putBoolean("isSettingPin", true);
-                mainActivity.isPinSetting = true;
-                changeStatusPin();
-            }
-        });
-
-        dialogSettingPin.show();
+        showBiometricPrompt();
     }
 
     private void changeStatusPin() {
-        if (tinyDb.getBoolean("isSettingPin")) {
-            binding.txtStatusPin.setText("Aktif");
-            binding.txtStatusPin.setTextColor(ContextCompat.getColor(getContext(), R.color.green));
-        } else {
-            binding.txtStatusPin.setText("Tidak Aktif");
-            binding.txtStatusPin.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
-        }
+        binding.switchPin.setChecked(mainActivity.isPinSetting);
 
     }
 

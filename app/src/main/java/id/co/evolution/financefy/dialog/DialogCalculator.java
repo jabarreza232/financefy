@@ -46,18 +46,33 @@ public class DialogCalculator {
     String result = "0";
     DialogCalculatorBinding binding;
     Locale locale;
-
+    int colorPrimary;
     public DialogCalculator(Context context, LayoutInflater layoutInflater, DialogInterfaceCallback dialogInterfaceCallback) {
         this.context = context;
         this.inflater = layoutInflater;
         this.dialogInterfaceCallback = dialogInterfaceCallback;
         initCalculator();
     }
-    public DialogCalculator(Context context, LayoutInflater layoutInflater,String result, DialogInterfaceCallback dialogInterfaceCallback) {
+    public DialogCalculator(Context context, int colorPrimary, LayoutInflater layoutInflater, DialogInterfaceCallback dialogInterfaceCallback) {
+        this.context = context;
+        this.inflater = layoutInflater;
+        this.dialogInterfaceCallback = dialogInterfaceCallback;
+        this.colorPrimary = colorPrimary;
+        initCalculator();
+    }
+    public DialogCalculator(Context context, LayoutInflater layoutInflater, String result, DialogInterfaceCallback dialogInterfaceCallback) {
         this.context = context;
         this.inflater = layoutInflater;
         this.dialogInterfaceCallback = dialogInterfaceCallback;
         this.result = result;
+        initCalculator();
+    }
+    public DialogCalculator(Context context, int colorPrimary, LayoutInflater layoutInflater, String result, DialogInterfaceCallback dialogInterfaceCallback) {
+        this.context = context;
+        this.inflater = layoutInflater;
+        this.dialogInterfaceCallback = dialogInterfaceCallback;
+        this.result = result;
+        this.colorPrimary = colorPrimary;
         initCalculator();
     }
 
@@ -70,174 +85,63 @@ public class DialogCalculator {
         binding.etAmount.setText(result);
         TinyDb tinyDb = new TinyDb(context);
         locale =tinyDb.getString("currency").equalsIgnoreCase("IDR")? Tools.getLocaleIDN():Tools.getLocaleUS();
-
+        binding.btnSubmit.setBackgroundColor(colorPrimary);
         AdapterCalculator adapterCalculator = new AdapterCalculator(context, DummyCalculator.getDataCalculator(), (data, position) -> {
             List<String> dataList = (List<String>) data;
+            String input = dataList.get(position);
 
-            if (result.equals("0") && !dataList.get(position).equals("0"))
+            // 1. Jika result masih "0", dan tombol yang ditekan adalah angka (0-9), hapus "0" di awal
+            if (result.equals("0") && input.matches("[0-9]")) {
                 result = "";
-            boolean checkSymbol = result.length() > 0 && Tools.isSpecialCharacterInMyString(Tools.getLastChar(result));
-
-            switch (dataList.get(position)) {
-                case "0":
-                    if (dataList.get(position).equalsIgnoreCase("0")) {
-                        if (result.equalsIgnoreCase(dataList.get(position))) {
-                            result = "0";
-                        } else {
-                            result += "0";
-                        }
-                    }
-                    break;
-                case "1":
-                    result += "1";
-                    break;
-                case "2":
-                    result += "2";
-                    break;
-                case "3":
-                    result += "3";
-                    break;
-                case "4":
-                    result += "4";
-                    break;
-                case "5":
-                    result += "5";
-                    break;
-                case "6":
-                    result += "6";
-                    break;
-                case "7":
-                    result += "7";
-                    break;
-                case "8":
-                    result += "8";
-                    break;
-                case "9":
-                    result += "9";
-                    break;
-                case "C":
-                    clearCalculate();
-                    break;
-                case "+":
-                    if (checkSymbol) {
-                        if (Tools.getLastChar(result).equalsIgnoreCase("+")) return;
-                        else {
-                            result = Tools.removeLastChar(result);
-                            result += "+";
-                        }
-                    } else
-                        result += "+";
-                    break;
-                case "-":
-                    if (checkSymbol) {
-                        if (Tools.getLastChar(result).equalsIgnoreCase("-")) return;
-                        else {
-                            result = Tools.removeLastChar(result);
-                            result += "-";
-                        }
-                    } else
-                        result += "-";
-                    break;
-                case "/":
-                    if (checkSymbol) {
-                        if (Tools.getLastChar(result).equalsIgnoreCase("/")) return;
-                        else {
-                            result = Tools.removeLastChar(result);
-                            result += "/";
-                        }
-                    } else
-                        result += "/";
-                    break;
-                case "x":
-                    if (checkSymbol) {
-                        if (Tools.getLastChar(result).equalsIgnoreCase("x")) return;
-                        else {
-                            result = Tools.removeLastChar(result);
-                            result += "x";
-                        }
-                    } else
-                        result += "x";
-                    break;
-
-                case "=":
-                    char[] typeCalculates = Tools.getSpecialCharacterInMyString(result).toCharArray();
-                    Log.e("cek:", "" + Tools.getSpecialCharacterInMyString(result) + " : " + typeCalculates.length);
-                    String symbolCalculate = "[x/\\-+]";
-                    Log.e("cek_juga_valuenya:", "" + new Gson().toJson(result.split(symbolCalculate)));
-                    long valueStart;
-                    long valueEnd;
-                    long valueResult = 0;
-                    for (int i = 0; i < typeCalculates.length; i++) {
-                        String value = Character.toString(typeCalculates[i]);
-
-                        valueStart = 0;
-                        valueEnd = 0;
-                        for (int j = 0; j < result.split(symbolCalculate).length; j++) {
-
-//                            Log.e("cek_juga_valuenya:", "" +value);
-
-                            Log.e("cek_value_result:", valueResult + "");
-
-                            if (j % 2 == 0) {
-                                valueStart = Long.parseLong(result.split(symbolCalculate)[j].isEmpty() ? "0" : result.split(symbolCalculate)[j]);
-                            } else {
-                                valueEnd = Long.parseLong(result.split(symbolCalculate)[j].isEmpty() ? "0" : result.split(symbolCalculate)[j]);
-                            }
-
-//                            if (valueStart == 0) {
-//                                if (valueResult > 0)
-//                                    valueStart = valueResult;
-//                                Log.e("cek_juga_value_start:", "" + valueStart);
-//                            }
-//
-//                            if (valueEnd == 0) {
-//                                if (valueResult > 0)
-//                                    valueEnd = valueResult;
-//                                Log.e("cek_juga_value_end:", "" + valueEnd);
-//                            }
-
-
-                            if (valueStart > 0 && valueEnd > 0) {
-                                if (valueResult == 0)
-                                    valueResult = Long.parseLong(HelperCalculator.calculate(valueStart, valueEnd, value));
-                                else {
-                                    if (j % 2 == 0)
-                                        valueResult = Long.parseLong(HelperCalculator.calculate(valueResult, valueStart, value));
-                                    else
-                                        valueResult = Long.parseLong(HelperCalculator.calculate(valueResult, valueEnd, value));
-                                }
-
-                                Log.e("cek_value_start_end:", valueStart + " : " + valueEnd + " : " + valueResult);
-
-                                valueStart = 0;
-                                valueEnd = 0;
-                            } else if (j > 0) {
-
-                                if (j % 2 == 1)
-                                    valueResult = Long.parseLong(HelperCalculator.calculate(valueResult, valueEnd, value));
-                                else
-                                    valueResult = Long.parseLong(HelperCalculator.calculate(valueResult, valueStart, value));
-                            }
-
-
-                            Log.e("cek_value_start_end:", valueStart + " : " + valueEnd + " : " + valueResult);
-
-////                            try {
-////                                result = HelperCalculator.calculate(valueStart, valueEnd, value);
-////
-////                            } catch (ArithmeticException e) {
-////                                e.printStackTrace();
-////                            }
-
-
-                        }
-                        result = String.valueOf(valueResult);
-                    }
-
-                    break;
-                default:
-                    break;
             }
+
+            // 2. Cek apakah karakter terakhir adalah operator (+, -, /, x)
+            boolean hasTrailingOperator = result.length() > 0 && Tools.isSpecialCharacterInMyString(Tools.getLastChar(result));
+
+            // 3. LOGIKA UTAMA (Tanpa Switch-Case Panjang)
+            if (input.matches("[0-9]")) {
+                // --- JIKA TOMBOL ANGKA (0-9) ---
+                result += input;
+
+            } else if (input.equals("C")) {
+                // --- JIKA TOMBOL CLEAR ---
+                clearCalculate();
+                // Pastikan clearCalculate() mereset result menjadi "0"
+
+            } else if (input.matches("[+\\-x/]")) {
+                // --- JIKA TOMBOL OPERATOR (+, -, x, /) ---
+                if (hasTrailingOperator) {
+                    // Cegah penumpukan operator (misal "15++"). Ganti operator terakhir
+                    result = Tools.removeLastChar(result);
+                }
+                result += input;
+
+            } else if (input.equals("=")) {
+                // --- JIKA TOMBOL SAMA DENGAN (=) ---
+                if (hasTrailingOperator) {
+                    // Hapus operator di akhir jika = ditekan prematur (misal "1500+" menjadi "1500")
+                    result = Tools.removeLastChar(result);
+                }
+
+                try {
+                    // Evaluasi string matematika (Ganti 'x' dengan '*' agar standar)
+                    String evaluableString = result.replace("x", "*");
+
+                    // Panggil fungsi penilai matematika
+                    double mathResult = evaluateMathExpression(evaluableString);
+
+                    // Cek apakah hasilnya bilangan bulat (misal 15000.0)
+                    if (mathResult == (long) mathResult) {
+                        result = String.valueOf((long) mathResult); // Tampilkan tanpa .0
+                    } else {
+                        result = String.valueOf(mathResult); // Tampilkan desimal (misal 2.5)
+                    }
+                } catch (Exception e) {
+                    Log.e("Calculator", "Error memproses hitungan", e);
+                }
+            }
+
+            // Format kembali ke bentuk Rupiah/Ribuan
             resultToNumberFormat();
         });
         binding.rvCalculator.setLayoutManager(new GridLayoutManager(context, 4));
@@ -256,7 +160,9 @@ public class DialogCalculator {
             clearCalculate();
             return false;
         });
-
+        binding.imgClose.setOnClickListener(v->{
+            dialog.dismiss();
+        });
         binding.etAmount.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -305,7 +211,67 @@ public class DialogCalculator {
             dialogInterfaceCallback.onSubmit(Tools.replaceStringNumberFormat(result));
         });
     }
+    public static double evaluateMathExpression(final String str) {
+        return new Object() {
+            int pos = -1, ch;
 
+            void nextChar() {
+                ch = (++pos < str.length()) ? str.charAt(pos) : -1;
+            }
+
+            boolean eat(int charToEat) {
+                while (ch == ' ') nextChar();
+                if (ch == charToEat) {
+                    nextChar();
+                    return true;
+                }
+                return false;
+            }
+
+            double parse() {
+                nextChar();
+                double x = parseExpression();
+                if (pos < str.length()) throw new RuntimeException("Karakter aneh: " + (char)ch);
+                return x;
+            }
+
+            double parseExpression() {
+                double x = parseTerm();
+                for (;;) {
+                    if      (eat('+')) x += parseTerm(); // Tambah
+                    else if (eat('-')) x -= parseTerm(); // Kurang
+                    else return x;
+                }
+            }
+
+            double parseTerm() {
+                double x = parseFactor();
+                for (;;) {
+                    if      (eat('*')) x *= parseFactor(); // Kali
+                    else if (eat('/')) x /= parseFactor(); // Bagi
+                    else return x;
+                }
+            }
+
+            double parseFactor() {
+                if (eat('+')) return parseFactor(); // Unary plus
+                if (eat('-')) return -parseFactor(); // Unary minus
+
+                double x;
+                int startPos = this.pos;
+                if (eat('(')) {
+                    x = parseExpression();
+                    eat(')');
+                } else if ((ch >= '0' && ch <= '9') || ch == '.') { // Angka
+                    while ((ch >= '0' && ch <= '9') || ch == '.') nextChar();
+                    x = Double.parseDouble(str.substring(startPos, this.pos));
+                } else {
+                    throw new RuntimeException("Karakter aneh: " + (char)ch);
+                }
+                return x;
+            }
+        }.parse();
+    }
     private void resultToNumberFormat() {
         binding.etAmount.setText(result);
     }

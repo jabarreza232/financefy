@@ -1,25 +1,17 @@
 package id.co.evolution.financefy.helper;
 
-import static android.content.Context.ALARM_SERVICE;
-
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.widget.Toast;
 
-import androidx.room.Room;
-
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-import java.util.Random;
 
-import dagger.hilt.android.AndroidEntryPoint;
-import id.co.evolution.financefy.db.FinanceDB;
+import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.model.ModelNotification;
+
 public class HelperNotification {
     Context context;
     TinyDb tinyDb;
@@ -29,81 +21,106 @@ public class HelperNotification {
         tinyDb = new TinyDb(context);
     }
 
-    @SuppressLint("UnspecifiedImmutableFlag")
-    public void reminderSet(boolean isChecked,ModelNotification modelNotification,String keyNotif,int requestCode) {
-        ReminderBroadcast reminderBroadcast = new ReminderBroadcast();
-        Intent intent = new Intent(context, reminderBroadcast.getClass());
-        ArrayList<Object>dataNotification;
-        if(tinyDb.getListObject("dataNotification",ModelNotification.class)!=null){
-            dataNotification = tinyDb.getListObject("dataNotification",ModelNotification.class);
-        }else{
-            dataNotification=new ArrayList<>();
+    @SuppressLint({"UnspecifiedImmutableFlag", "ScheduleExactAlarm"})
+    public void reminderSet(boolean isChecked, ModelNotification modelNotification, String keyNotif, int requestCode) {
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+
+        Intent intent = new Intent(context, ReminderBroadcast.class);
+        intent.putExtra("key", keyNotif);
+
+        int pendingFlags;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+        } else {
+            pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT;
         }
 
-        PendingIntent pendingIntent = null;
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, pendingFlags);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M&&Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            modelNotification.requestCode=requestCode;
-            if(dataNotification.size()<2){
-                dataNotification.add(modelNotification);
-            }else{
-                for (int i = 0; i < dataNotification.size(); i++) {
-                    ModelNotification modelNotification1 = (ModelNotification) dataNotification.get(i);
-                    if(modelNotification1.requestCode==modelNotification.requestCode)
-                    dataNotification.set(i,modelNotification);
+        if (isChecked) {
+            modelNotification.requestCode = requestCode;
+            tinyDb.putObject(keyNotif, modelNotification);
 
+            String timeNotif = tinyDb.getString("time_notification");
+            boolean isMonthly = "monthly".equalsIgnoreCase(timeNotif);
+
+            int hour = tinyDb.getInt("notif_hour", 8);
+            int minute = tinyDb.getInt("notif_minute", 0);
+            int day = tinyDb.getInt("notif_day", 1);
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(System.currentTimeMillis());
+
+            if (isMonthly) {
+                int maxDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+                calendar.set(Calendar.DAY_OF_MONTH, Math.min(day, maxDays));
+                calendar.set(Calendar.HOUR_OF_DAY, hour);
+                calendar.set(Calendar.MINUTE, minute);
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+
+                if (calendar.before(Calendar.getInstance())) {
+                    calendar.add(Calendar.MONTH, 1);
+                    maxDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+                    calendar.set(Calendar.DAY_OF_MONTH, Math.min(day, maxDays));
+                }
+
+                if (alarmManager != null) {
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                        } else {
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                        }
+                    } catch (Exception e) {
+                        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                    }
+                }
+            } else {
+                // Daily
+                calendar.set(Calendar.HOUR_OF_DAY, hour);
+                calendar.set(Calendar.MINUTE, minute);
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+
+                if (calendar.before(Calendar.getInstance())) {
+                    calendar.add(Calendar.DAY_OF_MONTH, 1);
+                }
+
+                if (alarmManager != null) {
+                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
                 }
             }
-            tinyDb.putListObject("dataNotification",dataNotification);
-            pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE);
-        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
-            intent.putExtra("key",keyNotif);
-            modelNotification.requestCode = requestCode;
-            tinyDb.putObject(keyNotif,modelNotification);
-            pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            if (alarmManager != null) {
+                alarmManager.cancel(pendingIntent);
+            }
+            tinyDb.remove(keyNotif);
         }
-        AlarmManager alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        // Set the alarm to start at approximately 2:00 p.m.
-        Calendar calendar = Calendar.getInstance();
+    }
 
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 8);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        // Jika waktu yang ditetapkan sudah berlalu, setel alarm untuk hari berikutnya
-        if (Calendar.getInstance().after(calendar)) {
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
+    public void rescheduleAllAlarmsOnBoot() {
+        boolean isCheckedFinance = tinyDb.getBoolean("isCheckedFinance");
+        if (isCheckedFinance) {
+            ModelNotification financeNotif = tinyDb.getObject(context.getString(R.string.jurnal_keuangan), ModelNotification.class);
+            if (financeNotif != null) {
+                reminderSet(true, financeNotif, context.getString(R.string.jurnal_keuangan), 200);
+            }
         }
 
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-
-        if (pendingIntent != null && alarmManager != null && !isChecked) {
-            alarmManager.cancel(pendingIntent);
-
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                dataNotification.remove(modelNotification);
-                tinyDb.putListObject("dataNotification", dataNotification);
+        boolean isCheckedSavings = tinyDb.getBoolean("isCheckedSavings");
+        if (isCheckedSavings) {
+            ModelNotification savingsNotif = tinyDb.getObject(context.getString(R.string.menabung), ModelNotification.class);
+            if (savingsNotif != null) {
+                reminderSet(true, savingsNotif, context.getString(R.string.menabung), 100);
             }
         }
     }
+
     public static long getTimeInMillisForTomorrow() {
-        // Mendapatkan instance dari Calendar
         Calendar calendar = Calendar.getInstance();
-
-        // Mengatur waktu kalender ke waktu saat ini
         calendar.setTimeInMillis(System.currentTimeMillis());
-
-        // Menambah satu hari ke waktu saat ini
         calendar.add(Calendar.DAY_OF_YEAR, 1);
-
-        // Mengatur jam, menit, dan detik ke waktu yang sama pada hari esok
-        calendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY));
-        calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE));
-        calendar.set(Calendar.SECOND, calendar.get(Calendar.SECOND));
-        calendar.set(Calendar.MILLISECOND, calendar.get(Calendar.MILLISECOND));
-
-        // Mengembalikan timeInMillis untuk hari esok
         return calendar.getTimeInMillis();
     }
-
 }

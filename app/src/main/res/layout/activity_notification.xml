@@ -1,131 +1,336 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".activity.NotificationActivity"
-    android:orientation="vertical">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:background="#D7808080">
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:fontFamily="@font/ubuntu_b"
-            android:text="@string/description_notification"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="15sp" />
-
-    </FrameLayout>
-    <!-- LinearLayout for buttons -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:padding="8dp">
+        android:layout_height="match_parent"
+        android:background="?attr/colorSurface"
+        android:orientation="vertical"
+        tools:context=".activity.NotificationActivity">
 
-        <Button
-            android:elevation="7dp"
-            android:id="@+id/buttonDaily"
-            android:layout_width="0dp"
+        <!-- HEADER INFO BANNER (Soft & Modern) -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Per Hari"
-            android:drawableLeft="@drawable/baseline_calendar_today_24"
-            android:background="@drawable/button_selector"
-            android:textAllCaps="false"
-            android:padding="16dp"
-            android:textSize="12sp"
-            android:textColor="@color/blackTextColor"
-            android:gravity="center"/>
+            android:background="#1A808080"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
 
-        <Button
-            android:id="@+id/buttonMonthly"
-            android:layout_width="0dp"
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_baseline_info_24"
+                app:tint="?android:attr/textColorSecondary" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFamily="@font/ubuntu_r"
+                android:lineSpacingExtra="4dp"
+                android:text="@string/description_notification"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+
+        <!-- Komponen ini menyatukan 2 tombol menjadi 1 baris pill yang elegan -->
+        <!-- FREQUENCY SELECTOR (Custom CardView Toggle) -->
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Per Bulan"
-            android:drawableLeft="@drawable/baseline_calendar_month_24"
-            android:background="@drawable/button_selector"
-            android:padding="16dp"
-            android:textColor="@color/blackTextColor"
-            android:textSize="12sp"
-            android:textAllCaps="false"
-            android:gravity="center"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginTop="24dp"
+            android:fontFamily="@font/ubuntu_b"
+            android:paddingHorizontal="24dp"
+            android:text="Frekuensi Laporan"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
 
+            <!-- Card: Per Hari (Set Aktif Default) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_daily"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/colorPrimary"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
+
+                    <ImageView
+                        android:id="@+id/img_daily"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/baseline_calendar_today_24"
+                        app:tint="@color/white" />
+
+                    <TextView
+                        android:id="@+id/txt_daily"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="@font/ubuntu_b"
+                        android:text="Per Hari"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Card: Per Bulan (Set Tidak Aktif Default) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_monthly"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="?android:attr/textColorSecondary"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingVertical="12dp">
+
+                    <ImageView
+                        android:id="@+id/img_monthly"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/baseline_calendar_month_24"
+                        app:tint="?android:attr/textColorSecondary" />
+
+                    <TextView
+                        android:id="@+id/txt_monthly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="@font/ubuntu_b"
+                        android:text="Per Bulan"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+        <!-- WAKTU PENGINGAT (Kartu Dinamis menyesuaikan pilihan frekuensi) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_time_date_picker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="?attr/colorSurface"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackground"
+                android:padding="16dp">
+
+                <!-- Ikon akan berubah di Java (Jam atau Kalender) -->
+                <ImageView
+                    android:id="@+id/img_time_date"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_access_time"
+                    app:tint="@color/colorPrimary" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="16dp"
+                    android:layout_toEndOf="@id/img_time_date"
+                    android:orientation="vertical">
+
+                    <!-- Judul akan berubah (Jam Pengingat / Tanggal Pengingat) -->
+                    <TextView
+                        android:id="@+id/txt_time_date_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/ubuntu_b"
+                        android:text="Jam Pengingat"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="@font/ubuntu_r"
+                        android:text="Ketuk untuk mengubah"
+                        android:textColor="?android:attr/textColorSecondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <!-- Value yang dipilih (Misal: 08:00 atau Tgl 25) -->
+                <TextView
+                    android:id="@+id/txt_time_date_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:background="@color/bg_action_light"
+                    android:fontFamily="@font/ubuntu_b"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:text="08:00"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="14sp" />
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <!-- NOTIFICATION PREFERENCES -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:fontFamily="@font/ubuntu_b"
+            android:paddingHorizontal="24dp"
+            android:text="Jenis Notifikasi"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="16sp" />
+
+        <!-- CardView Mengelompokkan pengaturan layaknya menu iPhone/Material 3 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="?attr/colorSurface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- ITEM 1: Keuangan -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="16dp">
+
+                    <!-- LinearLayout untuk membungkus Title + Subtitle -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toStartOf="@id/switch_notification_finance"
+                        android:orientation="vertical"
+                        android:paddingEnd="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/ubuntu_b"
+                            android:text="Arus Kas Keuangan"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/ubuntu_r"
+                            android:text="Laporan pemasukan dan pengeluaran harian/bulanan."
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_notification_finance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true" />
+                </RelativeLayout>
+
+                <!-- Divider Super Halus -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="#1A808080" />
+
+                <!-- ITEM 2: Tabungan -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toStartOf="@id/switch_notification_savings"
+                        android:orientation="vertical"
+                        android:paddingEnd="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/ubuntu_b"
+                            android:text="Progres Menabung"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/ubuntu_r"
+                            android:text="Notifikasi saat target tabungan Anda tercapai."
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_notification_savings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true" />
+                </RelativeLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
-
-
-    <RelativeLayout
-        android:background="@drawable/shape_line_gray"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-       >
-
-        <TextView
-            android:id="@+id/txt_notification_finance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/switch_notification_finance"
-            android:drawablePadding="5dp"
-            android:drawableTint="?android:textColorPrimary"
-            android:padding="10dp"
-            android:text="Pengeluaran dan pemasukan"
-            android:textColor="?android:textColorPrimary"
-            android:textSize="15sp" />
-        <Switch
-            android:layout_centerInParent="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/switch_notification_finance"
-            android:layout_alignParentEnd="true"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
-    </RelativeLayout>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="3dp"
-        app:cardCornerRadius="5dp"
-        android:background="@drawable/shape_line_gray"
-        app:cardElevation="3dp">
-
-        <TextView
-            android:id="@+id/txt_notification_savings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toStartOf="@id/switch_notification_savings"
-            android:drawablePadding="5dp"
-            android:drawableTint="?android:textColorPrimary"
-            android:padding="10dp"
-            android:text="Progress menabung"
-            android:textColor="?android:textColorPrimary"
-            android:textSize="15sp" />
-
-        <Switch
-            android:id="@+id/switch_notification_savings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerInParent="true"
-            tools:ignore="UseSwitchCompatOrMaterialXml" />
-    </RelativeLayout>
-
-
-
-
-</LinearLayout>
 </layout>

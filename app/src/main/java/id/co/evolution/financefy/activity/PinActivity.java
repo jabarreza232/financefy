@@ -1,6 +1,10 @@
 package id.co.evolution.financefy.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.GridLayoutManager;
 
@@ -14,6 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -35,12 +40,12 @@ public class PinActivity extends AppCompatActivity {
     @Inject
     TinyDb tinyDb;
     public ModelPrimaryColor modelPrimaryColor = Tools.modelPrimaryColor;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
 
+        // 1. Inisialisasi Tema
+        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
         if (isCustomActive) {
             int customColor = tinyDb.getInt("custom_color_int");
             getWindow().setStatusBarColor(customColor);
@@ -53,12 +58,11 @@ public class PinActivity extends AppCompatActivity {
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_pin);
 
+        // 2. Setup Keypad PIN Manual
         AdapterPinNumber adapterPin = new AdapterPinNumber(this, DummyNumberPin.getNumberPinConfirm(), (data, position) -> {
             List<String> dataList = (List<String>) data;
 
-
             switch (dataList.get(position)) {
-
                 case "C":
                     clearCalculate();
                     break;
@@ -75,18 +79,22 @@ public class PinActivity extends AppCompatActivity {
                         return;
                     }
 
+                    // PIN BENAR -> Masuk MainActivity
                     Intent intent = new Intent(this, MainActivity.class);
                     intent.putExtra("isInputPin", true);
-
                     startActivity(intent);
+                    finish(); // PENTING: Hancurkan halaman PIN agar tidak bisa di-back
                     break;
 
                 default:
-                    result += dataList.get(position);
+                    if (result.length() < 6) { // Cegah input lebih dari 6 digit
+                        result += dataList.get(position);
+                    }
                     break;
             }
             resultText();
         });
+
         binding.rvCalculator.setLayoutManager(new GridLayoutManager(this, 3));
         binding.rvCalculator.setAdapter(adapterPin);
         binding.rvCalculator.setClickable(true);
@@ -106,7 +114,54 @@ public class PinActivity extends AppCompatActivity {
         binding.etAmount.setEnabled(false);
         binding.etAmount.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
 
+        // 3. TRIGGER FINGERPRINT OTOMATIS
+        boolean isFingerprintActive = tinyDb.getBoolean("is_fingerprint_active");
+        if (isFingerprintActive) {
+            showBiometricPrompt();
+        }
+    }
 
+    // Metode khusus untuk menangani Biometrik
+    private void showBiometricPrompt() {
+        BiometricManager biometricManager = BiometricManager.from(this);
+
+        // Pastikan HP mendukung biometrik dan sudah ada sidik jari yang terdaftar
+        if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS) {
+
+            Executor executor = ContextCompat.getMainExecutor(this);
+            BiometricPrompt biometricPrompt = new BiometricPrompt(PinActivity.this, executor, new BiometricPrompt.AuthenticationCallback() {
+                @Override
+                public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                    super.onAuthenticationSucceeded(result);
+
+                    // SIDIK JARI BENAR -> Langsung masuk MainActivity tanpa tekan OK
+                    Intent intent = new Intent(PinActivity.this, MainActivity.class);
+                    intent.putExtra("isInputPin", true);
+                    startActivity(intent);
+                    finish(); // PENTING: Tutup halaman PIN
+                }
+
+                @Override
+                public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                    super.onAuthenticationError(errorCode, errString);
+
+                }
+
+                @Override
+                public void onAuthenticationFailed() {
+                    super.onAuthenticationFailed();
+                    // Sidik jari salah/tidak dikenali (Sistem Android akan mengurus pesannya otomatis)
+                }
+            });
+
+            BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                    .setTitle("Login Sidik Jari")
+                    .setSubtitle("Gunakan sidik jari untuk membuka Financefy")
+                    .setNegativeButtonText("Gunakan PIN") // Tombol fallback ke keypad
+                    .build();
+
+            biometricPrompt.authenticate(promptInfo);
+        }
     }
 
     private void resultText() {

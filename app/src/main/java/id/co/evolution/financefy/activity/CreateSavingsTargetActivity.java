@@ -63,7 +63,7 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
     ModelSavings modelSavings;
     ModelUser modelUser;
     Locale locale;
-
+    private int colorPrimary;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +72,13 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
 
         if (isCustomActive) {
             int customColor = tinyDb.getInt("custom_color_int");
+            colorPrimary = customColor;
+
             getWindow().setStatusBarColor(customColor);
         } else {
             if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
                 modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                colorPrimary = ContextCompat.getColor(this, modelPrimaryColor.getColorPrimary());
                 Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
             }
         }
@@ -176,9 +179,9 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
         } else if (id == R.id.img_back) {
             finish();
         } else if (id == R.id.btn_calculator) {
-            dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
+            dialogCalculator = new DialogCalculator(this, colorPrimary, getLayoutInflater(), result -> {
                 jumlah = result;
-                binding.etAmount.setText(Tools.convertToCurrency(result,locale));
+                binding.etAmount.setText(Tools.convertToCurrency(result, locale));
             });
             dialogCalculator.show();
         } else if (id == R.id.place_submit) {

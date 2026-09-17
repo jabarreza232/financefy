@@ -117,6 +117,7 @@
             android:layout_marginBottom="3dp"
             app:cardCornerRadius="5dp"
             app:cardElevation="3dp">
+
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -125,6 +126,7 @@
                     android:id="@+id/txt_pin_setting"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/switch_pin"
                     android:drawableStart="@drawable/ic_baseline_security_24"
                     android:drawablePadding="5dp"
                     android:drawableTint="?android:textColorPrimary"
@@ -133,30 +135,50 @@
                     android:textColor="?android:textColorPrimary"
                     android:textSize="15sp" />
 
-                <TextView
-                    android:id="@+id/txt_status_pin"
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_pin"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="10dp" />
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView><androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="3dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/txt_fingerprint_setting"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_toStartOf="@id/switch_fingerprint"
+                    android:drawableStart="@drawable/ic_fingerprint"
+                    android:drawablePadding="5dp"
+                    android:drawableTint="?android:textColorPrimary"
                     android:padding="10dp"
-                    android:text="Tidak Aktif"
-                    android:layout_toStartOf="@+id/img_keyboard_arrow_right"
-                    android:textColor="@color/red"
+                    android:text="Login Sidik Jari (Biometrik)"
+                    android:textColor="?android:textColorPrimary"
                     android:textSize="15sp" />
 
-                <ImageView
-                    android:id="@+id/img_keyboard_arrow_right"
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_fingerprint"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                    app:tint="?android:textColorPrimary"
                     android:layout_alignParentEnd="true"
-                    android:padding="10dp"
-                    />
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="10dp" />
             </RelativeLayout>
-
         </androidx.cardview.widget.CardView>
-
-
         <!-- MULAI BAGIAN AI / LLM -->
         <TextView
             android:id="@+id/txt_ai_settings"

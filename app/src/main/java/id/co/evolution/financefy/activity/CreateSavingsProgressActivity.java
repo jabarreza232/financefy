@@ -111,6 +111,8 @@ public class CreateSavingsProgressActivity extends BaseFinanceActivity implement
     private BottomSheetDialog loadingOcrDialog;
 
     private HelperResultLLM helperResultLLM;
+    private int colorPrimary;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,10 +120,13 @@ public class CreateSavingsProgressActivity extends BaseFinanceActivity implement
 
         if (isCustomActive) {
             int customColor = tinyDb.getInt("custom_color_int");
+            colorPrimary = customColor;
+
             getWindow().setStatusBarColor(customColor);
         } else {
             if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
                 modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                colorPrimary = ContextCompat.getColor(this, modelPrimaryColor.getColorPrimary());
                 Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
             }
         }
@@ -313,7 +318,7 @@ public class CreateSavingsProgressActivity extends BaseFinanceActivity implement
                 finish();
                 break;
             case "btn_calculator":
-                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
+                dialogCalculator = new DialogCalculator(this, colorPrimary, getLayoutInflater(), result -> {
                     jumlah = result;
                     binding.etAmount.setText(Tools.convertToCurrency(result, locale));
                 });

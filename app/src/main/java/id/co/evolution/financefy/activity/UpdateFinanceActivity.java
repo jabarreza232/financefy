@@ -91,6 +91,7 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
     private String currentOcrText = "";
 
     private HelperResultLLM helperResultLLM;
+    private int colorPrimary;
 
     @SuppressLint("ObsoleteSdkInt")
     @Override
@@ -100,10 +101,13 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
 
         if (isCustomActive) {
             int customColor = tinyDb.getInt("custom_color_int");
+            colorPrimary = customColor;
+
             getWindow().setStatusBarColor(customColor);
         } else {
             if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
                 modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                colorPrimary = ContextCompat.getColor(this, modelPrimaryColor.getColorPrimary());
                 Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
             }
         }
@@ -289,7 +293,7 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
                 showDialogType();
                 break;
             case "btn_calculator":
-                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), Tools.convertCurrencyToValue(jumlah), result -> {
+                dialogCalculator = new DialogCalculator(this, colorPrimary, getLayoutInflater(), Tools.convertCurrencyToValue(jumlah), result -> {
                     jumlah = Tools.convertToCurrency(result, locale);
                     binding.etAmount.setText(jumlah);
                 });

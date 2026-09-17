@@ -18,6 +18,7 @@ import java.util.List;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.callback.MethodCallback;
 import id.co.evolution.financefy.databinding.ListCalculatorBinding;
+import id.co.evolution.financefy.databinding.ListNumberPinBinding;
 
 public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.ViewHolder> {
     Context context;
@@ -35,7 +36,7 @@ public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.Vi
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.list_calculator, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.list_number_pin, parent, false);
         return new ViewHolder(view);
     }
 
@@ -51,7 +52,7 @@ public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.Vi
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        ListCalculatorBinding binding;
+        ListNumberPinBinding binding;
         TextView activeButton;
 
         public ViewHolder(@NonNull View itemView) {
@@ -62,40 +63,40 @@ public class AdapterCalculator extends RecyclerView.Adapter<AdapterCalculator.Vi
         public void bindData(String modelFilter, int position) {
             binding.txtName.setText(modelFilter);
 
-//            itemView.setOnClickListener(v -> {
-//                methodCallback.onClick(data, position);
-//            });
-            itemView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        methodCallback.onClick(data, position);
-                        binding.txtName.setBackgroundColor(ContextCompat.getColor(context, R.color.blueColor));
-                        binding.txtName.setSelected(true);
-                        return true;
-                    }
-                    if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                        if(binding.txtName.isSelected()){
-                            binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_selected_calculator));
-                            binding.txtName.setSelected(false);
-                        }else{
-                            binding.txtName.setBackgroundColor(ContextCompat.getColor(context, R.color.blueColor));
-                            binding.txtName.setSelected(true);
-                        }
-
-                        // Do what you want
-                        return true;
-                    }
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
-                        binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_selected_calculator));
-                        binding.txtName.setSelected(false);
-                        // Do what you want
-                        return true;
-                    }
-
-                    return false;
-                }
+            itemView.setOnClickListener(v -> {
+                methodCallback.onClick(data, position);
             });
+//            itemView.setOnTouchListener(new View.OnTouchListener() {
+//                @Override
+//                public boolean onTouch(View v, MotionEvent event) {
+//                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+//                        methodCallback.onClick(data, position);
+//                        binding.txtName.setBackgroundColor(ContextCompat.getColor(context, R.color.blueColor));
+//                        binding.txtName.setSelected(true);
+//                        return true;
+//                    }
+//                    if (event.getAction() == MotionEvent.ACTION_MOVE) {
+//                        if(binding.txtName.isSelected()){
+//                            binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_selected_calculator));
+//                            binding.txtName.setSelected(false);
+//                        }else{
+//                            binding.txtName.setBackgroundColor(ContextCompat.getColor(context, R.color.blueColor));
+//                            binding.txtName.setSelected(true);
+//                        }
+//
+//                        // Do what you want
+//                        return true;
+//                    }
+//                    if (event.getAction() == MotionEvent.ACTION_UP) {
+//                        binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_selected_calculator));
+//                        binding.txtName.setSelected(false);
+//                        // Do what you want
+//                        return true;
+//                    }
+//
+//                    return false;
+//                }
+//            });
 
 
         }

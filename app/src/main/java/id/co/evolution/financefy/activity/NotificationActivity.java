@@ -2,34 +2,28 @@ package id.co.evolution.financefy.activity;
 
 import static id.co.evolution.financefy.helper.Tools.getFormattedDateSimple;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.databinding.DataBindingUtil;
-import androidx.lifecycle.ViewModelProvider;
-
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.Button;
-import android.widget.CompoundButton;
+import android.widget.NumberPicker;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
+
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -39,7 +33,6 @@ import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityNotificationBinding;
 import id.co.evolution.financefy.helper.FinanceFilter;
 import id.co.evolution.financefy.helper.HelperNotification;
-import id.co.evolution.financefy.helper.ReminderBroadcast;
 import id.co.evolution.financefy.helper.SavingsFilter;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
@@ -63,12 +56,14 @@ public class NotificationActivity extends AppCompatActivity {
     public ViewModelFinance viewModelFinance;
     public ViewModelSavings viewModelSavings;
     public ViewModelSavingsProgress viewModelSavingsProgress;
+
     @Inject
     FinanceRepository financeRepository;
     @Inject
     SavingsRepository savingsRepository;
     @Inject
     SavingsProgressRepository savingsProgressRepository;
+
     public List<ModelFinance> dataFinance = new ArrayList<>();
     public List<ModelSavingsProgress> dataSaving = new ArrayList<>();
 
@@ -79,12 +74,15 @@ public class NotificationActivity extends AppCompatActivity {
     TinyDb tinyDb;
     Locale locale;
     HelperNotification helperNotification;
-    Button activeButton;
-    boolean isDailyNotification;
-    String descriptionFinance, descriptionSavings;
+    String descriptionFinance = "", descriptionSavings = "";
     boolean isCheckedFinance;
     boolean isCheckedSavings;
     private static final int NOTIFICATION_PERMISSION_CODE = 101;
+
+    int selectedHour = 8;
+    int selectedMinute = 0;
+    int selectedDay = 1;
+    boolean isDailyMode = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,90 +120,265 @@ public class NotificationActivity extends AppCompatActivity {
         helperNotification = new HelperNotification(this);
         user = tinyDb.getObject("user", ModelUser.class);
         modelSavings = tinyDb.getObject("savings", ModelSavings.class);
-        String notif=tinyDb.getString("time_notification");
-        locale = user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
-        isCheckedFinance= tinyDb.getBoolean("isCheckedFinance");
-        isCheckedSavings= tinyDb.getBoolean("isCheckedSavings");
+        if (user != null) {
+            locale = user.getType_currency().equalsIgnoreCase("IDR") ? Tools.getLocaleIDN() : Tools.getLocaleUS();
+        } else {
+            locale = Tools.getLocaleIDN();
+        }
+
+        selectedHour = tinyDb.getInt("notif_hour", 8);
+        selectedMinute = tinyDb.getInt("notif_minute", 0);
+        selectedDay = tinyDb.getInt("notif_day", 1);
+
+        String notif = tinyDb.getString("time_notification");
+        isCheckedFinance = tinyDb.getBoolean("isCheckedFinance");
+        isCheckedSavings = tinyDb.getBoolean("isCheckedSavings");
+
+        mBinding.cardTimeDatePicker.setOnClickListener(v -> {
+            if (isDailyMode) {
+                showTimePicker();
+            } else {
+                showDayPicker();
+            }
+        });
+
+        mBinding.cardDaily.setOnClickListener(v -> {
+            tinyDb.putString("time_notification", "daily");
+            setFrequencySelection(true);
+            getNotification("daily");
+            mBinding.switchNotificationFinance.setEnabled(true);
+            mBinding.switchNotificationSavings.setEnabled(true);
+        });
+
+        mBinding.cardMonthly.setOnClickListener(v -> {
+            tinyDb.putString("time_notification", "monthly");
+            setFrequencySelection(false);
+            getNotification("monthly");
+            mBinding.switchNotificationFinance.setEnabled(true);
+            mBinding.switchNotificationSavings.setEnabled(true);
+        });
+
         mBinding.switchNotificationFinance.setOnClickListener(view -> {
-            boolean  isCheckedSavings = tinyDb.getBoolean("isCheckedSavings");
             boolean isChecked = mBinding.switchNotificationFinance.isChecked();
             tinyDb.putBoolean("isCheckedFinance", isChecked);
-            ModelNotification modelNotification = new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), descriptionFinance);
+            isCheckedFinance = isChecked;
+
+            ModelNotification modelNotification = new ModelNotification(
+                    "Pengingat Pemasukan & Pengeluaran: " + (user != null ? user.getName() : ""),
+                    descriptionFinance
+            );
             helperNotification.reminderSet(isChecked, modelNotification, getString(R.string.jurnal_keuangan), 200);
-            if(isChecked) Toast.makeText(this, "Notifikasi berhasil di setting!", Toast.LENGTH_SHORT).show();
-            if(!isCheckedSavings&&!isChecked){
+
+            if (isChecked) {
+                Toast.makeText(this, "Notifikasi Keuangan diaktifkan!", Toast.LENGTH_SHORT).show();
+            }
+
+            boolean isSavingsOn = tinyDb.getBoolean("isCheckedSavings");
+            if (!isSavingsOn && !isChecked) {
                 tinyDb.putString("time_notification", "");
-                mBinding.buttonMonthly.setSelected(false);
-                mBinding.buttonDaily.setSelected(false);
                 mBinding.switchNotificationFinance.setEnabled(false);
                 mBinding.switchNotificationSavings.setEnabled(false);
             }
         });
-
 
         mBinding.switchNotificationSavings.setOnClickListener(view -> {
-            boolean isCheckedFinance = tinyDb.getBoolean("isCheckedFinance");
             boolean isChecked = mBinding.switchNotificationSavings.isChecked();
             tinyDb.putBoolean("isCheckedSavings", isChecked);
-            ModelNotification modelNotification = new ModelNotification("Pengingat Progress Menabung: " + user.getName(), descriptionSavings);
+            isCheckedSavings = isChecked;
+
+            ModelNotification modelNotification = new ModelNotification(
+                    "Pengingat Progress Menabung: " + (user != null ? user.getName() : ""),
+                    descriptionSavings
+            );
             helperNotification.reminderSet(isChecked, modelNotification, getString(R.string.menabung), 100);
-            if(isChecked)  Toast.makeText(this, "Notifikasi berhasil di setting!", Toast.LENGTH_SHORT).show();
-            if(!isCheckedFinance&&!isChecked){
+
+            if (isChecked) {
+                Toast.makeText(this, "Notifikasi Tabungan diaktifkan!", Toast.LENGTH_SHORT).show();
+            }
+
+            boolean isFinanceOn = tinyDb.getBoolean("isCheckedFinance");
+            if (!isFinanceOn && !isChecked) {
                 tinyDb.putString("time_notification", "");
-                mBinding.buttonMonthly.setSelected(false);
-                mBinding.buttonDaily.setSelected(false);
                 mBinding.switchNotificationFinance.setEnabled(false);
                 mBinding.switchNotificationSavings.setEnabled(false);
             }
         });
 
-        mBinding.buttonDaily.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setActiveButton((Button) v);
-                tinyDb.putString("time_notification", "daily");
-                getNotification("daily");
-                mBinding.switchNotificationFinance.setEnabled(true);
-                mBinding.switchNotificationSavings.setEnabled(true);
-            }
-        });
+        if (!notif.isEmpty()) {
+            boolean isDaily = notif.equalsIgnoreCase("daily");
+            setFrequencySelection(isDaily);
+            getNotification(notif);
 
-        mBinding.buttonMonthly.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setActiveButton((Button) v);
-                tinyDb.putString("time_notification", "monthly");
-                getNotification("monthly");
-                mBinding.switchNotificationFinance.setEnabled(true);
-                mBinding.switchNotificationSavings.setEnabled(true);
-            }
-        });
-        if(!notif.isEmpty()){
-            isDailyNotification = tinyDb.getString("time_notification").equalsIgnoreCase("daily");
+            mBinding.switchNotificationFinance.setEnabled(true);
+            mBinding.switchNotificationSavings.setEnabled(true);
+            mBinding.switchNotificationFinance.setChecked(isCheckedFinance);
+            mBinding.switchNotificationSavings.setChecked(isCheckedSavings);
+        } else {
+            setFrequencySelection(true);
+            mBinding.switchNotificationFinance.setEnabled(false);
+            mBinding.switchNotificationSavings.setEnabled(false);
+        }
+    }
 
-            if (isDailyNotification) {
-                mBinding.buttonDaily.setSelected(true);
-                mBinding.buttonMonthly.setSelected(false);
+    private void setFrequencySelection(boolean isDaily) {
+        this.isDailyMode = isDaily;
+        updateFrequencyUI(isDaily);
+
+        if (isDaily) {
+            mBinding.imgTimeDate.setImageResource(R.drawable.ic_access_time);
+            mBinding.txtTimeDateTitle.setText("Jam Pengingat");
+            mBinding.txtTimeDateValue.setText(String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute));
+        } else {
+            mBinding.imgTimeDate.setImageResource(R.drawable.baseline_calendar_today_24);
+            mBinding.txtTimeDateTitle.setText("Tanggal Pengingat");
+            mBinding.txtTimeDateValue.setText("Tgl " + selectedDay);
+        }
+    }
+
+    private void showTimePicker() {
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this, (view, hourOfDay, minute) -> {
+            selectedHour = hourOfDay;
+            selectedMinute = minute;
+            tinyDb.putInt("notif_hour", selectedHour);
+            tinyDb.putInt("notif_minute", selectedMinute);
+
+            mBinding.txtTimeDateValue.setText(String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute));
+            updateActiveAlarms();
+        }, selectedHour, selectedMinute, true);
+
+        timePickerDialog.show();
+    }
+
+    private void showDayPicker() {
+        NumberPicker numberPicker = new NumberPicker(this);
+        numberPicker.setMinValue(1);
+        numberPicker.setMaxValue(31);
+        numberPicker.setValue(selectedDay);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Pilih Tanggal Pengingat")
+                .setMessage("Notifikasi akan muncul setiap bulan pada tanggal ini.")
+                .setView(numberPicker)
+                .setPositiveButton("Simpan", (dialog, which) -> {
+                    selectedDay = numberPicker.getValue();
+                    tinyDb.putInt("notif_day", selectedDay);
+
+                    mBinding.txtTimeDateValue.setText("Tgl " + selectedDay);
+                    updateActiveAlarms();
+                })
+                .setNegativeButton("Batal", null)
+                .show();
+    }
+
+    private void updateActiveAlarms() {
+        if (isCheckedFinance) {
+            ModelNotification modelNotification = new ModelNotification(
+                    "Pengingat Pemasukan & Pengeluaran: " + (user != null ? user.getName() : ""),
+                    descriptionFinance
+            );
+            helperNotification.reminderSet(true, modelNotification, getString(R.string.jurnal_keuangan), 200);
+        }
+        if (isCheckedSavings) {
+            ModelNotification modelNotification = new ModelNotification(
+                    "Pengingat Progress Menabung: " + (user != null ? user.getName() : ""),
+                    descriptionSavings
+            );
+            helperNotification.reminderSet(true, modelNotification, getString(R.string.menabung), 100);
+        }
+    }
+
+    private void updateFrequencyUI(boolean isDaily) {
+        int activeColor;
+        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
+        if (isCustomActive) {
+            activeColor = tinyDb.getInt("custom_color_int");
+        } else {
+            activeColor = ContextCompat.getColor(this, modelPrimaryColor.getColorPrimary());
+        }
+
+        int inactiveContentColor = ContextCompat.getColor(this, R.color.colorDefaultText);
+        int whiteColor = ContextCompat.getColor(this, R.color.white);
+        int transparentColor = ContextCompat.getColor(this, android.R.color.transparent);
+        int strokeWidth = Math.round(1 * getResources().getDisplayMetrics().density);
+
+        if (isDaily) {
+            // Card Daily ACTIVE
+            mBinding.cardDaily.setCardBackgroundColor(activeColor);
+            mBinding.cardDaily.setStrokeWidth(0);
+            mBinding.imgDaily.setColorFilter(whiteColor);
+            mBinding.txtDaily.setTextColor(whiteColor);
+
+            // Card Monthly INACTIVE
+            mBinding.cardMonthly.setCardBackgroundColor(transparentColor);
+            mBinding.cardMonthly.setStrokeWidth(strokeWidth);
+            mBinding.cardMonthly.setStrokeColor(inactiveContentColor);
+            mBinding.imgMonthly.setColorFilter(inactiveContentColor);
+            mBinding.txtMonthly.setTextColor(inactiveContentColor);
+        } else {
+            // Card Monthly ACTIVE
+            mBinding.cardMonthly.setCardBackgroundColor(activeColor);
+            mBinding.cardMonthly.setStrokeWidth(0);
+            mBinding.imgMonthly.setColorFilter(whiteColor);
+            mBinding.txtMonthly.setTextColor(whiteColor);
+
+            // Card Daily INACTIVE
+            mBinding.cardDaily.setCardBackgroundColor(transparentColor);
+            mBinding.cardDaily.setStrokeWidth(strokeWidth);
+            mBinding.cardDaily.setStrokeColor(inactiveContentColor);
+            mBinding.imgDaily.setColorFilter(inactiveContentColor);
+            mBinding.txtDaily.setTextColor(inactiveContentColor);
+        }
+    }
+
+    private void getNotification(String time) {
+        if (user == null) return;
+
+        if (time.equalsIgnoreCase("daily")) {
+            viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(this, modelFinances -> {
+                dataFinance = modelFinances;
                 descriptionFinance = "Data pemasukan anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinance), locale) + "\n" +
                         "Data pengeluaran anda hari ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinance), locale);
 
+                if (isCheckedFinance) {
+                    ModelNotification modelNotification = new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), descriptionFinance);
+                    helperNotification.reminderSet(true, modelNotification, getString(R.string.jurnal_keuangan), 200);
+                }
+            });
+
+            if (modelSavings == null) modelSavings = new ModelSavings();
+
+            viewModelSavingsProgress.findAllSavingsByDate(getFormattedDateSimple(System.currentTimeMillis()), modelSavings.getId(), modelSavings.getType_currency()).observe(this, dataSavings -> {
+                dataSaving = dataSavings;
                 descriptionSavings = "Progress menabung anda hingga hari ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale);
-            } else {
-                mBinding.buttonMonthly.setSelected(true);
-                mBinding.buttonDaily.setSelected(false);
+
+                if (isCheckedSavings) {
+                    ModelNotification modelNotification = new ModelNotification("Pengingat Progress Menabung: " + user.getName(), descriptionSavings);
+                    helperNotification.reminderSet(true, modelNotification, getString(R.string.menabung), 100);
+                }
+            });
+        } else {
+            viewModelFinance.getFinanceByMonth(Tools.getFormattedMonthSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(this, modelFinances -> {
+                dataFinance = modelFinances;
                 descriptionFinance = "Data pemasukan anda bulan ini :" + Tools.convertToCurrency(new FinanceFilter().totalIncome(dataFinance), locale) + "\n" +
                         "Data pengeluaran anda bulan ini :" + Tools.convertToCurrency(new FinanceFilter().totalExpense(dataFinance), locale);
 
+                if (isCheckedFinance) {
+                    ModelNotification modelNotification = new ModelNotification("Pengingat Pemasukan & Pengeluaran: " + user.getName(), descriptionFinance);
+                    helperNotification.reminderSet(true, modelNotification, getString(R.string.jurnal_keuangan), 200);
+                }
+            });
+
+            if (modelSavings == null) modelSavings = new ModelSavings();
+
+            viewModelSavingsProgress.getSavingsByMonth(Tools.getFormattedMonthSimple(System.currentTimeMillis()), modelSavings.getId(), modelSavings.getType_currency()).observe(this, dataSavings -> {
+                dataSaving = dataSavings;
                 descriptionSavings = "Progress menabung anda bulan ini: " + Tools.convertToCurrency(new SavingsFilter().totalValueByType(dataSaving), locale);
-            }
 
-            mBinding.switchNotificationFinance.setChecked(isCheckedFinance);
-
-
-            mBinding.switchNotificationSavings.setChecked(isCheckedSavings);
-        }else{
-            mBinding.switchNotificationFinance.setEnabled(false);
-            mBinding.switchNotificationSavings.setEnabled(false);
+                if (isCheckedSavings) {
+                    ModelNotification modelNotification = new ModelNotification("Pengingat Progress Menabung: " + user.getName(), descriptionSavings);
+                    helperNotification.reminderSet(true, modelNotification, getString(R.string.menabung), 100);
+                }
+            });
         }
     }
 
@@ -228,58 +401,13 @@ public class NotificationActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == NOTIFICATION_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Izin diberikan, lanjutkan dengan menampilkan notifikasi
-
-            } else {
-                // Izin ditolak, beri tahu pengguna
+                // Izin diberikan
             }
         }
     }
 
-    private void getNotification(String time) {
-        if (time.equalsIgnoreCase("daily")) {
-            activeButton = mBinding.buttonMonthly;
-            setActiveButton(mBinding.buttonDaily);
-            viewModelFinance.getAllFinanceByDate(getFormattedDateSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(this, modelFinances -> {
-                dataFinance = modelFinances;
-            });
-            if (modelSavings == null)
-                modelSavings = new ModelSavings();
-
-            viewModelSavingsProgress.findAllSavingsByDate(getFormattedDateSimple(System.currentTimeMillis()), modelSavings.getId(), modelSavings.getType_currency()).observe(this, dataSavings -> {
-                dataSaving = dataSavings;
-            });
-        } else {
-            activeButton = mBinding.buttonDaily;
-
-            setActiveButton(mBinding.buttonMonthly);
-
-            viewModelFinance.getFinanceByMonth(Tools.getFormattedMonthSimple(System.currentTimeMillis()), user.getId(), user.getType_currency()).observe(this, modelFinances -> {
-                dataFinance = modelFinances;
-            });
-            if (modelSavings == null)
-                modelSavings = new ModelSavings();
-
-            viewModelSavingsProgress.getSavingsByMonth(Tools.getFormattedMonthSimple(System.currentTimeMillis()), modelSavings.getId(), modelSavings.getType_currency()).observe(this, dataSavings -> {
-                dataSaving = dataSavings;
-
-            });
-        }
-    }
-
-    private void setActiveButton(Button selectedButton) {
-        // Reset the previous active button
-        if (activeButton != null) {
-            activeButton.setSelected(false);
-        }
-        // Set the new active button
-        selectedButton.setSelected(true);
-        activeButton = selectedButton;
-    }
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-
         if (item.getItemId() == android.R.id.home) {
             Intent i = new Intent(this, MainActivity.class);
             i.putExtra("isInputPin", true);

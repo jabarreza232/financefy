@@ -178,6 +178,8 @@ public class TinyDb {
 
     public int getInt(String key) {
         return preferences.getInt(key, 0);
+    } public int getInt(String key, int defaultValue) {
+        return preferences.getInt(key, defaultValue);
     }
 
     /**

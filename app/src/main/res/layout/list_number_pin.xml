@@ -1,32 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <!-- Gunakan FrameLayout untuk membungkus efek klik -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        app:cardCornerRadius="16dp"
-            android:clickable="true"
-            android:focusable="true"
-        android:id="@+id/card_number_pin"
-        app:cardElevation="0dp">
+        android:layout_margin="8dp">
 
+        <!--
+           Ubah ukuran TextView menjadi kotak presisi (misal: 72dp x 72dp)
+           agar efek ripple (gelombang sentuhan) membentuk lingkaran sempurna
+        -->
         <TextView
-            android:background="?attr/selectableItemBackground"
-
             android:id="@+id/txt_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/ubuntu_b"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_gravity="center"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:fontFamily="@font/ubuntu_r"
             android:gravity="center"
-            android:minHeight="72dp"
-            android:paddingVertical="20dp"
             android:text="1"
-            android:textAlignment="center"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="24sp" />
+            android:textSize="28sp" />
 
-    </androidx.cardview.widget.CardView>
-
+    </FrameLayout>
 </layout>

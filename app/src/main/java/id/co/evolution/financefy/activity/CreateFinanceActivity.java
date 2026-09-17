@@ -94,6 +94,7 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         boolean isFromScanImage;
 
         private HelperResultLLM helperResultLLM;
+        private int colorPrimary;
     @SuppressLint("ObsoleteSdkInt")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,10 +103,13 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
 
         if (isCustomActive) {
             int customColor = tinyDb.getInt("custom_color_int");
+            colorPrimary= customColor;
+
             getWindow().setStatusBarColor(customColor);
         } else {
             if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
                 modelPrimaryColor = tinyDb.getObject("model_primary_color", ModelPrimaryColor.class);
+                colorPrimary= ContextCompat.getColor(this,modelPrimaryColor.getColorPrimary());
                 Tools.setThemeNoActionBarActivity(getTheme(), modelPrimaryColor);
             }
         }
@@ -292,7 +296,7 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
                 finish();
                 break;
             case "btn_calculator":
-                dialogCalculator = new DialogCalculator(this, getLayoutInflater(), result -> {
+                dialogCalculator = new DialogCalculator(this,colorPrimary, getLayoutInflater(), result -> {
                     jumlah = Tools.convertToCurrency(result, locale);
                     binding.etAmount.setText(jumlah);
                 });

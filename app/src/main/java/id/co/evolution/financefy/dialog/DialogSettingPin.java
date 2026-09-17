@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -45,6 +47,7 @@ public class DialogSettingPin {
     String result = "";
     DialogPinBinding binding;
     TinyDb tinyDb;
+    private boolean isPinVisible = false;
 
     public DialogSettingPin(Context context, LayoutInflater layoutInflater, DialogInterfaceCallback dialogInterfaceCallback) {
         this.context = context;
@@ -72,6 +75,22 @@ public class DialogSettingPin {
             dismiss();
         });
 
+// Taruh logika ini di dalam onCreate / onViewCreated
+        binding.btnVisibility.setOnClickListener(v -> {
+            isPinVisible = !isPinVisible;
+
+            if (isPinVisible) {
+                // Tampilkan PIN (Hilangkan sensor bulat/bintang)
+                binding.etAmount.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                // Ganti ikon menjadi mata terbuka
+                binding.btnVisibility.setImageResource(R.drawable.ic_visibility_on);
+            } else {
+                // Sembunyikan PIN (Sensor kembali menjadi bulat/bintang)
+                binding.etAmount.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                // Ganti ikon menjadi mata tertutup / tercoret
+                binding.btnVisibility.setImageResource(R.drawable.ic_visibility_off);
+            }
+        });
         AdapterCalculator adapterCalculator = new AdapterCalculator(context, DummyNumberPin.getNumberPinConfirm(), (data, position) -> {
             List<String> dataList = (List<String>) data;
 
