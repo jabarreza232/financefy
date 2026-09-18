@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="6dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="?attr/colorSurface"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:padding="16dp">
+
+        <!-- Ikon Dokumen -->
+        <ImageView
+            android:id="@+id/img_excel_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:background="@color/bg_action_light"
+            android:padding="8dp"
+            android:src="@drawable/baseline_calendar_month_24"
+            app:tint="@color/colorPrimary" /> <!-- Ganti dengan ic_excel jika Anda punya -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="16dp"
+            android:layout_toStartOf="@id/img_share"
+            android:layout_toEndOf="@id/img_excel_icon"
+            android:orientation="vertical">
+
+            <!-- Nama File -->
+            <TextView
+                android:id="@+id/txt_file_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/ubuntu_b"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:text="Jurnal_Keuangan_17092026.xlsx"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="14sp" />
+
+            <!-- Tanggal Dibuat & Ukuran File -->
+            <TextView
+                android:id="@+id/txt_file_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/ubuntu_r"
+                android:text="17 Sep 2026 • 12 KB"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Tombol Bagikan Cepat -->
+        <ImageView
+            android:id="@+id/img_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="8dp"
+            android:src="@drawable/ic_share"
+            app:tint="?android:attr/textColorSecondary" />
+    </RelativeLayout>
+</com.google.android.material.card.MaterialCardView>

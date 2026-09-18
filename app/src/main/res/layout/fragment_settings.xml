@@ -3,396 +3,473 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <LinearLayout
+    <!-- BUNGKUS DENGAN NESTED SCROLL VIEW -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?attr/colorSurface"
-        android:orientation="vertical"
+        android:fillViewport="true"
         tools:context=".fragment.FragmentSettings">
 
-        <TextView
-            android:id="@+id/txt_groups"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:padding="10dp"
-            android:text="GRUP"
-            android:textColor="?android:textColorPrimary"
-            android:textSize="15sp" />
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cv_switch_theme"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="5dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
+            android:orientation="vertical"
+            android:paddingBottom="20dp"> <!-- Tambahan padding bawah agar tidak mepet -->
 
             <TextView
-                android:id="@+id/txt_switch_theme"
+                android:id="@+id/txt_groups"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_baseline_palette_24"
-                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
-                android:drawablePadding="5dp"
-                android:drawableTint="?android:textColorPrimary"
+                android:layout_marginTop="10dp"
                 android:padding="10dp"
-                android:text="Ubah Tema"
+                android:text="GRUP"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="15sp" />
 
-        </androidx.cardview.widget.CardView>
-
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="5dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
-
-            <RelativeLayout
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cv_switch_theme"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone">
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
 
                 <TextView
-                    android:id="@+id/txt_money"
+                    android:id="@+id/txt_switch_theme"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/txt_selected_money"
-                    android:drawableStart="@drawable/ic_baseline_attach_money_24"
+                    android:drawableStart="@drawable/ic_baseline_palette_24"
+                    android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
                     android:drawablePadding="5dp"
                     android:drawableTint="?android:textColorPrimary"
                     android:padding="10dp"
-                    android:text="Mata Uang"
+                    android:text="Ubah Tema"
                     android:textColor="?android:textColorPrimary"
                     android:textSize="15sp" />
 
-                <TextView
-                    android:id="@+id/txt_selected_money"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
-                    android:layout_toStartOf="@id/img_money_right"
-                    android:drawablePadding="5dp"
-                    android:drawableTint="?android:textColorPrimary"
-                    android:padding="10dp"
-                    android:text="IDR (Rp)"
-                    android:textColor="?attr/colorControlNormal"
-                    android:textSize="15sp" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                    app:tint="?attr/colorOnSurface"
-                    android:id="@+id/img_money_right"
-                    android:layout_centerInParent="true"
-                    android:layout_marginEnd="10dp"
-                    android:layout_alignParentEnd="true"
-                    />
-            </RelativeLayout>
-        </androidx.cardview.widget.CardView>
-
-        <TextView
-            android:id="@+id/txt_security"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:padding="10dp"
-            android:text="KEAMANAN"
-            android:textColor="?android:textColorPrimary"
-            android:textSize="15sp" />
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="3dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/txt_pin_setting"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/switch_pin"
-                    android:drawableStart="@drawable/ic_baseline_security_24"
-                    android:drawablePadding="5dp"
-                    android:drawableTint="?android:textColorPrimary"
-                    android:padding="10dp"
-                    android:text="Atur Pin"
-                    android:textColor="?android:textColorPrimary"
-                    android:textSize="15sp" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switch_pin"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp" />
-
-            </RelativeLayout>
-        </androidx.cardview.widget.CardView><androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="10dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/txt_fingerprint_setting"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/switch_fingerprint"
-                    android:drawableStart="@drawable/ic_fingerprint"
-                    android:drawablePadding="5dp"
-                    android:drawableTint="?android:textColorPrimary"
-                    android:padding="10dp"
-                    android:text="Login Sidik Jari (Biometrik)"
-                    android:textColor="?android:textColorPrimary"
-                    android:textSize="15sp" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switch_fingerprint"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp" />
-            </RelativeLayout>
-        </androidx.cardview.widget.CardView>
-        <!-- MULAI BAGIAN AI / LLM -->
-        <TextView
-            android:id="@+id/txt_ai_settings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:padding="10dp"
-            android:text="FITUR KECERDASAN BUATAN"
-            android:textColor="?android:textColorPrimary"
-            android:textSize="15sp" />
-
-        <!-- Switch Mode LLM -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="5dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:id="@+id/txt_llm_mode"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/switch_llm"
-                    android:drawableStart="@drawable/ic_baseline_memory_24"
-                    android:drawablePadding="5dp"
-                    android:drawableTint="?android:textColorPrimary"
-                    android:padding="10dp"
-                    android:text="Mode Scan LLM Lokal"
-                    android:textColor="?android:textColorPrimary"
-                    android:textSize="15sp" />
-
-                <androidx.appcompat.widget.SwitchCompat
-                    android:id="@+id/switch_llm"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginEnd="10dp" />
-            </RelativeLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Tombol Download Model LLM -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cv_download_llm"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="5dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
-
-            <RelativeLayout
+            </androidx.cardview.widget.CardView>
+            <!-- MENU RIWAYAT EKSPOR EXCEL -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_export_history"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="10dp">
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
 
-                <!-- 1. TOMBOL PANAH (Paling Kanan Atas) -->
-                <ImageView
-                    android:id="@+id/img_arrow_llm"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:padding="10dp"
-                    android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
-                    app:tint="?android:textColorPrimary" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
-                <!-- 2. TOMBOL CANCEL (Posisi sama persis dengan Panah, disembunyikan) -->
-                <ImageView
-                    android:id="@+id/img_cancel_llm"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_alignParentTop="true"
-                    android:padding="10dp"
-                    android:src="@drawable/ic_close"
-                    app:tint="@color/red"
-                    android:visibility="gone"
-                    android:layout_below="@id/img_arrow_llm"
-                    />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toStartOf="@+id/img_arrow_history"
+                        android:drawableStart="@drawable/ic_history"
+                        android:drawablePadding="10dp"
+                        android:drawableTint="?android:textColorPrimary"
+                        android:padding="12dp"
+                        android:text="Riwayat Ekspor Laporan"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="15sp" />
 
-                <!-- 3. STATUS (Di sebelah kiri Panah/Cancel, presisi di tengah vertikal baris pertama) -->
-                <TextView
-                    android:id="@+id/txt_status_llm"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/img_arrow_llm"
-                    android:layout_alignBottom="@id/img_arrow_llm"
-                    android:layout_toStartOf="@+id/img_arrow_llm"
-                    android:gravity="center_vertical"
-                    android:paddingEnd="5dp"
-                    android:paddingStart="10dp"
-                    android:text="Belum Unduh"
-                    android:textColor="@color/red"
-                    android:textSize="15sp" />
+                    <ImageView
+                        android:id="@+id/img_arrow_history"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:padding="12dp"
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        app:tint="?android:textColorPrimary" />
 
-                <!-- 4. JUDUL (Di sebelah paling kiri, mengisi ruang sisa, presisi di tengah vertikal baris pertama) -->
-                <TextView
-                    android:id="@+id/txt_download_llm"
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                app:cardCornerRadius="5dp"
+                android:visibility="gone"
+                app:cardElevation="3dp">
+
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignTop="@id/img_arrow_llm"
-                    android:layout_alignBottom="@id/img_arrow_llm"
-                    android:layout_alignParentStart="true"
-                    android:layout_toStartOf="@id/txt_status_llm"
-                    android:drawableStart="@drawable/ic_outline_cloud_download_24"
-                    android:drawablePadding="5dp"
-                    android:drawableTint="?android:textColorPrimary"
-                    android:gravity="center_vertical"
-                    android:paddingStart="10dp"
-                    android:paddingEnd="5dp"
-                    android:text="Unduh Model AI"
-                    android:textColor="?android:textColorPrimary"
-                    android:textSize="15sp" />
+                    >
 
-                <!-- 5. PROGRESS BAR (Membentang penuh di bawah baris judul dan status) -->
-                <ProgressBar
-                    android:id="@+id/progress_bar_llm"
-                    style="?android:attr/progressBarStyleHorizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/img_arrow_llm"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:visibility="gone"
-                    android:max="100"
-                />
+                    <TextView
+                        android:id="@+id/txt_money"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toStartOf="@id/txt_selected_money"
+                        android:drawableStart="@drawable/ic_baseline_attach_money_24"
+                        android:drawablePadding="5dp"
+                        android:drawableTint="?android:textColorPrimary"
+                        android:padding="10dp"
+                        android:text="Mata Uang"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="15sp" />
 
-            </RelativeLayout>
-        </androidx.cardview.widget.CardView>
-        <TextView
-            android:id="@+id/txt_advanced"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
-            android:padding="10dp"
-            android:text="LANJUTAN"
-            android:textColor="?android:textColorPrimary"
-            android:textSize="15sp" />
+                    <TextView
+                        android:id="@+id/txt_selected_money"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_toStartOf="@id/img_money_right"
+                        android:drawablePadding="5dp"
+                        android:drawableTint="?android:textColorPrimary"
+                        android:padding="10dp"
+                        android:text="IDR (Rp)"
+                        android:textColor="?attr/colorControlNormal"
+                        android:textSize="15sp" />
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="5dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        app:tint="?attr/colorOnSurface"
+                        android:id="@+id/img_money_right"
+                        android:layout_centerInParent="true"
+                        android:layout_marginEnd="10dp"
+                        android:layout_alignParentEnd="true"
+                        />
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
 
             <TextView
-                android:id="@+id/txt_notification"
+                android:id="@+id/txt_security"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_baseline_notifications_24"
-                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
-                android:drawablePadding="5dp"
-                android:drawableTint="?android:textColorPrimary"
+                android:layout_marginTop="10dp"
                 android:padding="10dp"
-                android:text="Notifikasi"
+                android:text="KEAMANAN"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="15sp" />
-        </androidx.cardview.widget.CardView>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="5dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="3dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/txt_pin_setting"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toStartOf="@id/switch_pin"
+                        android:drawableStart="@drawable/ic_baseline_security_24"
+                        android:drawablePadding="5dp"
+                        android:drawableTint="?android:textColorPrimary"
+                        android:padding="10dp"
+                        android:text="Atur Pin"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="15sp" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_pin"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="10dp" />
+
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView><androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/txt_fingerprint_setting"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toStartOf="@id/switch_fingerprint"
+                        android:drawableStart="@drawable/ic_fingerprint"
+                        android:drawablePadding="5dp"
+                        android:drawableTint="?android:textColorPrimary"
+                        android:padding="10dp"
+                        android:text="Login Sidik Jari (Biometrik)"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="15sp" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_fingerprint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="10dp" />
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
+            <!-- MULAI BAGIAN AI / LLM -->
+            <TextView
+                android:id="@+id/txt_ai_settings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:padding="10dp"
+                android:text="FITUR KECERDASAN BUATAN"
+                android:textColor="?android:textColorPrimary"
+                android:textSize="15sp" />
+
+            <!-- Switch Mode LLM -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/txt_llm_mode"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toStartOf="@id/switch_llm"
+                        android:drawableStart="@drawable/ic_baseline_memory_24"
+                        android:drawablePadding="5dp"
+                        android:drawableTint="?android:textColorPrimary"
+                        android:padding="10dp"
+                        android:text="Mode Scan LLM Lokal"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="15sp" />
+
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/switch_llm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginEnd="10dp" />
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Tombol Download Model LLM -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cv_download_llm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="10dp">
+
+                    <!-- 1. TOMBOL PANAH (Paling Kanan Atas) -->
+                    <ImageView
+                        android:id="@+id/img_arrow_llm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
+                        app:tint="?android:textColorPrimary" />
+
+                    <!-- 2. TOMBOL CANCEL (Posisi sama persis dengan Panah, disembunyikan) -->
+                    <ImageView
+                        android:id="@+id/img_cancel_llm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_close"
+                        app:tint="@color/red"
+                        android:visibility="gone"
+                        android:layout_below="@id/img_arrow_llm"
+                        />
+
+                    <!-- 3. STATUS (Di sebelah kiri Panah/Cancel, presisi di tengah vertikal baris pertama) -->
+                    <TextView
+                        android:id="@+id/txt_status_llm"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@id/img_arrow_llm"
+                        android:layout_alignBottom="@id/img_arrow_llm"
+                        android:layout_toStartOf="@+id/img_arrow_llm"
+                        android:gravity="center_vertical"
+                        android:paddingEnd="5dp"
+                        android:paddingStart="10dp"
+                        android:text="Belum Unduh"
+                        android:textColor="@color/red"
+                        android:textSize="15sp" />
+
+                    <!-- 4. JUDUL (Di sebelah paling kiri, mengisi ruang sisa, presisi di tengah vertikal baris pertama) -->
+                    <TextView
+                        android:id="@+id/txt_download_llm"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@id/img_arrow_llm"
+                        android:layout_alignBottom="@id/img_arrow_llm"
+                        android:layout_alignParentStart="true"
+                        android:layout_toStartOf="@id/txt_status_llm"
+                        android:drawableStart="@drawable/ic_outline_cloud_download_24"
+                        android:drawablePadding="5dp"
+                        android:drawableTint="?android:textColorPrimary"
+                        android:gravity="center_vertical"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="5dp"
+                        android:text="Unduh Model AI"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="15sp" />
+
+                    <!-- 5. PROGRESS BAR (Membentang penuh di bawah baris judul dan status) -->
+                    <ProgressBar
+                        android:id="@+id/progress_bar_llm"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/img_arrow_llm"
+                        android:layout_marginStart="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:visibility="gone"
+                        android:max="100"
+                        />
+
+                </RelativeLayout>
+            </androidx.cardview.widget.CardView>
 
             <TextView
-                android:id="@+id/txt_export_excel"
+                android:id="@+id/txt_advanced"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableStart="@drawable/icon_excel"
-                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
-                android:drawablePadding="5dp"
-                android:drawableTint="?android:textColorPrimary"
+                android:layout_marginTop="10dp"
                 android:padding="10dp"
-                android:text="Export Excel"
+                android:text="LANJUTAN"
                 android:textColor="?android:textColorPrimary"
                 android:textSize="15sp" />
-        </androidx.cardview.widget.CardView>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
-
-            <TextView
-                android:id="@+id/txt_info"
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawableStart="@drawable/ic_baseline_info_24"
-                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
-                android:drawablePadding="5dp"
-                android:drawableTint="?android:textColorPrimary"
-                android:padding="10dp"
-                android:text="Tentang"
-                android:textColor="?android:textColorPrimary"
-                android:textSize="15sp" />
-        </androidx.cardview.widget.CardView>
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
 
-    </LinearLayout>
+                <TextView
+                    android:id="@+id/txt_notification"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_baseline_notifications_24"
+                    android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
+                    android:drawablePadding="5dp"
+                    android:drawableTint="?android:textColorPrimary"
+                    android:padding="10dp"
+                    android:text="Notifikasi"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="15sp" />
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
+
+                <TextView
+                    android:id="@+id/txt_export_excel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/icon_excel"
+                    android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
+                    android:drawablePadding="5dp"
+                    android:drawableTint="?android:textColorPrimary"
+                    android:padding="10dp"
+                    android:text="Export Excel"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="15sp" />
+            </androidx.cardview.widget.CardView>
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cv_faq"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="5dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
+
+                <TextView
+                    android:id="@+id/txt_faq"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_help"
+                    android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
+                    android:drawablePadding="5dp"
+                    android:drawableTint="?android:textColorPrimary"
+                    android:padding="10dp"
+                    android:text="FAQ &amp; Bantuan"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="15sp" />
+            </androidx.cardview.widget.CardView>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="2dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
+
+                <TextView
+                    android:id="@+id/txt_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_baseline_info_24"
+                    android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_right_24"
+                    android:drawablePadding="5dp"
+                    android:drawableTint="?android:textColorPrimary"
+                    android:padding="10dp"
+                    android:text="Tentang"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="15sp" />
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </layout>

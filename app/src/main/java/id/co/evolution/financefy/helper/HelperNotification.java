@@ -28,12 +28,10 @@ public class HelperNotification {
         Intent intent = new Intent(context, ReminderBroadcast.class);
         intent.putExtra("key", keyNotif);
 
-        int pendingFlags;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
-        } else {
-            pendingFlags = PendingIntent.FLAG_UPDATE_CURRENT;
-        }
+        // Tambahkan FLAG_UPDATE_CURRENT agar data intent selalu terbarui
+        int pendingFlags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ?
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE :
+                PendingIntent.FLAG_UPDATE_CURRENT;
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, pendingFlags);
 
@@ -51,44 +49,37 @@ public class HelperNotification {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(System.currentTimeMillis());
 
+            // Setup jam dan menit
+            calendar.set(Calendar.HOUR_OF_DAY, hour);
+            calendar.set(Calendar.MINUTE, minute);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+
             if (isMonthly) {
                 int maxDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
                 calendar.set(Calendar.DAY_OF_MONTH, Math.min(day, maxDays));
-                calendar.set(Calendar.HOUR_OF_DAY, hour);
-                calendar.set(Calendar.MINUTE, minute);
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
 
+                // Jika waktu sudah lewat, set untuk bulan depan
                 if (calendar.before(Calendar.getInstance())) {
                     calendar.add(Calendar.MONTH, 1);
                     maxDays = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
                     calendar.set(Calendar.DAY_OF_MONTH, Math.min(day, maxDays));
                 }
-
-                if (alarmManager != null) {
-                    try {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-                        } else {
-                            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-                        }
-                    } catch (Exception e) {
-                        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-                    }
-                }
             } else {
-                // Daily
-                calendar.set(Calendar.HOUR_OF_DAY, hour);
-                calendar.set(Calendar.MINUTE, minute);
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
-
+                // Daily: Jika waktu sudah lewat hari ini, set untuk besok
                 if (calendar.before(Calendar.getInstance())) {
                     calendar.add(Calendar.DAY_OF_MONTH, 1);
                 }
+            }
 
-                if (alarmManager != null) {
-                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+            if (alarmManager != null) {
+                // GUNAKAN setExactAndAllowWhileIdle untuk akurasi jam 1 pagi
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                } else {
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
                 }
             }
         } else {
@@ -98,7 +89,6 @@ public class HelperNotification {
             tinyDb.remove(keyNotif);
         }
     }
-
     public void rescheduleAllAlarmsOnBoot() {
         boolean isCheckedFinance = tinyDb.getBoolean("isCheckedFinance");
         if (isCheckedFinance) {

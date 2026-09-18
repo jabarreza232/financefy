@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -53,12 +55,39 @@ public class AboutActivity extends AppCompatActivity {
             }
         }
 
-        binding.txtAppVersion.setText(BuildConfig.VERSION_NAME);
-        binding.txtSystemVersion.setText(Build.VERSION.RELEASE);
-        binding.txtDeviceModel.setText(Build.MODEL);
+        try {
+            PackageInfo pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            String version = pInfo.versionName;
+            binding.txtAppVersion.setText(version);
+        } catch (PackageManager.NameNotFoundException e) {
+            binding.txtAppVersion.setText("1.0.0");
+        }
+
+        // 2. Dapatkan Versi Android pengguna secara otomatis (Contoh: "Android 13 (API 33)")
+        String androidVersion = "Android " + Build.VERSION.RELEASE + " (API " + Build.VERSION.SDK_INT + ")";
+        binding.txtSystemVersion.setText(androidVersion);
+
+        // 3. Dapatkan Merek & Model HP secara otomatis (Contoh: "Samsung SM-G998B")
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        // Mencegah duplikasi nama (seperti "Samsung Samsung SM...")
+        if (model.toLowerCase().startsWith(manufacturer.toLowerCase())) {
+            binding.txtDeviceModel.setText(capitalize(model));
+        } else {
+            binding.txtDeviceModel.setText(capitalize(manufacturer) + " " + model);
+        }
 
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+    private String capitalize(String s) {
+        if (s == null || s.length() == 0) return "";
+        char first = s.charAt(0);
+        if (Character.isUpperCase(first)) {
+            return s;
+        } else {
+            return Character.toUpperCase(first) + s.substring(1);
         }
     }
     @Override

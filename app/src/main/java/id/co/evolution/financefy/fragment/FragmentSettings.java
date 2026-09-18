@@ -20,6 +20,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +40,8 @@ import androidx.core.content.FileProvider;
 import androidx.core.util.Pair;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.ads.AdError;
@@ -42,10 +50,14 @@ import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.textfield.TextInputEditText;
 
 import org.apache.commons.compress.utils.Lists;
 import org.apache.poi.ss.usermodel.Cell;
@@ -58,6 +70,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -73,6 +86,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.activity.AboutActivity;
+import id.co.evolution.financefy.activity.ExportHistoryActivity;
+import id.co.evolution.financefy.activity.FAQActivity;
 import id.co.evolution.financefy.activity.NotificationActivity;
 import id.co.evolution.financefy.activity.PinActivity;
 import id.co.evolution.financefy.activity.SwitchThemeActivity;
@@ -139,6 +154,8 @@ public class FragmentSettings extends Fragment {
     FragmentSettingsBinding binding;
     File modelFile;
     private LlmViewModel viewModel;
+    private Long filterStartDate = null;
+    private Long filterEndDate = null;
     @SuppressLint("SetTextI18n")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -188,7 +205,10 @@ public class FragmentSettings extends Fragment {
 
             snackbar.show();
         });
-
+        binding.cardExportHistory.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ExportHistoryActivity.class);
+            startActivity(intent);
+        });
         binding.imgCancelLlm.setOnClickListener(v -> {
             if (isDownloading && currentDownloadId != -1) {
                 DownloadManager manager = (DownloadManager) requireContext().getSystemService(Context.DOWNLOAD_SERVICE);
@@ -306,7 +326,10 @@ public class FragmentSettings extends Fragment {
             Intent i = new Intent(getContext(), AboutActivity.class);
             startActivity(i);
         });
-
+        binding.cvFaq.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), FAQActivity.class);
+            startActivity(intent);
+        });
         binding.txtExportExcel.setOnClickListener(v -> {
             menuSettings = MENU.FROM_EXPORT_EXCEL;
             if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.S){
@@ -484,7 +507,7 @@ public class FragmentSettings extends Fragment {
                                 startActivity(i);
                                 getActivity().finish();
                             }else{
-                                openDateRangePicker();
+                                showBottomSheetExportFilter();
                             }
 
                         }
@@ -528,31 +551,70 @@ public class FragmentSettings extends Fragment {
 
 }
 
-    private void openDateRangePicker() {
-        DateRangeDialog dateRangeDialog = new DateRangeDialog(getActivity(), (startDate, endDate,datesList) -> {
-            Log.e("cek:",startDate +" : "+endDate);
-
-            if(user.getCategory().equalsIgnoreCase(getString(R.string.menabung))){
-                viewModelSavingsProgress.getSavingsByWeek(datesList,mainActivity.modelSavings.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
-                    dataSaving = modelFinances;
-                    exportExcelByData(new ArrayList<>(dataSaving));
-                });
-
-            }else{
-                viewModelFinance.getFinanceByWeek(datesList,user.getId(), user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
-                    dataFinance = modelFinances;
-                    exportExcelByData(new ArrayList<>(dataFinance));
-                });
-
-            }
-        });
-
-        dateRangeDialog.show();
-    }
+//    private void openDateRangePicker() {
+//        DateRangeDialog dateRangeDialog = new DateRangeDialog(getActivity(), (startDate, endDate, datesList) -> {
+//            Log.e("cek:", startDate + " : " + endDate);
+//
+//            if (user.getCategory().equalsIgnoreCase(getString(R.string.menabung))) {
+//
+//                // 1. Tampung LiveData di variabel
+//                LiveData<List<ModelSavingsProgress>> liveDataSaving = viewModelSavingsProgress.getSavingsByWeek(datesList, mainActivity.modelSavings.getId(), user.getType_currency());
+//
+//                // 2. Gunakan cara penjabaran (new Observer) agar kita bisa menyebut 'this'
+//                liveDataSaving.observe(getViewLifecycleOwner(), new Observer<List<ModelSavingsProgress>>() {
+//                    @Override
+//                    public void onChanged(List<ModelSavingsProgress> modelFinances) {
+//                        // 3. HANCURKAN OBSERVER SEGERA SETELAH DATA DITERIMA (One-Shot Request)
+//                        liveDataSaving.removeObserver(this);
+//
+//                        dataSaving = modelFinances;
+//                        if (dataSaving.isEmpty()) {
+//                            Toast.makeText(getContext(), "Tidak ada data di rentang tanggal ini", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            exportExcelByData(new ArrayList<>(dataSaving));
+//                        }
+//                    }
+//                });
+//
+//            } else {
+//
+//                // 1. Tampung LiveData di variabel
+//                LiveData<List<ModelFinance>> liveDataFinance = viewModelFinance.getFinanceByWeek(datesList, user.getId(), user.getType_currency());
+//
+//                // 2. Gunakan cara penjabaran (new Observer)
+//                liveDataFinance.observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+//                    @Override
+//                    public void onChanged(List<ModelFinance> modelFinances) {
+//                        // 3. HANCURKAN OBSERVER SEGERA (One-Shot Request)
+//                        liveDataFinance.removeObserver(this);
+//
+//                        dataFinance = modelFinances;
+//                        if (dataFinance.isEmpty()) {
+//                            Toast.makeText(getContext(), "Tidak ada data keuangan di rentang tanggal ini", Toast.LENGTH_SHORT).show();
+//                        } else {
+//                            exportExcelByData(new ArrayList<>(dataFinance));
+//                        }
+//                    }
+//                });
+//            }
+//        });
+//
+//        dateRangeDialog.show();
+//    }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if (getActivity() != null && getActivity().getIntent() != null) {
+            boolean triggerExport = getActivity().getIntent().getBooleanExtra("ACTION_TRIGGER_EXPORT", false);
 
+            if (triggerExport) {
+                // Tampilkan Bottom Sheet
+                showBottomSheetExportFilter();
+
+                // Hapus pesan agar Bottom Sheet tidak muncul lagi kalau user pindah tab lalu kembali ke Settings
+                getActivity().getIntent().removeExtra("ACTION_TRIGGER_EXPORT");
+            }
+        }
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
 
         viewModelSavingsProgress = new ViewModelProvider(this).get(ViewModelSavingsProgress.class);
@@ -669,23 +731,24 @@ public class FragmentSettings extends Fragment {
     public static <T> boolean isOfType(Object input) {
         return input != null; // won't compile
     }
-    private void exportExcelByData(List<Object> data) {
-
+    private void exportExcelByData(List<Object> data, String filterCategory) {
         Workbook workbook = new XSSFWorkbook();
-
-        // Buat Sheet baru
         Sheet sheet = workbook.createSheet(user.getType());
+
         Row headerNameUserRow = sheet.createRow(0);
         headerNameUserRow.createCell(0).setCellValue("Nama: " + user.getName());
 
         Row headerRow = sheet.createRow(1);
         headerRow.createCell(0).setCellValue("Kategori: " + user.getCategory());
 
-        // Buat Header Row
-        if(user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))){
+        // Buat CellStyle untuk Wrap Text sekali saja di luar loop
+        CellStyle wrapTextStyle = workbook.createCellStyle();
+        wrapTextStyle.setWrapText(true);
+
+        if (filterCategory.equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
             List<ModelFinance> dataFinance = new ArrayList<>();
-            for (Object object:data){
-                dataFinance.add((ModelFinance)object);
+            for (Object object : data) {
+                dataFinance.add((ModelFinance) object);
             }
 
             Row columnHeaderRow = sheet.createRow(6);
@@ -702,46 +765,39 @@ public class FragmentSettings extends Fragment {
                 Row dataRow = sheet.createRow(rowNum++);
                 dataRow.createCell(0).setCellValue(modelFinance.getId());
                 dataRow.createCell(1).setCellValue(modelFinance.getJumlahDesc(locale));
-                sheet.setColumnWidth(1, (modelFinance.getJumlahDesc(locale).length() * 400));
                 dataRow.createCell(2).setCellValue(modelFinance.getKategori());
-                sheet.setColumnWidth(2, (modelFinance.getKategori().length() * 400));
-                CellStyle cellStyle = workbook.createCellStyle();
-                cellStyle.setWrapText(true); // Mengaktifkan pembungkusan teks
 
-
-                Cell cell = dataRow.createCell(3);
-                cell.setCellStyle(cellStyle);
-
-                cell.setCellValue(modelFinance.getKeterangan());
-                dataRow.setHeightInPoints(((float) modelFinance.getKeterangan().length() / 20) * sheet.getDefaultRowHeightInPoints()); // Sesuaikan tinggi baris
-
-                sheet.setColumnWidth(3, Math.min((modelFinance.getKeterangan().length() + 2) * 256, 20000)); // 20000 adalah batas maksimum width
+                // Terapkan Wrap Text tanpa memanipulasi Height secara manual
+                Cell cellKet = dataRow.createCell(3);
+                cellKet.setCellStyle(wrapTextStyle);
+                cellKet.setCellValue(modelFinance.getKeterangan());
 
                 dataRow.createCell(4).setCellValue(modelFinance.getDate());
-                sheet.setColumnWidth(4, (modelFinance.getDate().length() * 400));
-
                 dataRow.createCell(5).setCellValue(modelFinance.getTipe());
-                sheet.setColumnWidth(5, (modelFinance.getTipe().length() * 400));
-
                 dataRow.createCell(6).setCellValue(modelFinance.getMonth());
-                sheet.setColumnWidth(6, (modelFinance.getMonth().length() * 400));
-
-
             }
 
-        }else{
+            // SET COLUMN WIDTH DI LUAR LOOP (Setelah semua data masuk)
+            sheet.setColumnWidth(0, 3000); // ID
+            sheet.setColumnWidth(1, 5000); // Jumlah
+            sheet.setColumnWidth(2, 5000); // Kategori
+            sheet.setColumnWidth(3, 10000); // Keterangan (Dibuat lebar agar Wrap Text bekerja)
+            sheet.setColumnWidth(4, 4000); // Tanggal
+            sheet.setColumnWidth(5, 4000); // Tipe
+            sheet.setColumnWidth(6, 4000); // Bulan
+
+        } else {
             Row headerSavingsNameRow = sheet.createRow(2);
             headerSavingsNameRow.createCell(0).setCellValue("Target: " + mainActivity.modelSavings.getTitle());
-            sheet.setColumnWidth(0, (mainActivity.modelSavings.getTitle().length() * 400));
 
             Row headerSavingsTargetRow = sheet.createRow(3);
-            headerSavingsTargetRow.createCell(0).setCellValue("Jumlah: " + Tools.convertToCurrency(mainActivity.modelSavings.getTargetValue(),locale));
-            sheet.setColumnWidth(0, (Tools.convertToCurrency(mainActivity.modelSavings.getTargetValue(),locale).length() * 400));
+            headerSavingsTargetRow.createCell(0).setCellValue("Jumlah: " + Tools.convertToCurrency(mainActivity.modelSavings.getTargetValue(), locale));
 
-            List<ModelSavingsProgress> dataSavings  = new ArrayList<>();
-            for (Object object:data){
-                dataSavings.add((ModelSavingsProgress)object);
+            List<ModelSavingsProgress> dataSavings = new ArrayList<>();
+            for (Object object : data) {
+                dataSavings.add((ModelSavingsProgress) object);
             }
+
             Row columnHeaderRow = sheet.createRow(6);
             columnHeaderRow.createCell(0).setCellValue("ID");
             columnHeaderRow.createCell(1).setCellValue("Judul");
@@ -755,75 +811,326 @@ public class FragmentSettings extends Fragment {
                 Row dataRow = sheet.createRow(rowNum++);
                 dataRow.createCell(0).setCellValue(modelSavingsProgress.getId());
                 dataRow.createCell(1).setCellValue(modelSavingsProgress.getTitle());
-                sheet.setColumnWidth(1, (modelSavingsProgress.getTitle().length() * 400));
-                CellStyle cellStyle = workbook.createCellStyle();
-                cellStyle.setWrapText(true); // Mengaktifkan pembungkusan teks
 
+                Cell cellKet = dataRow.createCell(2);
+                cellKet.setCellStyle(wrapTextStyle);
+                cellKet.setCellValue(modelSavingsProgress.getDescription());
 
-                Cell cell = dataRow.createCell(2);
-                cell.setCellStyle(cellStyle);
-
-                cell.setCellValue(modelSavingsProgress.getDescription());
-                dataRow.setHeightInPoints(((float) modelSavingsProgress.getDescription().length() / 20) * sheet.getDefaultRowHeightInPoints()); // Sesuaikan tinggi baris
-
-                sheet.setColumnWidth(2, Math.min((modelSavingsProgress.getDescription().length() + 2) * 256, 20000)); // 20000 adalah batas maksimum width
-
-
-                dataRow.createCell(3).setCellValue(Tools.convertToCurrency(modelSavingsProgress.getProcessValue(),locale));
-                sheet.setColumnWidth(3, (Tools.convertToCurrency(modelSavingsProgress.getProcessValue(),locale).length() * 400));
-
+                dataRow.createCell(3).setCellValue(Tools.convertToCurrency(modelSavingsProgress.getProcessValue(), locale));
                 dataRow.createCell(4).setCellValue(modelSavingsProgress.getDate_progress_savings());
-                sheet.setColumnWidth(4, (modelSavingsProgress.getDate_progress_savings().length() * 400));
-
                 dataRow.createCell(5).setCellValue(modelSavingsProgress.getMonth());
-                sheet.setColumnWidth(5, (modelSavingsProgress.getMonth().length() * 400));
-
-
             }
 
+            // SET COLUMN WIDTH DI LUAR LOOP
+            sheet.setColumnWidth(0, 3000); // ID
+            sheet.setColumnWidth(1, 6000); // Judul
+            sheet.setColumnWidth(2, 10000); // Keterangan
+            sheet.setColumnWidth(3, 5000); // Jumlah
+            sheet.setColumnWidth(4, 4000); // Tanggal
+            sheet.setColumnWidth(5, 4000); // Bulan
         }
 
-        // Simpan file Excel ke Penyimpanan
-
-        String fileName = user.getCategory()+"_"+Calendar.getInstance().getTimeInMillis() + ".xlsx";
-
+        String fileName = user.getCategory() + "_" + Calendar.getInstance().getTimeInMillis() + ".xlsx";
         File file;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Buat file Excel seperti yang Anda lakukan sebelumnya
             file = new File(getContext().getExternalFilesDir(null), fileName);
         } else {
             file = new File(Environment.getExternalStorageDirectory(), fileName);
         }
 
         try (FileOutputStream fileOut = new FileOutputStream(file)) {
-
             workbook.write(fileOut);
             workbook.close();
 
-// Bagikan file atau buka dengan aplikasi lain menggunakan Intent
             Uri fileUri = FileProvider.getUriForFile(getContext(), getContext().getPackageName() + ".provider", file);
 
-//            Intent intent = new Intent(Intent.ACTION_SEND);
-//            intent.setType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-//            intent.putExtra(Intent.EXTRA_STREAM, fileUri);
-//            startActivity(Intent.createChooser(intent, "Share Excel File"));
-//// Tambahkan flag untuk memberikan izin kepada aplikasi penerima untuk mengakses file
-//            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            Toast.makeText(getContext(), "File berhasil disimpan di: " + file.getAbsolutePath(), Toast.LENGTH_LONG).show();
+            Toast.makeText(getContext(), "Berhasil diekspor!", Toast.LENGTH_SHORT).show();
 
             Intent intent = new Intent(Intent.ACTION_SEND);
             intent.setDataAndType(fileUri, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             intent.putExtra(Intent.EXTRA_STREAM, fileUri);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            startActivity(Intent.createChooser(intent, "Share Excel File"));
+            startActivity(Intent.createChooser(intent, "Bagikan Excel via..."));
 
         } catch (IOException e) {
             Toast.makeText(getContext(), "Gagal menyimpan file: " + e.getMessage(), Toast.LENGTH_LONG).show();
-
             e.printStackTrace();
         }
     }
+   private void showBottomSheetExportFilter() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getActivity());
+        View view = getLayoutInflater().inflate(R.layout.layout_bottom_sheet_export, null);
+        bottomSheetDialog.setContentView(view);
 
+        // Inisiasi Komponen
+        TabLayout tabLayout = view.findViewById(R.id.tab_layout_filter);
 
+        // Layout Kontainer
+        LinearLayout layoutMonth = view.findViewById(R.id.layout_filter_month);
+        LinearLayout layoutYear = view.findViewById(R.id.layout_filter_year);
+        LinearLayout layoutRange = view.findViewById(R.id.layout_filter_range);
+
+        // Input Dropdown
+        AutoCompleteTextView dropdownMonth = view.findViewById(R.id.dropdown_month);
+        AutoCompleteTextView dropdownYearForMonth = view.findViewById(R.id.dropdown_year_for_month);
+        AutoCompleteTextView dropdownYearOnly = view.findViewById(R.id.dropdown_year_only);
+
+        // Rentang Tanggal
+       TextInputEditText etPickDateRange = view.findViewById(R.id.et_pick_date_range);
+        MaterialButton btnExportAction = view.findViewById(R.id.btn_export_action);
+
+        // 1. Setup Tab Layout Item
+        tabLayout.addTab(tabLayout.newTab().setText("Bulan"));
+        tabLayout.addTab(tabLayout.newTab().setText("Tahun"));
+        tabLayout.addTab(tabLayout.newTab().setText("Rentang"));
+
+        // 2. Setup Data Dropdown (Bulan & Tahun)
+        String[] months = {"Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"};
+        String[] years = {"2024", "2025", "2026", "2027"}; // Bisa di-generate dinamis
+
+        ArrayAdapter<String> monthAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, months);
+        ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, years);
+
+       dropdownMonth.setAdapter(monthAdapter);
+       dropdownYearForMonth.setAdapter(yearAdapter);
+       dropdownYearOnly.setAdapter(yearAdapter);
+
+       Calendar now = Calendar.getInstance();
+
+       String currentMonth = months[now.get(Calendar.MONTH)];
+       String currentYear = String.valueOf(now.get(Calendar.YEAR));
+
+       // Isi ke dalam dropdown (Gunakan false agar tidak memunculkan popup list saat di-set)
+       dropdownMonth.setText(currentMonth, false);
+       dropdownYearForMonth.setText(currentYear, false);
+       dropdownYearOnly.setText(currentYear, false);
+
+        // 3. Logika Perpindahan Tab
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                // Sembunyikan semua terlebih dahulu
+                layoutMonth.setVisibility(View.GONE);
+                layoutYear.setVisibility(View.GONE);
+                layoutRange.setVisibility(View.GONE);
+
+                // Tampilkan berdasarkan tab yang diklik
+                switch (tab.getPosition()) {
+                    case 0: layoutMonth.setVisibility(View.VISIBLE); break;
+                    case 1: layoutYear.setVisibility(View.VISIBLE); break;
+                    case 2: layoutRange.setVisibility(View.VISIBLE); break;
+                }
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        });
+       AutoCompleteTextView dropdownCategory = view.findViewById(R.id.dropdown_category);
+
+       String[] kategoriList = {"Jurnal Uang", "Menabung"};
+       ArrayAdapter<String> kategoriAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_list_item_1, kategoriList);
+       dropdownCategory.setAdapter(kategoriAdapter);
+
+       String categoryFromNotif = null;
+       if (getActivity() != null && getActivity().getIntent() != null) {
+           categoryFromNotif = getActivity().getIntent().getStringExtra("EXPORT_CATEGORY");
+       }
+
+       if (categoryFromNotif != null && !categoryFromNotif.isEmpty()) {
+           dropdownCategory.setText(categoryFromNotif, false); // Dari notifikasi
+       } else {
+           dropdownCategory.setText(user.getCategory(), false); // Default aplikasi
+       }
+
+        // 5. Logika Tombol Ekspor
+        btnExportAction.setOnClickListener(v -> {
+            int selectedTab = tabLayout.getSelectedTabPosition();
+            List<String> datesList = new ArrayList<>();
+
+            if (selectedTab == 0) {
+                // ==========================================
+                // TAB 1: EKSPOR BERDASARKAN BULAN & TAHUN
+                // ==========================================
+                String selectedMonth = dropdownMonth.getText().toString();
+                String selectedYear = dropdownYearForMonth.getText().toString();
+
+                if (selectedMonth.isEmpty() || selectedYear.isEmpty()) {
+                    Toast.makeText(requireContext(), "Pilih bulan dan tahun terlebih dahulu!", Toast.LENGTH_SHORT).show();
+                    return; // Hentikan proses jika kosong
+                }
+
+                int monthIndex = getMonthIndex(selectedMonth);
+                int year = Integer.parseInt(selectedYear);
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.YEAR, year);
+                calendar.set(Calendar.MONTH, monthIndex);
+
+                // Atur ke tanggal 1 (Hari pertama di bulan tersebut)
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+                long startOfMonth = calendar.getTimeInMillis();
+
+                // Atur ke tanggal terakhir di bulan tersebut (misal 28, 30, atau 31)
+                calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+                long endOfMonth = calendar.getTimeInMillis();
+
+                // Buat List Tanggal dan panggil ViewModel
+                datesList = generateDatesBetween(startOfMonth, endOfMonth);
+                String selectedCategory = dropdownCategory.getText().toString();
+                fetchDataAndExport(datesList,selectedCategory);
+                bottomSheetDialog.dismiss();
+
+            } else if (selectedTab == 1) {
+                // ==========================================
+                // TAB 2: EKSPOR BERDASARKAN TAHUN FULL
+                // ==========================================
+                String selectedYear = dropdownYearOnly.getText().toString();
+
+                if (selectedYear.isEmpty()) {
+                    Toast.makeText(requireContext(), "Pilih tahun terlebih dahulu!", Toast.LENGTH_SHORT).show();
+                    return; // Hentikan proses jika kosong
+                }
+
+                int year = Integer.parseInt(selectedYear);
+
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.YEAR, year);
+
+                // Atur ke 1 Januari
+                calendar.set(Calendar.MONTH, Calendar.JANUARY);
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+                long startOfYear = calendar.getTimeInMillis();
+
+                // Atur ke 31 Desember
+                calendar.set(Calendar.MONTH, Calendar.DECEMBER);
+                calendar.set(Calendar.DAY_OF_MONTH, 31);
+                long endOfYear = calendar.getTimeInMillis();
+
+                // Buat List Tanggal (365/366 hari) dan panggil ViewModel
+                datesList = generateDatesBetween(startOfYear, endOfYear);
+                String selectedCategory = dropdownCategory.getText().toString();
+                fetchDataAndExport(datesList,selectedCategory);
+                bottomSheetDialog.dismiss();
+
+            } else {
+                // ==========================================
+                // TAB 3: EKSPOR RENTANG TANGGAL BEBAS
+                // ==========================================
+                if (filterStartDate != null && filterEndDate != null) {
+                    datesList = generateDatesBetween(filterStartDate, filterEndDate);
+                    fetchDataAndExport(datesList,dropdownCategory.getText().toString());
+                    bottomSheetDialog.dismiss();
+                } else {
+                    Toast.makeText(requireContext(), "Pilih rentang tanggal di kalender terlebih dahulu!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+       etPickDateRange.setOnClickListener(v -> {
+           MaterialDatePicker.Builder<Pair<Long, Long>> builder = MaterialDatePicker.Builder.dateRangePicker();
+           builder.setTitleText("Pilih Rentang Tanggal");
+           MaterialDatePicker<Pair<Long, Long>> picker = builder.build();
+
+           picker.addOnPositiveButtonClickListener(selection -> {
+               filterStartDate = selection.first;
+               filterEndDate = selection.second;
+
+               SimpleDateFormat sdfUI = new SimpleDateFormat("dd MMM yyyy", new Locale("id", "ID"));
+               String startString = sdfUI.format(new Date(filterStartDate));
+               String endString = sdfUI.format(new Date(filterEndDate));
+
+               // 3. Masukkan teks hasil pilihan langsung ke dalam OutlinedBox
+               etPickDateRange.setText(startString + " - " + endString);
+           });
+
+           picker.show(getParentFragmentManager(), "DATE_RANGE_PICKER");
+       });
+        bottomSheetDialog.show();
+    }
+    private int getMonthIndex(String monthName) {
+        String[] months = {"Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"};
+        for (int i = 0; i < months.length; i++) {
+            if (months[i].equalsIgnoreCase(monthName)) {
+                return i;
+            }
+        }
+        return 0; // Fallback otomatis ke Januari
+    }
+    private void fetchDataAndExport(List<String> datesList,String categoryFilter) {
+        if (categoryFilter.equalsIgnoreCase(getString(R.string.menabung))) {
+
+            // Panggil ViewModel Tabungan
+            LiveData<List<ModelSavingsProgress>> liveDataSaving;
+            if (datesList == null || datesList.isEmpty()) {
+                // TODO: Ganti dengan fungsi ViewModel Anda untuk mengambil SEMUA data tanpa filter tanggal
+                liveDataSaving = viewModelSavingsProgress.getAllSavings();
+            } else {
+                liveDataSaving = viewModelSavingsProgress.getSavingsByWeek(datesList, mainActivity.modelSavings.getId(), user.getType_currency());
+            }
+
+            liveDataSaving.observe(getViewLifecycleOwner(), new Observer<List<ModelSavingsProgress>>() {
+                @Override
+                public void onChanged(List<ModelSavingsProgress> modelFinances) {
+                    liveDataSaving.removeObserver(this); // Cegah memory leak
+                    if (modelFinances == null || modelFinances.isEmpty()) {
+                        Toast.makeText(getContext(), "Tidak ada data pada rentang waktu tersebut", Toast.LENGTH_SHORT).show();
+                    } else {
+                        exportExcelByData(new ArrayList<>(modelFinances),categoryFilter);
+                    }
+                }
+            });
+
+        } else {
+
+            // Panggil ViewModel Keuangan (Jurnal Keuangan)
+            LiveData<List<ModelFinance>> liveDataFinance;
+            if (datesList == null || datesList.isEmpty()) {
+                // TODO: Ganti dengan fungsi ViewModel Anda untuk mengambil SEMUA data tanpa filter tanggal
+                liveDataFinance = viewModelFinance.getAllFinance();
+            } else {
+                liveDataFinance = viewModelFinance.getFinanceByWeek(datesList, user.getId(), user.getType_currency());
+            }
+
+            liveDataFinance.observe(getViewLifecycleOwner(), new Observer<List<ModelFinance>>() {
+                @Override
+                public void onChanged(List<ModelFinance> modelFinances) {
+                    liveDataFinance.removeObserver(this); // Cegah memory leak
+                    if (modelFinances == null || modelFinances.isEmpty()) {
+                        Toast.makeText(getContext(), "Tidak ada data pada rentang waktu tersebut", Toast.LENGTH_SHORT).show();
+                    } else {
+                        exportExcelByData(new ArrayList<>(modelFinances),categoryFilter);
+                    }
+                }
+            });
+        }
+    }
+
+    // Fungsi untuk membuat list string tanggal (yyyy-MM-dd) dari Long rentang waktu
+    private List<String> generateDatesBetween(long startDateMillis, long endDateMillis) {
+        List<String> dates = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(startDateMillis);
+
+        // FORMAT SESUAI DATABASE: "September 17, 2026"
+        // Gunakan Locale.US/ENGLISH agar format teksnya tidak berubah menjadi format lokal (dd MMMM yyyy)
+        SimpleDateFormat sdf = new SimpleDateFormat("MMMM dd, yyyy", Locale.US);
+
+        while (calendar.getTimeInMillis() <= endDateMillis) {
+            dates.add(sdf.format(calendar.getTime()));
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        return dates;
+    }
+
+    // Fungsi untuk membuat list string tanggal (yyyy-MM-dd) untuk bulan ini
+    private List<String> generateDatesForThisMonth() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_MONTH, 1); // Set ke tanggal 1 bulan ini
+
+        long startOfMonth = calendar.getTimeInMillis();
+
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH)); // Set ke hari terakhir bulan ini
+        long endOfMonth = calendar.getTimeInMillis();
+
+        return generateDatesBetween(startOfMonth, endOfMonth);
+    }
 }

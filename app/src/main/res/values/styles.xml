@@ -9,7 +9,8 @@
         <item name="colorControlNormal">@color/colorPrimary</item>
         <item name="colorControlActivated">@color/colorPrimary</item>
         <item name="boxStrokeColor">@color/colorPrimary</item>
-
+        <item name="materialCalendarTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar</item>
+        <item name="materialCalendarFullscreenTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar.Fullscreen</item>
     </style>
 
     <style name="AppThemeNoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
@@ -20,7 +21,8 @@
         <item name="colorControlNormal">@color/colorPrimary</item>
         <item name="colorControlActivated">@color/colorPrimary</item>
         <item name="boxStrokeColor">@color/colorPrimary</item>
-
+        <item name="materialCalendarTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar</item>
+        <item name="materialCalendarFullscreenTheme">@style/ThemeOverlay.MaterialComponents.MaterialCalendar.Fullscreen</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

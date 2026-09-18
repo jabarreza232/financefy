@@ -81,6 +81,9 @@ public class PinActivity extends AppCompatActivity {
 
                     // PIN BENAR -> Masuk MainActivity
                     Intent intent = new Intent(this, MainActivity.class);
+                    if (getIntent().getBooleanExtra("ACTION_TRIGGER_EXPORT", false)) {
+                        intent.putExtra("ACTION_TRIGGER_EXPORT", true);
+                    }
                     intent.putExtra("isInputPin", true);
                     startActivity(intent);
                     finish(); // PENTING: Hancurkan halaman PIN agar tidak bisa di-back

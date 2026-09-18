@@ -118,9 +118,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
          isPinSetting = tinyDb.getBoolean("isSettingPin");
         boolean isPinInput = getIntent().getBooleanExtra("isInputPin", false);
 
-        if (isPinSetting && !isPinInput) {
-            startActivity(new Intent(this, PinActivity.class));
-        }
 
          isCustomActive = tinyDb.getBoolean("is_custom_color_active");
         if (isCustomActive) {
@@ -134,7 +131,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        if (getIntent().getBooleanExtra("ACTION_TRIGGER_EXPORT", false)) {
+            isPinSetting = false;
 
+            binding.layout.bnMain.post(() -> {
+                binding.layout.bnMain.setSelectedItemId(R.id.settings);
+                tinyDb.getBoolean("isSettingPin",true);
+            });
+        }
+        if (isPinSetting && !isPinInput) {
+            Intent intentToPin = new Intent(this, PinActivity.class);
+
+            startActivity(intentToPin);
+        }
         if (isCustomActive) {
             int customColor = tinyDb.getInt("custom_color_int");
             if (getSupportActionBar() != null) {
@@ -171,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             tinyDb.putObject("user", user);
         }
-        createNotificationChannel();
+//        createNotificationChannel();
         if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
             showHideFabSavings(false);
 
@@ -208,7 +217,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .start();
 
     }
-
 
 
     @Override

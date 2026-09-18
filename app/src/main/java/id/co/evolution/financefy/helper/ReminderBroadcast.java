@@ -23,7 +23,6 @@ public class ReminderBroadcast extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent == null) return;
 
-        // Handle reboot
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             HelperNotification helperNotification = new HelperNotification(context);
             helperNotification.rescheduleAllAlarmsOnBoot();
@@ -39,24 +38,19 @@ public class ReminderBroadcast extends BroadcastReceiver {
             ModelNotification modelNotification = tinyDb.getObject(keyNotif, ModelNotification.class);
 
             if (modelNotification != null) {
-                pushNotification(context, modelNotification.title, modelNotification.description, modelNotification.requestCode);
-
-                // If monthly frequency, reschedule for next month
-                String timeNotif = tinyDb.getString("time_notification");
-                if ("monthly".equalsIgnoreCase(timeNotif)) {
-                    HelperNotification helperNotification = new HelperNotification(context);
-                    helperNotification.reminderSet(true, modelNotification, keyNotif, modelNotification.requestCode);
-                }
+                pushNotification(context, modelNotification.title, modelNotification.description,keyNotif, modelNotification.requestCode);
+                HelperNotification helperNotification = new HelperNotification(context);
+                helperNotification.reminderSet(true, modelNotification, keyNotif, modelNotification.requestCode);
             }
         }
     }
-
-    private void pushNotification(Context context, String title, String description, int requestCode) {
+    private void pushNotification(Context context, String title, String description,String keyNotif, int requestCode) {
         String channelId = (user != null) ? String.valueOf(user.getId()) : "financefy_channel";
         String channelName = "Financefy Reminders";
 
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        // 1. Buat Channel Notifikasi (Untuk Android O ke atas)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     channelId,
@@ -70,6 +64,7 @@ public class ReminderBroadcast extends BroadcastReceiver {
             }
         }
 
+        // 2. Intent Utama (Ketika badan notifikasi diklik)
         Intent openAppIntent = new Intent(context, MainActivity.class);
         openAppIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
@@ -79,13 +74,34 @@ public class ReminderBroadcast extends BroadcastReceiver {
 
         PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, openAppIntent, pendingFlags);
 
+        // ==========================================
+        // 3. INTENT KHUSUS UNTUK TOMBOL "EXPORT EXCEL"
+        // ==========================================
+        Intent exportIntent = new Intent(context, MainActivity.class);
+        exportIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        // Bawa pesan bahwa user menekan tombol ekspor
+        exportIntent.putExtra("ACTION_TRIGGER_EXPORT", true);
+        exportIntent.putExtra("EXPORT_CATEGORY", keyNotif);
+        tinyDb.getBoolean("isSettingPin",false);
+        // Gunakan requestCode yang berbeda (misal: requestCode + 100) agar tidak bentrok dengan intent utama
+        PendingIntent exportPendingIntent = PendingIntent.getActivity(
+                context,
+                requestCode + 100,
+                exportIntent,
+                pendingFlags
+        );
+        // ==========================================
+
+        // 4. Bangun Notifikasi
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, channelId)
-                .setSmallIcon(R.drawable.logo)
+                .setSmallIcon(R.drawable.logo) // Pastikan Anda menggunakan ikon yang transparan/putih untuk Material Design
                 .setContentTitle(title)
                 .setContentText(description)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 .setAutoCancel(true)
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                // Tambahkan tombol di sini
+                .addAction(R.drawable.icon_excel, "Export Excel", exportPendingIntent);
 
         if (notificationManager != null) {
             notificationManager.notify(requestCode, builder.build());
