@@ -213,6 +213,9 @@ public class TinyDb {
     public float getFloat(String key) {
         return preferences.getFloat(key, 0);
     }
+ public float getFloat(String key,float defaultValue) {
+        return preferences.getFloat(key, defaultValue);
+    }
 
     /**
      * Get double value from SharedPreferences at 'key'. If exception thrown, return 'defaultValue'

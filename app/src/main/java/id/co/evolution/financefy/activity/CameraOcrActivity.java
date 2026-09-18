@@ -60,12 +60,14 @@ import java.util.concurrent.Executors;
 
 import javax.inject.Inject;
 
+import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.databinding.ActivityCameraOcrBinding;
 import id.co.evolution.financefy.helper.TinyDb;
 import id.co.evolution.financefy.helper.Tools;
 import id.co.evolution.financefy.model.ModelPrimaryColor;
 
+@AndroidEntryPoint
 @ExperimentalGetImage
 public class CameraOcrActivity extends AppCompatActivity {
 
@@ -87,7 +89,7 @@ public class CameraOcrActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active");
+        boolean isCustomActive = tinyDb.getBoolean("is_custom_color_active",false);
 
         if (isCustomActive) {
             int customColor = tinyDb.getInt("custom_color_int");

@@ -7,6 +7,7 @@ import static id.co.evolution.financefy.helper.Tools.getFileName;
 import static id.co.evolution.financefy.helper.Tools.getRealPathFromURI;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -37,6 +38,7 @@ import com.google.ai.edge.litertlm.Engine;
 import com.google.ai.edge.litertlm.Message;
 import com.google.ai.edge.litertlm.MessageCallback;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
@@ -50,10 +52,13 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.dialog.DialogConfirm;
@@ -133,7 +138,8 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         Tools.setImageTintView(binding.imgCamera, modelPrimaryColor);
         Tools.setImageTintView(binding.imgGallery, modelPrimaryColor);
         Tools.setImageTintView(binding.imgCalendar, modelPrimaryColor);
-
+        binding.tilAmount.setBoxStrokeColor(colorPrimary);
+        binding.tilDescription.setBoxStrokeColor(colorPrimary);
         dialogPreviewImage = new DialogPreviewImage(this);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelFinance.init(financeRepository);
@@ -143,6 +149,7 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
 
         helperResultLLM = new HelperResultLLM(map -> {
             binding.etAmount.setText(map.get("total"));
+            jumlah = Tools.convertToCurrency(map.get("total"), locale);
             binding.txtDate.setText(map.get("tanggal"));
             binding.etDescription.setText(map.get("description"));
         });
@@ -197,6 +204,22 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
         binding.btnClose.setOnClickListener(this);
         binding.btnScan.setOnClickListener(this);
 
+        initLLM();
+
+        if (!OpenCVLoader.initDebug()) {
+            Log.e("OpenCV", "Gagal load OpenCV");
+        } else {
+            Toast.makeText(this, "Berhasil load opencv", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initLLM();
+    }
+
+    private void initLLM() {
         new Thread(() -> {
             helperResultLLM.initLlmInference(this);
 
@@ -205,19 +228,11 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
 
                 if (litertEngine != null) {
                     binding.btnScan.setEnabled(true);
-                    Toast.makeText(this, "AI Siap Digunakan!", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(this, "AI Belum Terunduh", Toast.LENGTH_SHORT).show();
                     binding.btnScan.setEnabled(true);
                 }
             });
         }).start();
-
-        if (!OpenCVLoader.initDebug()) {
-            Log.e("OpenCV", "Gagal load OpenCV");
-        } else {
-            Toast.makeText(this, "Berhasil load opencv", Toast.LENGTH_SHORT).show();
-        }
     }
 
     private void loadData() {
@@ -495,7 +510,60 @@ public class UpdateFinanceActivity extends BaseFinanceActivity implements View.O
 
                     Log.e("LLM_ERROR", "Gagal memproses AI", throwable);
                     runOnUiThread(() -> {
-                        binding.etDescription.setText("Gagal memproses AI: " + throwable.getMessage());
+                        String rawError = throwable.getMessage();
+                        String userFriendlyMessage = "Maaf, terjadi kesalahan saat AI mencoba membaca struk ini.";
+
+                        if (rawError != null && rawError.contains("too long")) {
+
+                            // 1. Ekstrak Angka Error menggunakan Regex (Misal: dari teks "1206 >= 1024")
+                            String tokenDipakai = "???";
+                            String tokenMaksimal = "???";
+
+                            // Mencari pola angka yang diapit oleh spasi dan >= (Contoh: " 1206 >= 1024")
+                            Pattern pattern = Pattern.compile("(\\d+)\\s*>=\\s*(\\d+)");
+                            Matcher matcher = pattern.matcher(rawError);
+                            if (matcher.find()) {
+                                tokenDipakai = matcher.group(1);   // Hasil: 1206
+                                tokenMaksimal = matcher.group(2);  // Hasil: 1024
+                            }
+
+                            // 2. Susun Pesan Peringatan dengan 2 Saran
+                            userFriendlyMessage = "Teks dari struk ini terlalu panjang untuk dibaca oleh kecerdasan buatan (AI) saat ini.\n\n" +
+                                    "Kapasitas teks (Input): " + tokenDipakai + " / " + tokenMaksimal + " Token.\n\n" +
+                                    "💡 Saran Solusi:\n" +
+                                    "1. Foto Ulang: Coba potong (foto lebih dekat) hanya pada bagian rincian barang dan total harga saja.\n" +
+                                    "2. Pengaturan: Cobalah tingkatkan batas 'Max Token' di menu pengaturan AI (Jika didukung oleh model).";
+
+                        } else {
+                            userFriendlyMessage += "\n\nDetail teknis: " + rawError;
+                        }
+
+                        // 3. Tampilkan Dialog
+                        new MaterialAlertDialogBuilder(UpdateFinanceActivity.this)
+                                .setTitle("Kapasitas AI Terlampaui")
+                                .setMessage(userFriendlyMessage)
+                                .setIcon(R.drawable.ic_error)
+                                .setPositiveButton("Mengerti", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                                .setNeutralButton("Buka Pengaturan AI", (dialog, which) -> {
+                                    dialog.dismiss();
+                                    Intent intent = new Intent(UpdateFinanceActivity.this, MainActivity.class);
+
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                                    intent.putExtra("GO_TO_SETTINGS", true);
+
+                                    startActivity(intent);
+
+                                    finish();
+                                })
+                                .setCancelable(false)
+                                .show();
+
                     });
                 }
             }, extraContext);

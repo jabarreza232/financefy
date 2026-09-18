@@ -8,6 +8,7 @@ import static id.co.evolution.financefy.helper.Tools.getFormattedMonthSimple;
 import static id.co.evolution.financefy.helper.Tools.getRealPathFromURI;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -38,6 +39,7 @@ import com.google.ai.edge.litertlm.Conversation;
 import com.google.ai.edge.litertlm.Message;
 import com.google.ai.edge.litertlm.MessageCallback;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
@@ -52,10 +54,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import dagger.hilt.android.AndroidEntryPoint;
+import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
 import id.co.evolution.financefy.dialog.DialogCalculator;
 import id.co.evolution.financefy.dialog.DialogConfirm;
@@ -104,7 +109,6 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         if (isCustomActive) {
             int customColor = tinyDb.getInt("custom_color_int");
             colorPrimary= customColor;
-
             getWindow().setStatusBarColor(customColor);
         } else {
             if (tinyDb.getObject("model_primary_color", ModelPrimaryColor.class) != null) {
@@ -135,6 +139,8 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         Tools.setImageTintView(binding.imgGallery, modelPrimaryColor);
         Tools.setImageTintView(binding.imgCalendar, modelPrimaryColor);
 
+        binding.tilAmount.setBoxStrokeColor(colorPrimary);
+        binding.tilDescription.setBoxStrokeColor(colorPrimary);
        //TODO HIDE STATUS BAR
 
         cur_calendar.get(Calendar.YEAR);
@@ -208,24 +214,8 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         binding.tvFileName.setOnClickListener(this);
         binding.btnClose.setOnClickListener(this);
         binding.btnScan.setOnClickListener(this);
-        new Thread(() -> {
-            helperResultLLM.initLlmInference(this);
 
-            runOnUiThread(() -> {
-                litertEngine = helperResultLLM.getLitertEngine();
-
-                if (litertEngine != null) {
-                    // Model berhasil dimuat
-                    binding.etDescription.setText(""); // Kosongkan keterangan
-                    binding.btnScan.setEnabled(true);  // Aktifkan kembali tombol scan
-                    Toast.makeText(this, "AI Siap Digunakan!", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "AI Belum Terunduh", Toast.LENGTH_SHORT).show();
-                    binding.btnScan.setEnabled(true);
-                }
-            });
-        }).start();
-
+        initLLM();
         if (!OpenCVLoader.initDebug()) {
             Log.e("OpenCV", "Gagal load OpenCV");
         } else {
@@ -235,7 +225,29 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initLLM();
+    }
 
+    private void initLLM(){
+    new Thread(() -> {
+        helperResultLLM.initLlmInference(this);
+
+        runOnUiThread(() -> {
+            litertEngine = helperResultLLM.getLitertEngine();
+
+            if (litertEngine != null) {
+                // Model berhasil dimuat
+                binding.etDescription.setText(""); // Kosongkan keterangan
+                binding.btnScan.setEnabled(true);  // Aktifkan kembali tombol scan
+            } else {
+                binding.btnScan.setEnabled(true);
+            }
+        });
+    }).start();
+}
 
 
 
@@ -348,25 +360,49 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
     }
 
     private void onSubmit(ModelFinance model) {
-        boolean isUpdate = false;
-        //TODO ketika submit terdapat data yang identik sama maka tidak dapat duplikasi.
-        // melainkan hanya bisa melakukan penjumlahan value nya saja
+        boolean isDuplicateSuspected = false;
 
+        // 1. Cek potensi input ganda (Double Input)
+        for (ModelFinance existingFinance : listFinance) {
+            // Logika: Kategori SAMA & Tanggal SAMA & Jumlah Nominal SAMA PERSIS
+            if (existingFinance.getKategori().equalsIgnoreCase(model.getKategori()) &&
+                    existingFinance.getDate().equals(model.getDate()) &&
+                    existingFinance.getJumlahValue() == model.getJumlahValue()) {
 
-        for (ModelFinance modelFinance : listFinance) {
-            if (modelFinance.getKategori().contains(model.getKategori()) && modelFinance.getDate().contains(model.getDate())) {
-                double jumlahValue = modelFinance.getJumlahValue() + model.getJumlahValue();
-                model.setId(modelFinance.getId());
-                model.setJumlah(jumlahValue);
-                isUpdate = true;
+                isDuplicateSuspected = true;
+                break; // Berhenti mencari karena sudah ketemu kembarannya
             }
         }
 
-        if (isUpdate)
-            viewModelFinance.inputUpdateFinance("Update", model);
-        else
+        // 2. Eksekusi Logika Bisnis
+        if (isDuplicateSuspected) {
+            // Tampilkan Pop-up Konfirmasi
+            new MaterialAlertDialogBuilder(this) // Gunakan 'this' jika di Activity
+                    .setTitle("Transaksi Serupa Ditemukan")
+                    .setMessage("Kamu sudah mencatat '" + model.getKategori() + "' sebesar " +
+                            model.getJumlahDesc(locale) + " di tanggal ini.\n\n" +
+                            "Apakah ini pengeluaran yang baru, atau kamu tidak sengaja menginput dua kali?")
+                    .setPositiveButton("Simpan Baru", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // User sadar dan tetap ingin menyimpan (memang beli barang yang sama 2x)
+                            viewModelFinance.inputUpdateFinance("Create", model);
+                            dialog.dismiss();
+                        }
+                    })
+                    .setNegativeButton("Batalkan", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // User tidak sengaja pencet 2x, batalkan penyimpanan
+                            dialog.dismiss();
+                        }
+                    })
+                    .setCancelable(false) // Mencegah dialog tertutup jika user klik di luar area
+                    .show();
+        } else {
+            // Jika tidak ada yang kembar, langsung simpan dengan mulus
             viewModelFinance.inputUpdateFinance("Create", model);
-
+        }
     }
 
     // 🔹 Cek Izin Kamera
@@ -549,7 +585,61 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
 
                     Log.e("LLM_ERROR", "Gagal memproses AI", throwable);
                     runOnUiThread(() -> {
-                        binding.etDescription.setText("Gagal memproses AI: " + throwable.getMessage());
+                        String rawError = throwable.getMessage();
+                        String userFriendlyMessage = "Maaf, terjadi kesalahan saat AI mencoba membaca struk ini.";
+
+                        if (rawError != null && rawError.contains("too long")) {
+
+                            // 1. Ekstrak Angka Error menggunakan Regex (Misal: dari teks "1206 >= 1024")
+                            String tokenDipakai = "???";
+                            String tokenMaksimal = "???";
+
+                            // Mencari pola angka yang diapit oleh spasi dan >= (Contoh: " 1206 >= 1024")
+                            Pattern pattern = Pattern.compile("(\\d+)\\s*>=\\s*(\\d+)");
+                            Matcher matcher = pattern.matcher(rawError);
+                            if (matcher.find()) {
+                                tokenDipakai = matcher.group(1);   // Hasil: 1206
+                                tokenMaksimal = matcher.group(2);  // Hasil: 1024
+                            }
+
+                            // 2. Susun Pesan Peringatan dengan 2 Saran
+                            userFriendlyMessage = "Teks dari struk ini terlalu panjang untuk dibaca oleh kecerdasan buatan (AI) saat ini.\n\n" +
+                                    "Kapasitas teks (Input): " + tokenDipakai + " / " + tokenMaksimal + " Token.\n\n" +
+                                    "💡 Saran Solusi:\n" +
+                                    "1. Foto Ulang: Coba potong (foto lebih dekat) hanya pada bagian rincian barang dan total harga saja.\n" +
+                                    "2. Pengaturan: Cobalah tingkatkan batas 'Max Token' di menu pengaturan AI (Jika didukung oleh model).";
+
+                        } else {
+                            userFriendlyMessage += "\n\nDetail teknis: " + rawError;
+                        }
+
+                        // 3. Tampilkan Dialog
+                        new MaterialAlertDialogBuilder(CreateFinanceActivity.this) // Ganti 'this' jika di Fragment
+                                .setTitle("Kapasitas AI Terlampaui")
+                                .setMessage(userFriendlyMessage)
+                                .setIcon(R.drawable.ic_error) // Pastikan ikon ini ada
+                                .setPositiveButton("Mengerti", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                })
+                                // (Opsional) Tombol kedua yang langsung membuka Pengaturan
+                                .setNeutralButton("Buka Pengaturan AI", (dialog, which) -> {
+                                    dialog.dismiss();
+                                    Intent intent = new Intent(CreateFinanceActivity.this, MainActivity.class);
+
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+                                    intent.putExtra("GO_TO_SETTINGS", true);
+
+                                    startActivity(intent);
+
+                                    finish();
+                                })
+                                .setCancelable(false)
+                                .show();
+
                     });
                 }
             }, extraContext);

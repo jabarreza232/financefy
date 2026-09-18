@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/colorSurface"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/ubuntu_b"
+        android:text="Pengaturan AI Lokal"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/ubuntu_r"
+        android:text="Atur batas panjang teks yang dihasilkan AI. Angka yang besar meningkatkan akurasi untuk struk panjang, tetapi prosesnya sedikit lebih lama."
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="14sp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:fontFamily="@font/ubuntu_b"
+            android:text="Batas Token (Max)"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/txt_dialog_token_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:fontFamily="@font/ubuntu_b"
+            android:text="2048"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="15sp" />
+    </RelativeLayout>
+
+    <com.google.android.material.slider.Slider
+        android:id="@+id/slider_dialog_max_token"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:stepSize="256.0"
+        android:value="2048.0"
+        android:valueFrom="256.0"
+        android:valueTo="2048.0" />
+
+    <TextView
+        android:id="@+id/txt_dialog_token_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:fontFamily="@font/ubuntu_r"
+        android:text="Kualitas: Sangat Akurat &amp; Detail (Proses lebih lama)"
+        android:textColor="?android:textColorSecondary"
+        android:textSize="13sp" />
+
+</LinearLayout>

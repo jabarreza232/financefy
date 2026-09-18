@@ -71,24 +71,19 @@ public class HelperResultLLM {
 
     public void initLlmInference(Context context) {
         File modelFile = new File(context.getExternalFilesDir(null), "Qwen2_0.5B_Instruct.litertlm");
-
+        TinyDb tinyDb = new TinyDb(context);
         if (modelFile.exists()) {
             new Thread(() -> {
                 try {
                     // 1. Persiapkan parameter konfigurasi
                     String modelPath = modelFile.getAbsolutePath();
 
-                    // Gunakan CPU sebagai default yang aman, atau Backend.GPU jika perangkat mendukung
-                    // Asumsi class Backend memiliki enum/konstanta CPU
                     Backend backend = new Backend.CPU();
 
-                    // Kosongkan vision dan audio karena Qwen2_0.5B_Instruct hanya model teks
                     Backend visionBackend = null;
                     Backend audioBackend = null;
 
-                    // Batasi jumlah token karena output struk (JSON) tidak akan terlalu panjang
-                    // Ini akan sangat menghemat pemakaian RAM
-                    Integer maxNumTokens = 2054;
+                    Integer maxNumTokens = tinyDb.getInt("max_tokens",2054);
                     // Gunakan folder cache bawaan aplikasi Android untuk mempercepat inisialisasi berikutnya
                     String cacheDir = context.getCacheDir().getAbsolutePath();
 
@@ -101,11 +96,9 @@ public class HelperResultLLM {
                             cacheDir
                     );
 
-                    // 3. Buat dan Inisialisasi Engine (Berjalan di background)
                     litertEngine = new Engine(config);
                     litertEngine.initialize();
 
-                    // 4. Buat sesi percakapan
                     litertConversation = litertEngine.createConversation(new ConversationConfig());
 
                     Log.d("LITERT", "Engine & Conversation berhasil diinisialisasi dengan maxTokens: " + maxNumTokens);

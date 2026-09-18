@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -44,6 +45,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
@@ -55,6 +57,8 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.slider.Slider;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputEditText;
@@ -183,6 +187,9 @@ public class FragmentSettings extends Fragment {
 //        });
          modelFile = new File(requireContext().getExternalFilesDir(null), "Qwen2_0.5B_Instruct.litertlm");
  // 2. Aksi ketika CardView ditekan (Tampilkan Dialog)
+        if (modelFile.exists()) {
+            binding.imgArrowLlm.setImageResource(R.drawable.ic_baseline_settings_24);
+        }
         binding.cvDownloadLlm.setOnClickListener(v -> {
            processDownload();
         });
@@ -350,10 +357,60 @@ public class FragmentSettings extends Fragment {
 //        changeColorThemeSettings(mainActivity.modelPrimaryColor);
         return binding.getRoot();
     }
+    private void showDialogLlmSettings() {
+        // 1. CEK STATUS UNDUHAN LLM
+        // Ganti variabel ini dengan logika/fungsi Anda yang mengecek apakah file model.bin sudah ada di storage
 
+        // 2. SIAPKAN CUSTOM VIEW
+        View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_llm_settings, null);
+
+        Slider sliderToken = dialogView.findViewById(R.id.slider_dialog_max_token);
+        TextView txtTokenValue = dialogView.findViewById(R.id.txt_dialog_token_value);
+        TextView txtTokenIndicator = dialogView.findViewById(R.id.txt_dialog_token_indicator);
+
+        float savedToken = tinyDb.getInt("max_tokens",2048);
+
+        sliderToken.setValue(savedToken);
+        updateTokenUI(savedToken, txtTokenValue, txtTokenIndicator);
+
+        // Listener Slider
+        sliderToken.addOnChangeListener((slider, value, fromUser) -> {
+            updateTokenUI(value, txtTokenValue, txtTokenIndicator);
+        });
+
+        // 3. TAMPILKAN DIALOG
+        AlertDialog dialog = new MaterialAlertDialogBuilder(requireContext())
+                .setView(dialogView)
+                .setPositiveButton("Simpan", (dialogInterface, i) -> {
+                    // Simpan ke SharedPreferences saat user klik Simpan
+                    float finalValue = sliderToken.getValue();
+                    tinyDb.putInt("max_tokens",(int)finalValue);
+                    Toast.makeText(requireContext(), "Pengaturan AI berhasil disimpan", Toast.LENGTH_SHORT).show();
+                })
+                .setNegativeButton("Batal", (dialogInterface, i) -> {
+                    dialogInterface.dismiss();
+                })
+                .create();
+
+        dialog.show();
+    }
+
+    // Fungsi pembantu untuk mengupdate teks indikator
+    private void updateTokenUI(float value, TextView txtVal, TextView txtInd) {
+        int token = (int) value;
+        txtVal.setText(token + " Token");
+
+        if (token <= 512) {
+            txtInd.setText("Performa: Sangat Cepat\nSaran: Berisiko 'Lazy', kurang cocok untuk struk belanja panjang.");
+        } else if (token <= 1024) {
+            txtInd.setText("Performa: Seimbang\nSaran: Cukup akurat untuk struk belanja pendek atau menengah.");
+        } else {
+            txtInd.setText("Performa: Sedikit Lebih Lama\nSaran: Sangat Akurat! Disarankan agar semua item pada struk terbaca sempurna.");
+        }
+    }
     private void processDownload() {
         if (modelFile.exists()) {
-            Toast.makeText(getContext(), "Model Telah Berhasil Terunduh!", Toast.LENGTH_SHORT).show();
+            showDialogLlmSettings();
             return;
         }
         showDownloadDialog();

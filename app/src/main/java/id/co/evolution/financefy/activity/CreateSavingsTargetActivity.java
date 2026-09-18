@@ -91,6 +91,8 @@ public class CreateSavingsTargetActivity extends AppCompatActivity implements Vi
         Tools.setTextColorView(binding.txtDetail, modelPrimaryColor);
         Tools.setTextColorView(binding.txtInformation, modelPrimaryColor);
         Tools.setImageTintView(binding.imgCalendar, modelPrimaryColor);
+        binding.tilAmount.setBoxStrokeColor(ContextCompat.getColor(this,modelPrimaryColor.getColorPrimary()));
+        binding.tilTitle.setBoxStrokeColor(ContextCompat.getColor(this,modelPrimaryColor.getColorPrimary()));
 
         //TODO HIDE STATUS BAR
 
