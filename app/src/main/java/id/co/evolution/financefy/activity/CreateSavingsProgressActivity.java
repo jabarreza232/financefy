@@ -52,6 +52,8 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
+import org.opencv.android.OpenCVLoader;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.NumberFormat;
@@ -233,6 +235,12 @@ public class CreateSavingsProgressActivity extends BaseFinanceActivity implement
         binding.tvFileName.setOnClickListener(this);
         binding.btnClose.setOnClickListener(this);
         binding.btnScan.setOnClickListener(this);
+
+        if (!OpenCVLoader.initDebug()) {
+            Log.e("OpenCV", "Gagal load OpenCV");
+        } else {
+            Log.e("OpenCV", "Berhasil load opencv");
+        }
     }
 
     @Override

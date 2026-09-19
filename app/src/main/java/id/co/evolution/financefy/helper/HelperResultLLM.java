@@ -2,6 +2,7 @@ package id.co.evolution.financefy.helper;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -42,7 +43,9 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
@@ -276,16 +279,14 @@ Tools.setImageTintView(iconHeader,modelPrimaryColor);
             });
 
             btnEditTanggal.setOnClickListener(v -> {
-                EditText input = new EditText(context);
-                input.setText(tvTanggal.getText().toString());
-                input.setPadding(40, 40, 40, 40);
-
-                new AlertDialog.Builder(context)
-                        .setTitle("Edit Tanggal")
-                        .setView(input)
-                        .setPositiveButton("Simpan", (dialog, which) -> tvTanggal.setText(input.getText().toString().trim()))
-                        .setNegativeButton("Batal", null)
-                        .show();
+                Calendar calendar = Calendar.getInstance();
+                new DatePickerDialog(context, (view, year, month, dayOfMonth) -> {
+                    String selectedDate = String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, (month + 1), year);
+                    tvTanggal.setText(selectedDate);
+                },
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH)).show();
             });
 
             btnEditNominal.setOnClickListener(v -> {
@@ -438,10 +439,15 @@ Tools.setImageTintView(iconHeader,modelPrimaryColor);
                 }
             }
             String finalTotalString = String.valueOf(calculatedTotal);
-            if(calculatedTotal==0){
-                tvTotal.setText(Tools.convertCurrencyToValue(total));
-            }else{
+            String cleanTotal = total.replaceAll("[^0-9]", "");
+            if (cleanTotal.isEmpty()) cleanTotal = "0";
+
+            long parsedTotal = Long.parseLong(cleanTotal);
+
+            if(parsedTotal == 0){
                 tvTotal.setText(Tools.convertCurrencyToValue(finalTotalString));
+            } else {
+                tvTotal.setText(Tools.convertCurrencyToValue(cleanTotal));
             }
             tvToko.setText(namaToko);
             tvTanggal.setText(tanggal);
@@ -467,16 +473,14 @@ Tools.setImageTintView(iconHeader,modelPrimaryColor);
             final String[] rawTotalAmount = { String.valueOf(calculatedTotal>0?calculatedTotal:Long.parseLong(total)) };
             // EDIT TANGGAL
             btnEditTanggal.setOnClickListener(v -> {
-                EditText input = new EditText(context);
-                input.setText(tvTanggal.getText().toString());
-                input.setPadding(40, 40, 40, 40);
-
-                new AlertDialog.Builder(context)
-                        .setTitle("Edit Tanggal")
-                        .setView(input)
-                        .setPositiveButton("Simpan", (dialog, which) -> tvTanggal.setText(input.getText().toString().trim()))
-                        .setNegativeButton("Batal", null)
-                        .show();
+                Calendar calendar = Calendar.getInstance();
+                new DatePickerDialog(context, (view, year, month, dayOfMonth) -> {
+                    String selectedDate = String.format(Locale.getDefault(), "%02d/%02d/%04d", dayOfMonth, (month + 1), year);
+                    tvTanggal.setText(selectedDate);
+                },
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH)).show();
             });
 
             btnEditTotal.setOnClickListener(v -> {
@@ -513,14 +517,29 @@ Tools.setImageTintView(iconHeader,modelPrimaryColor);
                         .setPositiveButton("Simpan", (dialog, which) -> tvItems.setText(input.getText().toString().trim()))
                         .setNegativeButton("Batal", null)
                         .show();
-            });            btnBatal.setOnClickListener(v -> bottomSheetDialog.dismiss());
+            });
+
+            btnBatal.setOnClickListener(v -> bottomSheetDialog.dismiss());
 
             btnGunakan.setOnClickListener(v -> {
-                HashMap<String,String>map= new HashMap<>();
-                String finalDescription = "Toko: " + namaToko + "\nBarang:\n" + itemDetails.toString().trim();
-                map.put("total",tvTotal.getText().toString());
-                map.put("tanggal",Tools.convertFormatDateAi(tanggal));
-                map.put("description",finalDescription);
+                HashMap<String,String> map = new HashMap<>();
+
+                // 1. Ambil data TERBARU dari TextView yang mungkin sudah diedit user
+                String updatedToko = tvToko.getText().toString();
+                String updatedTanggal = tvTanggal.getText().toString();
+                String updatedItems = tvItems.getText().toString();
+                String updatedTotal = rawTotalAmount[0]; // Dari variabel array yang menyimpan angka mentah
+
+                // 2. Susun ulang description
+                String finalDescription = "Toko: " + updatedToko + "\nBarang:\n" + updatedItems;
+
+                // 3. Masukkan ke Map
+                map.put("total", updatedTotal);
+
+                // Pastikan fungsi Tools Anda bisa menangani format "dd/MM/yyyy" yang baru dari DatePicker
+                map.put("tanggal", Tools.convertFormatDateAi(updatedTanggal));
+                map.put("description", finalDescription);
+
                 this.methodCallback.onResultLLM(map);
                 bottomSheetDialog.dismiss();
                 Toast.makeText(context, "Data struk berhasil dimasukkan", Toast.LENGTH_SHORT).show();

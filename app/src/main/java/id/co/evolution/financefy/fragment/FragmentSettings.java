@@ -189,12 +189,16 @@ public class FragmentSettings extends Fragment {
  // 2. Aksi ketika CardView ditekan (Tampilkan Dialog)
         if (modelFile.exists()) {
             binding.imgArrowLlm.setImageResource(R.drawable.ic_baseline_settings_24);
+            binding.switchLlm.setEnabled(true);
+        }else{
+            binding.switchLlm.setEnabled(false);
         }
         binding.cvDownloadLlm.setOnClickListener(v -> {
            processDownload();
         });
-        boolean isLlmActive = tinyDb.getBoolean("isSwitchLLM",true);
+        boolean isLlmActive = tinyDb.getBoolean("isSwitchLLM",false);
         binding.switchLlm.setChecked(isLlmActive);
+
         binding.switchLlm.setOnCheckedChangeListener((buttonView, isChecked) -> {
             // Simpan ke TinyDB
             tinyDb.putBoolean("isSwitchLLM", isChecked);
@@ -291,20 +295,20 @@ public class FragmentSettings extends Fragment {
             }
         });
         binding.txtPinSetting.setOnClickListener(v -> {
-            showDialogSettingPIN();
+            showOnSettingPIN();
         });
         binding.switchPin.setChecked(mainActivity.isPinSetting);
 
-// 2. Logika saat Switch digeser
+        binding.cardSettingPin.setOnClickListener(v->{
+            showOnSettingPIN();
+        });
         binding.switchPin.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-
             if (!buttonView.isPressed()) return;
 
             if (isChecked) {
                 binding.switchPin.setChecked(false);
 
-                showDialogSettingPIN();
+                showOnSettingPIN();
 
             } else {
                 binding.switchPin.setChecked(true);
@@ -457,6 +461,7 @@ public class FragmentSettings extends Fragment {
                     binding.imgCancelLlm.setVisibility(View.GONE);
                     binding.imgArrowLlm.setVisibility(View.VISIBLE);
                     binding.txtStatusLlm.setText("Terunduh");
+                    binding.switchLlm.setEnabled(true);
                     binding.txtStatusLlm.setTextColor(ContextCompat.getColor(getContext(), R.color.colorTextGreen));
                     break;
 
@@ -535,7 +540,7 @@ public class FragmentSettings extends Fragment {
     //official ad unit id = ca-app-pub-5068422046187558/6331529776
     //example ad unit id = ca-app-pub-3940256099942544/1033173712
     dialogLoading.show("Silahkan Tunggu...");
-    InterstitialAd.load(getContext(),"ca-app-pub-3940256099942544/1033173712", adRequest,
+    InterstitialAd.load(getContext(),"ca-app-pub-5068422046187558/6331529776", adRequest,
             new InterstitialAdLoadCallback() {
                 @Override
                 public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
@@ -702,6 +707,19 @@ public class FragmentSettings extends Fragment {
     public void onDestroy() {
         super.onDestroy();
     }
+    private void showDialogSettingPin(){
+        DialogSettingPin dialogSettingPin = new DialogSettingPin(getContext(), getLayoutInflater(), new DialogSettingPin.DialogInterfaceCallback() {
+            @Override
+            public void onSubmit(String result) {
+                tinyDb.putString("pin", result);
+                tinyDb.putBoolean("isSettingPin", true);
+                mainActivity.isPinSetting = true;
+                changeStatusPin();
+            }
+        });
+
+        dialogSettingPin.show();
+    }
     private void showBiometricPrompt() {
         BiometricManager biometricManager = BiometricManager.from(getContext());
 
@@ -713,17 +731,7 @@ public class FragmentSettings extends Fragment {
                 @Override
                 public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                     super.onAuthenticationSucceeded(result);
-                    DialogSettingPin dialogSettingPin = new DialogSettingPin(getContext(), getLayoutInflater(), new DialogSettingPin.DialogInterfaceCallback() {
-                        @Override
-                        public void onSubmit(String result) {
-                            tinyDb.putString("pin", result);
-                            tinyDb.putBoolean("isSettingPin", true);
-                            mainActivity.isPinSetting = true;
-                            changeStatusPin();
-                        }
-                    });
-
-                    dialogSettingPin.show();
+                    showDialogSettingPin();
                 }
 
                 @Override
@@ -748,8 +756,12 @@ public class FragmentSettings extends Fragment {
             biometricPrompt.authenticate(promptInfo);
         }
     }
-    private void showDialogSettingPIN() {
-        showBiometricPrompt();
+    private void showOnSettingPIN() {
+        if(!mainActivity.isPinSetting&&tinyDb.getBoolean("is_fingerprint_active")){
+            showBiometricPrompt();
+        }else{
+            showDialogSettingPin();
+        }
     }
 
     private void changeStatusPin() {

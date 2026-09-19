@@ -219,7 +219,7 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
         if (!OpenCVLoader.initDebug()) {
             Log.e("OpenCV", "Gagal load OpenCV");
         } else {
-            Toast.makeText(this, "Berhasil load opencv", Toast.LENGTH_SHORT).show();
+            Log.e("OpenCV", "Berhasil load opencv");
         }
 
 
