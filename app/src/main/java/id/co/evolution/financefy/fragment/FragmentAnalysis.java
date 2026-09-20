@@ -12,6 +12,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -56,6 +57,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.MPPointF;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
@@ -203,8 +205,17 @@ public class FragmentAnalysis extends Fragment {
             }
         });
 
-        binding.btnToggle.setOnClickListener(v->{
-            toggleView();
+       setupHeaderToggle();
+        FloatingActionButton fabAdd = ((MainActivity) getActivity()).binding.layout.fabAdd;
+        binding.nsView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+
+                if (scrollY > oldScrollY && fabAdd.isShown() && !((MainActivity) getActivity()).isFabOpen)
+                    fabAdd.hide();
+                else if(!fabAdd.isShown())
+                    fabAdd.show();
+            }
         });
         binding.placeMonth.setOnClickListener(v -> showDialogMonthPicker());
 
@@ -492,6 +503,8 @@ public class FragmentAnalysis extends Fragment {
         binding.layoutFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data),locale));
         binding.layoutFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data),locale));
         binding.layoutFinanceJournal.txtTotalAll.setText(convertToCurrency(total,locale));
+        if(total<0) binding.layoutFinanceJournal.txtTotalAll.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
+
 //        binding.layoutFinanceJournal.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.green));
     }
 
@@ -841,41 +854,52 @@ public class FragmentAnalysis extends Fragment {
     private List<String> getListDateWeek() {
         return localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek));
     }
-    boolean isHidden;
-    public void toggleView() {
-        if (isHidden) {
-            // Show the view with animation
-            ObjectAnimator animatorFabOpen = getObjectAnimator(binding.btnToggle, View.ROTATION, 0, 300);
-            animatorFabOpen.start();
-            binding.headerView.setVisibility(View.VISIBLE);
-            binding.placeDateMonth.setVisibility(View.VISIBLE);
-            Tools.setBackgroundColorView(binding.llAppBar, ((MainActivity)getActivity()).modelPrimaryColor);
-            binding.headerView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.fade_in));
-        } else {
-            // Hide the view with animation
-            Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.fade_out);
-            slideUp.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {}
+    private boolean isHeaderExpanded = true;
+    private int headerOriginalHeight = 0;
+    private void setupHeaderToggle() {
+        // 1. Post pada wadah luar untuk mendapatkan tinggi aslinya
+        binding.flHeaderWrapper.post(() -> {
+            headerOriginalHeight = binding.flHeaderWrapper.getHeight();
 
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    binding.headerView.setVisibility(View.GONE);
-                    binding.placeDateMonth.setVisibility(View.GONE);
-                    @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorSurface);
+            // 2. KUNCI TINGGI WADAH DALAM
+            // Ini adalah trik agar konten tidak tergencet/mengecil saat animasi
+            ViewGroup.LayoutParams innerParams = binding.llHeaderContent.getLayoutParams();
+            innerParams.height = headerOriginalHeight;
+            binding.llHeaderContent.setLayoutParams(innerParams);
+        });
 
-                    binding.llAppBar.setBackground(new ColorDrawable(colorSurface));
-                }
+        binding.btnToggle.setOnClickListener(v -> {
+            if (headerOriginalHeight == 0) return; // Mencegah klik sebelum render selesai
 
-                @Override
-                public void onAnimationRepeat(Animation animation) {}
+            ValueAnimator slideAnimator;
+
+            if (isHeaderExpanded) {
+                // Animasi Menutup (Collapse) - Tinggi wadah luar menjadi 0
+                slideAnimator = ValueAnimator.ofInt(headerOriginalHeight, 0);
+                binding.btnToggle.animate().rotation(180f).setDuration(300).start();
+            } else {
+                // Animasi Membuka (Expand) - Tinggi wadah luar kembali normal
+                slideAnimator = ValueAnimator.ofInt(0, headerOriginalHeight);
+                binding.btnToggle.animate().rotation(0f).setDuration(300).start();
+            }
+
+            slideAnimator.addUpdateListener(animation -> {
+                // 3. Terapkan perubahan tinggi HANYA pada WADAH LUAR
+                int animatedValue = (int) animation.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = binding.flHeaderWrapper.getLayoutParams();
+                layoutParams.height = animatedValue;
+                binding.flHeaderWrapper.setLayoutParams(layoutParams);
             });
-            binding.headerView.startAnimation(slideUp);
-            ObjectAnimator animatorFabClose = getObjectAnimator(binding.btnToggle, View.ROTATION, 180, 300);
-            animatorFabClose.start();
-        }
-        isHidden = !isHidden;
+
+            slideAnimator.setDuration(300);
+            slideAnimator.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
+            slideAnimator.start();
+
+            // Balikkan status
+            isHeaderExpanded = !isHeaderExpanded;
+        });
     }
+
 }
 
 

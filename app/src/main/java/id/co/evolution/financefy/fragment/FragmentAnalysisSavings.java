@@ -8,6 +8,7 @@ import static id.co.evolution.financefy.helper.Tools.convertToCurrency;
 import static id.co.evolution.financefy.helper.Tools.getObjectAnimator;
 
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -60,6 +61,7 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.MPPointF;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.ontbee.legacyforks.cn.pedant.SweetAlert.SweetAlertDialog;
 
@@ -76,6 +78,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.activity.CreateSavingsProgressActivity;
 import id.co.evolution.financefy.adapter.AdapterAnalysisSavings;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
 import id.co.evolution.financefy.databinding.FragmentAnalysisSavingsBinding;
@@ -223,12 +226,25 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
 
         Log.e("cek_list_week: ", localizedWeekHelper.getFirstDay(-7).substring(0, (localizedWeekHelper.getFirstDay(-7).length() - 3)));
         setHasOptionsMenu(true);
-        binding.layoutSavingsProgress.imgChooseRecommendation.setOnClickListener(v -> {
-
+        binding.layoutSavingsProgress.txtLabelRecom.setOnClickListener(v -> {
             showMenu(v);
         });
-        binding.btnToggle.setOnClickListener(v->{
-            toggleView();
+        setupHeaderToggle();
+        FloatingActionButton fabAdd = ((MainActivity) getActivity()).binding.layout.fabAdd;
+        binding.nsView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+
+                if (scrollY > oldScrollY && fabAdd.isShown() && !((MainActivity) getActivity()).isFabOpen)
+                    fabAdd.hide();
+                else if(!fabAdd.isShown())
+                    fabAdd.show();
+            }
+        });
+        binding.layoutSavingsProgress.btnAddSaving.setOnClickListener(v->{
+            Intent intent = new Intent(getContext(), CreateSavingsProgressActivity.class);
+            intent.putExtra("savings", modelSavings);
+            startActivityForResult(intent, REQUEST_CODE_SAVINGS);
         });
         return binding.getRoot();
     }
@@ -562,7 +578,8 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
     }
 
     private void setTextRecommendationSavings(String type, long recommendationSavings) {
-        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi " + type + ": ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings,locale), "green")));
+        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml( changeTitleColor(convertToCurrency(recommendationSavings,locale), "green")));
+        binding.layoutSavingsProgress.txtLabelRecom.setText("Rekomendasi " + type);
     }
     private void loadDataHeader() {
         long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
@@ -571,7 +588,8 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         String txtPercentage = percentage >= 100 ? getString(R.string.achieved) : percentage+"%";
 
         binding.layoutSavingsProgress.txtTitle.setText(modelSavings.getTitle());
-        binding.layoutSavingsProgress.txtProgress.setText(convertToCurrency(modelSavings.getProcessValue(),locale) + " s/d " + convertToCurrency(modelSavings.getTargetValue(),locale));
+        binding.layoutSavingsProgress.txtCurrentAmount.setText(convertToCurrency(modelSavings.getProcessValue(), locale));
+        binding.layoutSavingsProgress.txtTargetAmount.setText("Target: " + convertToCurrency(modelSavings.getTargetValue(), locale));
         binding.layoutSavingsProgress.progressSavings.setProgress((int) calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutSavingsProgress.progressSavings.setMax(100);
         binding.layoutSavingsProgress.txtPercentage.setText(txtPercentage);
@@ -892,39 +910,49 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         return localizedWeekHelper.getListWeek(localizedWeekHelper.getFirstDay(prevNextWeek - 7), localizedWeekHelper.getLastDay(prevNextWeek));
     }
 
-    boolean isHidden;
-    public void toggleView() {
-        if (isHidden) {
-            // Show the view with animation
-            ObjectAnimator animatorFabOpen = getObjectAnimator(binding.btnToggle, View.ROTATION, 0, 300);
-            animatorFabOpen.start();
-            binding.headerView.setVisibility(View.VISIBLE);
-            binding.placeDateMonth.setVisibility(View.VISIBLE);
-            Tools.setBackgroundColorView(binding.llAppBar, ((MainActivity)getActivity()).modelPrimaryColor);
-            binding.headerView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.fade_in));
-        } else {
-            // Hide the view with animation
-            Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.fade_out);
-            slideUp.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {}
+    private boolean isHeaderExpanded = true;
+    private int headerOriginalHeight = 0;
+    private void setupHeaderToggle() {
+        // 1. Post pada wadah luar untuk mendapatkan tinggi aslinya
+        binding.flHeaderWrapper.post(() -> {
+            headerOriginalHeight = binding.flHeaderWrapper.getHeight();
 
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    binding.headerView.setVisibility(View.GONE);
-                    binding.placeDateMonth.setVisibility(View.GONE);
-                    @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorSurface);
+            // 2. KUNCI TINGGI WADAH DALAM
+            // Ini adalah trik agar konten tidak tergencet/mengecil saat animasi
+            ViewGroup.LayoutParams innerParams = binding.llHeaderContent.getLayoutParams();
+            innerParams.height = headerOriginalHeight;
+            binding.llHeaderContent.setLayoutParams(innerParams);
+        });
 
-                    binding.llAppBar.setBackground(new ColorDrawable(colorSurface));
-                }
+        binding.btnToggle.setOnClickListener(v -> {
+            if (headerOriginalHeight == 0) return; // Mencegah klik sebelum render selesai
 
-                @Override
-                public void onAnimationRepeat(Animation animation) {}
+            ValueAnimator slideAnimator;
+
+            if (isHeaderExpanded) {
+                // Animasi Menutup (Collapse) - Tinggi wadah luar menjadi 0
+                slideAnimator = ValueAnimator.ofInt(headerOriginalHeight, 0);
+                binding.btnToggle.animate().rotation(180f).setDuration(300).start();
+            } else {
+                // Animasi Membuka (Expand) - Tinggi wadah luar kembali normal
+                slideAnimator = ValueAnimator.ofInt(0, headerOriginalHeight);
+                binding.btnToggle.animate().rotation(0f).setDuration(300).start();
+            }
+
+            slideAnimator.addUpdateListener(animation -> {
+                // 3. Terapkan perubahan tinggi HANYA pada WADAH LUAR
+                int animatedValue = (int) animation.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = binding.flHeaderWrapper.getLayoutParams();
+                layoutParams.height = animatedValue;
+                binding.flHeaderWrapper.setLayoutParams(layoutParams);
             });
-            binding.headerView.startAnimation(slideUp);
-            ObjectAnimator animatorFabClose = getObjectAnimator(binding.btnToggle, View.ROTATION, 180, 300);
-            animatorFabClose.start();
-        }
-        isHidden = !isHidden;
+
+            slideAnimator.setDuration(300);
+            slideAnimator.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
+            slideAnimator.start();
+
+            // Balikkan status
+            isHeaderExpanded = !isHeaderExpanded;
+        });
     }
 }

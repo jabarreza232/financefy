@@ -59,15 +59,9 @@ public class AdapterFilter extends RecyclerView.Adapter<AdapterFilter.ViewHolder
         }
 
         public void bindData(ModelFilter modelFilter,int position) {
-            binding.txtName.setText(modelFilter.getValue());
+            binding.chipName.setText(modelFilter.getValue());
 
-            if (modelFilter.isChecked()) {
-                binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_input_form_calculator));
-                binding.txtName.setTextColor(ContextCompat.getColor(context,R.color.white));
-            } else {
-                binding.txtName.setBackground(ContextCompat.getDrawable(context, R.drawable.shape_selected_filter));
-                binding.txtName.setTextColor(ContextCompat.getColor(context,R.color.blackTextColor));
-            }
+            binding.chipName.setChecked(modelFilter.isChecked());
 
             itemView.setOnClickListener(v -> {
                 modelFilter.setChecked(!modelFilter.isChecked());

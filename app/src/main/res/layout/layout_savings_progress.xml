@@ -1,141 +1,215 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/linearlayout_savings_progress"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_savings_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/txt_type_account"
-        android:visibility="gone"
-        android:orientation="horizontal">
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        app:cardBackgroundColor="?attr/colorSurface"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="2dp">
 
-
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:orientation="vertical">
+            android:paddingTop="16dp">
 
+            <!-- Baris 1: Ikon & Judul Tabungan -->
+            <ImageView
+                android:id="@+id/img_goal_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="16dp"
+                android:src="@drawable/ic_flag"
+                app:tint="?android:attr/textColorPrimary"
+                app:layout_constraintBottom_toBottomOf="@+id/txt_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/txt_title"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="10dp">
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="?attr/selectableItemBackground"
+                android:drawableEnd="@drawable/ic_arrow_drop_down"
+                android:drawablePadding="4dp"
+                android:ellipsize="end"
+                android:fontFamily="@font/ubuntu_b"
+                android:lines="1"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="16sp"
+                app:drawableTint="?android:attr/textColorPrimary"
+                app:layout_constraintEnd_toStartOf="@+id/txt_percentage"
+                app:layout_constraintStart_toEndOf="@id/img_goal_icon"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="Liburan Tahunan" />
 
+            <!-- Badge Persentase (Kanan Atas) menggunakan background lembut -->
+            <TextView
+                android:id="@+id/txt_percentage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/shape_bg_soft"
+                android:fontFamily="@font/ubuntu_b"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/txt_title"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="40%" />
 
-                <TextView
-                    android:id="@+id/txt_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/txt_percentage"
-                    android:background="?attr/selectableItemBackground"
-                    android:drawableEnd="@drawable/ic_arrow_drop_down"
-                    android:ellipsize="end"
-                    android:fontFamily="@font/ubuntu_b"
-                    android:gravity="start|center"
-                    android:lines="1"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="20sp"
-                    app:drawableTint="?attr/colorOnSurface"
-                    tools:text="Pencapaian" />
+            <!-- Baris 2: Nominal Terkumpul (Hero Text) -->
+            <TextView
+                android:id="@+id/txt_label_current"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/ubuntu_r"
+                android:text="Terkumpul"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txt_title" />
 
+            <TextView
+                android:id="@+id/txt_current_amount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="16dp"
+                android:fontFamily="@font/ubuntu_b"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="24sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txt_label_current"
+                tools:text="Rp 20.000" />
 
-                <TextView
-                    android:id="@+id/txt_percentage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
+            <!-- Baris 3: Progress Bar -->
+            <ProgressBar
+                android:id="@+id/progress_savings"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="12dp"
+                android:progressDrawable="@drawable/progress_income_drawable"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/txt_current_amount"
+                tools:progress="40" />
 
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:background="@drawable/shape_line_black"
+            <!-- Baris 4: Nominal Target & Sisa Hari -->
+            <TextView
+                android:id="@+id/txt_target_amount"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/ubuntu_r"
+                android:textColor="?android:attr/textColorSecondary"
+                android:textSize="12sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/progress_savings"
+                tools:text="Target: Rp 50.000" />
 
-                    android:fontFamily="@font/ubuntu_r"
-                    android:gravity="center"
-                    android:padding="3dp"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="20sp"
-                    tools:text="20%" />
+            <!-- Badge Sisa Hari menggunakan background lembut -->
+            <TextView
+                android:id="@+id/txt_day"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/shape_bg_soft"
+                android:fontFamily="@font/ubuntu_b"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textSize="11sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/progress_savings"
+                tools:text="Sisa 28 hari" />
 
-
-                <ProgressBar
-                    android:id="@+id/progress_savings"
-                    style="@android:style/Widget.ProgressBar.Horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/txt_title"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:progressDrawable="@drawable/progress_income_drawable"
-                    tools:ignore="UnusedAttribute" />
-
-                <TextView
-                    android:id="@+id/txt_progress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/progress_savings"
-                    android:layout_marginTop="7dp"
-                    android:layout_marginEnd="10dp"
-                    android:fontFamily="@font/ubuntu_r"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="18sp"
-                    tools:text="Rp.20.000 s/d Rp.50.000" />
-
-                <TextView
-                    android:id="@+id/txt_day"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/progress_savings"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="7dp"
-                    android:layout_marginEnd="10dp"
-                    android:fontFamily="@font/ubuntu_r"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="15sp"
-                    android:visibility="gone"
-                    tools:text="Sisa 28 hari" />
-            </RelativeLayout>
-
+            <!-- Garis Pemisah (Divider) -->
             <View
+                android:id="@+id/divider"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginTop="10dp"
-                android:background="@color/colorGrey30" />
+                android:layout_marginTop="16dp"
+                android:background="@color/colorGrey30"
+                app:layout_constraintTop_toBottomOf="@id/txt_target_amount" />
 
-            <RelativeLayout
+            <!-- Baris 5: Rekomendasi & Call To Action -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/rl_savings_recommendation_target"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/blueColor"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content"
+                android:background="?attr/colorSurface"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/divider">
 
-                <TextView
-                    android:id="@+id/txt_recommendation_saving"
-                    android:layout_width="match_parent"
+                <!-- Container Menu Dropdown (Klik area ini untuk memanggil showMenu) -->
+                <LinearLayout
+                    android:id="@+id/ll_recommendation_selector"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/img_choose_recommendation"
-                    android:fontFamily="@font/ubuntu_b"
-                    android:padding="10dp"
-                    android:text="Rekomendasi menabung perhari: Rp.500.000"
-                    android:textColor="@color/white"
-                    android:textSize="18sp" />
+                    android:background="?attr/selectableItemBackground"
+                    android:orientation="vertical"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/btn_add_saving"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <ImageView
-                    android:id="@+id/img_choose_recommendation"
+                    <TextView
+                        android:id="@+id/txt_label_recom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawableEnd="@drawable/ic_arrow_drop_down"
+                        android:drawablePadding="4dp"
+                        android:fontFamily="@font/ubuntu_r"
+                        android:text="Rekomendasi perhari"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="12sp"
+                        app:drawableTint="?android:attr/textColorPrimary" />
+
+                    <TextView
+                        android:id="@+id/txt_recommendation_saving"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="@font/ubuntu_b"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textSize="16sp"
+                        tools:text="Rp 500.000" />
+                </LinearLayout>
+
+                <!-- Tombol Eksekusi (MaterialButton dengan warna solid) -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_add_saving"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:fontFamily="@font/ubuntu_b"
+                    android:text="+ Nabung"
+                    android:textColor="?attr/colorOnPrimary"
                     android:padding="10dp"
-                    android:src="@drawable/ic_baseline_more_vert_24"
-                    app:tint="@color/white" />
+                    android:textSize="14sp"
+                    app:backgroundTint="?attr/colorPrimary"
+                    app:cornerRadius="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            </RelativeLayout>
-
-        </LinearLayout>
-
-    </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 </layout>

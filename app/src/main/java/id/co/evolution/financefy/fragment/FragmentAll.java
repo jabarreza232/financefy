@@ -11,6 +11,7 @@ import static id.co.evolution.financefy.helper.Tools.getObjectAnimator;
 import static id.co.evolution.financefy.helper.Tools.modelPrimaryColor;
 
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -63,6 +64,7 @@ import javax.inject.Inject;
 import dagger.hilt.android.AndroidEntryPoint;
 import id.co.evolution.financefy.MainActivity;
 import id.co.evolution.financefy.R;
+import id.co.evolution.financefy.activity.CreateSavingsProgressActivity;
 import id.co.evolution.financefy.adapter.AdapterFinance;
 import id.co.evolution.financefy.adapter.AdapterSavings;
 import id.co.evolution.financefy.callback.CallbackOnActivityResult;
@@ -156,7 +158,8 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
     TinyDb tinyDb;
 
     MainActivity mainActivity;
-
+    private boolean isHeaderExpanded = true;
+    private int headerOriginalHeight = 0;
     public FragmentAll() {
         // Required empty public constructor
     }
@@ -225,9 +228,10 @@ public class FragmentAll extends Fragment implements CallbackOnActivityResult.On
 
         binding.btnNext.setImageTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), R.color.colorGrey50)));
         binding.btnNext.setEnabled(false);
-binding.btnToggle.setOnClickListener(v->{
-    toggleView();
-});
+//binding.btnToggle.setOnClickListener(v->{
+//    toggleView();
+//});
+        setupHeaderToggle();
         binding.btnPrev.setOnClickListener(v -> {
             if (filterPeriod.equalsIgnoreCase(getString(R.string.bulanan))) {
                 prevNextMonth.get(Calendar.YEAR);
@@ -287,10 +291,10 @@ binding.btnToggle.setOnClickListener(v->{
             @Override
             public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
 
-                 if (scrollY > oldScrollY && fabAdd.isShown() && !((MainActivity) getActivity()).isFabOpen)
+                if (scrollY > oldScrollY && fabAdd.isShown() && !((MainActivity) getActivity()).isFabOpen)
                     fabAdd.hide();
-                 else if(!fabAdd.isShown())
-                     fabAdd.show();
+                else if(!fabAdd.isShown())
+                    fabAdd.show();
             }
         });
 
@@ -310,10 +314,15 @@ binding.btnToggle.setOnClickListener(v->{
             }
         });
 
-        binding.layoutSavingsProgress.imgChooseRecommendation.setOnClickListener(v -> {
+        binding.layoutSavingsProgress.txtLabelRecom.setOnClickListener(v -> {
             showMenu(v);
         });
         String timeNotification=        tinyDb.getString("time_notification");
+        binding.layoutSavingsProgress.btnAddSaving.setOnClickListener(v->{
+            Intent intent = new Intent(getContext(), CreateSavingsProgressActivity.class);
+            intent.putExtra("savings", modelSavings);
+            startActivityForResult(intent, REQUEST_CODE_SAVINGS);
+        });
         if(!timeNotification.isEmpty()){
             setUpNotification();
         }
@@ -354,7 +363,8 @@ binding.btnToggle.setOnClickListener(v->{
     }
 
     private void setTextRecommendationSavings(String type, long recommendationSavings) {
-        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml(changeTitleColor("Rekomendasi " + type + ": ", "#FFFFFF") + changeTitleColor(convertToCurrency(recommendationSavings,locale), "green")));
+        binding.layoutSavingsProgress.txtRecommendationSaving.setText(Html.fromHtml( changeTitleColor(convertToCurrency(recommendationSavings,locale), "green")));
+        binding.layoutSavingsProgress.txtLabelRecom.setText("Rekomendasi " + type);
     }
 
     @SuppressLint("SetTextI18n")
@@ -601,7 +611,7 @@ binding.btnToggle.setOnClickListener(v->{
         if (user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan))) {
             //BY FINANCE
             binding.layoutFinanceJournal.linearlayoutFinanceJournal.setVisibility(View.VISIBLE);
-            binding.layoutSavingsProgress.linearlayoutSavingsProgress.setVisibility(View.GONE);
+            binding.layoutSavingsProgress.cardSavingsProgress.setVisibility(View.GONE);
 
             if (filterType.equalsIgnoreCase(getString(R.string.semuanya))) {
                 viewModelFinance.getFinanceByMonth(Tools.getFormattedMonthSimple(date_ship_milis), user.getId(),user.getType_currency()).observe(getViewLifecycleOwner(), modelFinances -> {
@@ -625,7 +635,7 @@ binding.btnToggle.setOnClickListener(v->{
             });
 
             binding.layoutFinanceJournal.linearlayoutFinanceJournal.setVisibility(View.GONE);
-            binding.layoutSavingsProgress.linearlayoutSavingsProgress.setVisibility(View.VISIBLE);
+            binding.layoutSavingsProgress.cardSavingsProgress.setVisibility(View.VISIBLE);
             if (modelSavings != null) {
                 viewModelSavingsProgress.getSavingsByMonth(Tools.getFormattedMonthSimple(date_ship_milis), modelSavings.getId(),modelSavings.getType_currency()).observe(getViewLifecycleOwner(), modelSavings -> {
                     if (modelSavings != null) loadDataSavings(modelSavings);
@@ -698,7 +708,7 @@ binding.btnToggle.setOnClickListener(v->{
         binding.layoutFinanceJournal.txtTotalIncome.setText(convertToCurrency(financeFilter.totalIncome(data),locale));
         binding.layoutFinanceJournal.txtTotalExpense.setText(convertToCurrency(financeFilter.totalExpense(data),locale));
         binding.layoutFinanceJournal.txtTotalAll.setText(convertToCurrency(total,locale));
-        binding.layoutFinanceJournal.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.white));
+        if(total<0) binding.layoutFinanceJournal.txtTotalAll.setTextColor(ContextCompat.getColor(getContext(), R.color.red));
     }
 
     @SuppressLint("SetTextI18n")
@@ -709,7 +719,8 @@ binding.btnToggle.setOnClickListener(v->{
         long recommendationSavingsDay = Tools.calculateRecommendationDay(modelSavings.getTargetValue(), restOfTheDay);
 
         binding.layoutSavingsProgress.txtTitle.setText(modelSavings.getTitle());
-        binding.layoutSavingsProgress.txtProgress.setText(convertToCurrency(modelSavings.getProcessValue(),locale) + " s/d " + convertToCurrency(modelSavings.getTargetValue(),locale));
+        binding.layoutSavingsProgress.txtCurrentAmount.setText(convertToCurrency(modelSavings.getProcessValue(), locale));
+        binding.layoutSavingsProgress.txtTargetAmount.setText("Target: " + convertToCurrency(modelSavings.getTargetValue(), locale));
         binding.layoutSavingsProgress.progressSavings.setProgress((int) calculatePercentage(modelSavings.getProcessValue(), modelSavings.getTargetValue()));
         binding.layoutSavingsProgress.progressSavings.setMax(100);
         binding.layoutSavingsProgress.txtPercentage.setText(txtPercentage);
@@ -860,41 +871,48 @@ binding.btnToggle.setOnClickListener(v->{
         tinyDb.putObject("savings", modelSavings);
         mainActivity.modelSavings = modelSavings;
     }
-    boolean isHidden;
-    public void toggleView() {
-        if (isHidden) {
-            // Show the view with animation
-            ObjectAnimator animatorFabOpen = getObjectAnimator(binding.btnToggle, View.ROTATION, 0, 300);
-            animatorFabOpen.start();
-            binding.headerView.setVisibility(View.VISIBLE);
-            binding.placeDateMonth.setVisibility(View.VISIBLE);
-            Tools.setBackgroundColorView(binding.llAppBar, ((MainActivity)getActivity()).modelPrimaryColor);
-            binding.headerView.startAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.fade_in));
-        } else {
-            // Hide the view with animation
-            Animation slideUp = AnimationUtils.loadAnimation(getContext(), R.anim.fade_out);
-            slideUp.setAnimationListener(new Animation.AnimationListener() {
-                @Override
-                public void onAnimationStart(Animation animation) {}
+    private void setupHeaderToggle() {
+        // 1. Post pada wadah luar untuk mendapatkan tinggi aslinya
+        binding.flHeaderWrapper.post(() -> {
+            headerOriginalHeight = binding.flHeaderWrapper.getHeight();
 
-                @Override
-                public void onAnimationEnd(Animation animation) {
-                    binding.headerView.setVisibility(View.GONE);
-                    binding.placeDateMonth.setVisibility(View.GONE);
-                    @ColorInt int colorSurface = ((MainActivity)getActivity()).getColorFromAttr(getContext(), R.attr.colorSurface);
+            // 2. KUNCI TINGGI WADAH DALAM
+            // Ini adalah trik agar konten tidak tergencet/mengecil saat animasi
+            ViewGroup.LayoutParams innerParams = binding.llHeaderContent.getLayoutParams();
+            innerParams.height = headerOriginalHeight;
+            binding.llHeaderContent.setLayoutParams(innerParams);
+        });
 
-                    binding.llAppBar.setBackground(new ColorDrawable(colorSurface));
-                }
+        binding.btnToggle.setOnClickListener(v -> {
+            if (headerOriginalHeight == 0) return; // Mencegah klik sebelum render selesai
 
-                @Override
-                public void onAnimationRepeat(Animation animation) {}
+            ValueAnimator slideAnimator;
+
+            if (isHeaderExpanded) {
+                // Animasi Menutup (Collapse) - Tinggi wadah luar menjadi 0
+                slideAnimator = ValueAnimator.ofInt(headerOriginalHeight, 0);
+                binding.btnToggle.animate().rotation(180f).setDuration(300).start();
+            } else {
+                // Animasi Membuka (Expand) - Tinggi wadah luar kembali normal
+                slideAnimator = ValueAnimator.ofInt(0, headerOriginalHeight);
+                binding.btnToggle.animate().rotation(0f).setDuration(300).start();
+            }
+
+            slideAnimator.addUpdateListener(animation -> {
+                // 3. Terapkan perubahan tinggi HANYA pada WADAH LUAR
+                int animatedValue = (int) animation.getAnimatedValue();
+                ViewGroup.LayoutParams layoutParams = binding.flHeaderWrapper.getLayoutParams();
+                layoutParams.height = animatedValue;
+                binding.flHeaderWrapper.setLayoutParams(layoutParams);
             });
-            binding.headerView.startAnimation(slideUp);
-            ObjectAnimator animatorFabClose = getObjectAnimator(binding.btnToggle, View.ROTATION, 180, 300);
-            animatorFabClose.start();
-        }
 
-        isHidden = !isHidden;
+            slideAnimator.setDuration(300);
+            slideAnimator.setInterpolator(new android.view.animation.AccelerateDecelerateInterpolator());
+            slideAnimator.start();
+
+            // Balikkan status
+            isHeaderExpanded = !isHeaderExpanded;
+        });
     }
     // Fungsi untuk mendapatkan warna dari atribut tema
     String descriptionFinance,descriptionSavings;

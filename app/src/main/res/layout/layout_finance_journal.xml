@@ -1,134 +1,146 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
-
-<LinearLayout android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_below="@id/txt_type_account"
-    android:layout_marginStart="10dp"
-    android:id="@+id/linearlayout_finance_journal"
-    android:layout_marginEnd="10dp"
-    android:layout_marginBottom="10dp"
-    android:orientation="vertical"
-    android:weightSum="2"
-    android:layout_marginTop="24dp"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <androidx.cardview.widget.CardView
-        app:cardCornerRadius="10dp"
-        android:layout_width="match_parent"
-        android:layout_marginBottom="10dp"
-        android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/green"
-        android:layout_weight="1"
-       >
-
-        <LinearLayout
-            android:padding="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:fontFamily="@font/ubuntu_b"
-                android:text="PEMASUKAN"
-                android:textColor="@color/white"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/txt_total_income"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/ubuntu_r"
-                android:text="Rp.0"
-                android:textColor="@color/white"
-                android:textSize="35sp" />
-
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        app:cardCornerRadius="10dp"
-        android:layout_marginBottom="10dp"
-        app:cardBackgroundColor="@color/red">
-
-        <LinearLayout
-            android:padding="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:fontFamily="@font/ubuntu_b"
-                android:text="PENGELUARAN"
-                android:textColor="@color/white"
-                android:textSize="15sp" />
-
-            <TextView
-                android:id="@+id/txt_total_expense"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/ubuntu_r"
-                android:text="Rp.0"
-                android:textColor="@color/white"
-                android:textSize="35sp" />
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <LinearLayout
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:orientation="horizontal"
-       android:weightSum="2">
-
-       </LinearLayout>
-
-    <androidx.cardview.widget.CardView
+        android:id="@+id/linearlayout_finance_journal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        app:cardCornerRadius="10dp"
-        android:layout_marginBottom="10dp"
-        app:cardBackgroundColor="@color/colorAccent">
+        android:layout_below="@id/txt_type_account"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical">
 
+        <!-- KARTU 1: TOTAL SALDO (Hero) -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="?attr/colorSurface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/ubuntu_b"
+                    android:text="TOTAL SALDO"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="12sp"
+                    android:letterSpacing="0.05" />
+
+                <TextView
+                    android:id="@+id/txt_total_all"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:fontFamily="@font/ubuntu_b"
+                    android:gravity="center"
+                    android:text="Rp 0"
+                    android:textColor="?android:textColorPrimary"
+                    android:textSize="28sp"
+                    android:maxLines="1"
+                    app:autoSizeTextType="uniform"
+                    app:autoSizeMinTextSize="18sp"
+                    app:autoSizeMaxTextSize="28sp"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- KARTU 2 & 3: PEMASUKAN & PENGELUARAN (Split Horizontal) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:padding="10dp"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:baselineAligned="false">
 
-            <TextView
-                android:layout_width="match_parent"
+            <!-- Pemasukan -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
-                android:fontFamily="@font/ubuntu_b"
-                android:text="TOTAL"
-                android:textColor="@color/white"
-                android:textSize="15sp" />
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                app:cardBackgroundColor="?attr/colorSurface"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
 
-            <TextView
-                android:id="@+id/txt_total_all"
-                android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/ubuntu_r"
+                        android:text="Pemasukan"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/txt_total_income"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="@font/ubuntu_b"
+                        android:text="Rp 0"
+                        android:textColor="#388E3C"
+                        android:textSize="18sp"
+                        android:maxLines="1"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="14sp"
+                        app:autoSizeMaxTextSize="18sp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- Pengeluaran -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/ubuntu_r"
-                android:text="Rp.0"
-                android:textColor="@color/white"
-                android:textSize="35sp" />
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                app:cardBackgroundColor="?attr/colorSurface"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/ubuntu_r"
+                        android:text="Pengeluaran"
+                        android:textColor="?android:textColorPrimary"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/txt_total_expense"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="@font/ubuntu_b"
+                        android:text="Rp 0"
+                        android:textColor="#D32F2F"
+                        android:textSize="18sp"
+                        android:maxLines="1"
+                        app:autoSizeTextType="uniform"
+                        app:autoSizeMinTextSize="14sp"
+                        app:autoSizeMaxTextSize="18sp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
-
-
-
-
-</LinearLayout>
+    </LinearLayout>
 </layout>

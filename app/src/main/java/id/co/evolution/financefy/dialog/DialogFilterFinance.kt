@@ -7,6 +7,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 import id.co.evolution.financefy.R
 import id.co.evolution.financefy.adapter.AdapterFilter
 import id.co.evolution.financefy.model.ModelFilter
@@ -29,7 +30,7 @@ open class DialogFilterFinance(
         listFilterNominal: List<ModelFilter>,
         listFilterPeriod: List<ModelFilter>, isAnalysis: Boolean = false
     ) {
-        val txtSubmit = findViewById<TextView>(R.id.txt_submit)
+        val txtSubmit = findViewById<MaterialButton>(R.id.btn_submit)
         val txtNominal = findViewById<TextView>(R.id.txt_nominal)
         val rvListType: RecyclerView = findViewGroupById(R.id.rv_type)
         val rvListNominal: RecyclerView = findViewGroupById(R.id.rv_nominal)

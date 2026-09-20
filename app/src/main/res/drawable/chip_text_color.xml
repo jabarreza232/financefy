@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Saat chip dipilih -->
+    <item android:color="@color/blueColor" android:state_checked="true" />
+
+    <!-- Saat chip tidak dipilih -->
+    <item android:color="?android:textColorPrimary" />
+</selector>

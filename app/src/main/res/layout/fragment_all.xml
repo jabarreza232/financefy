@@ -24,19 +24,34 @@
                 android:layout_marginBottom="16dp"
                 android:background="@color/colorPrimary"
                 android:orientation="vertical">
+                <FrameLayout
+                    android:id="@+id/fl_header_wrapper"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
 
+
+                <LinearLayout
+                    android:id="@+id/ll_header_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
                 <androidx.cardview.widget.CardView
                     android:id="@+id/header_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="16dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="8dp"
                     app:cardBackgroundColor="?attr/colorSurface"
-                    app:cardCornerRadius="6dp"
-                    app:cardElevation="5dp">
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
 
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="16dp">
+
+                        <!-- Navigasi Bulan -->
                         <RelativeLayout
                             android:id="@+id/place_date_month"
                             android:layout_width="match_parent"
@@ -47,9 +62,9 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginStart="10dp"
+                                android:layout_marginTop="6dp"
                                 android:background="?attr/selectableItemBackgroundBorderless"
                                 android:padding="9dp"
-                                android:layout_marginTop="6dp"
                                 android:src="@drawable/ic_baseline_keyboard_arrow_left_24"
                                 app:tint="?attr/colorOnSurface" />
 
@@ -57,8 +72,7 @@
                                 android:id="@+id/place_month"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginLeft="10dp"
-                                android:layout_marginRight="10dp"
+                                android:layout_marginHorizontal="10dp"
                                 android:layout_marginBottom="10dp"
                                 android:layout_toStartOf="@id/btn_next"
                                 android:layout_toEndOf="@id/btn_prev">
@@ -74,8 +88,6 @@
                                     android:textAlignment="center"
                                     android:textColor="?android:attr/textColorPrimary"
                                     android:textSize="17sp" />
-
-
                             </RelativeLayout>
 
                             <ImageButton
@@ -83,71 +95,70 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
+                                android:layout_marginTop="6dp"
                                 android:layout_marginEnd="10dp"
                                 android:background="?attr/selectableItemBackgroundBorderless"
                                 android:padding="9dp"
-                                android:layout_marginTop="6dp"
                                 android:src="@drawable/ic_baseline_keyboard_arrow_right_24"
                                 app:tint="?attr/colorOnSurface" />
-
                         </RelativeLayout>
+
+                        <!-- Sapaan Pengguna -->
                         <TextView
-                            android:layout_below="@id/place_date_month"
                             android:id="@+id/txt_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginTop="10dp"
-                            android:layout_marginEnd="10dp"
+                            android:layout_below="@id/place_date_month"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginTop="8dp"
                             android:fontFamily="@font/ubuntu_b"
-                            android:text="Good morning, Jackson!"
+                            android:text="Good morning, Muhammad Jabbar Syahrial Reza!"
                             android:textColor="?android:attr/textColorPrimary"
                             android:textSize="20sp" />
 
+                        <!-- Tipe Akun -->
                         <TextView
                             android:id="@+id/txt_type_account"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_below="@id/txt_name"
-                            android:layout_marginStart="10dp"
-                            android:layout_marginEnd="10dp"
-                            android:layout_marginBottom="5dp"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginTop="4dp"
                             android:fontFamily="@font/ubuntu_r"
                             android:text="Bisnis"
-                            android:textColor="@color/blueColorLight"
-                            android:textSize="18sp" />
-
-                        <include
-                            android:id="@+id/layout_finance_journal"
-                            layout="@layout/layout_finance_journal" />
-
-                        <include
-                            android:id="@+id/layout_savings_progress"
-                            layout="@layout/layout_savings_progress" />
+                            android:textColor="?attr/colorPrimary"
+                            android:textSize="14sp" />
 
                     </RelativeLayout>
                 </androidx.cardview.widget.CardView>
 
+                <!-- KARTU 2: DASHBOARD KEUANGAN (Termasuk Saldo & Split Income/Expense) -->
+                <include
+                    android:id="@+id/layout_finance_journal"
+                    layout="@layout/layout_finance_journal" />
 
+                <!-- KARTU 3: PROGRESS TABUNGAN -->
+                <include
+                    android:id="@+id/layout_savings_progress"
+                    layout="@layout/layout_savings_progress" />
+                </LinearLayout>
+                </FrameLayout>
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/btn_toggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/ic_baseline_keyboard_arrow_down_24"
                     android:layout_gravity="center"
-                    app:tint="@color/colorAccent"
-                    app:fabSize="mini"
-                    app:backgroundTint="@color/white"
                     android:layout_margin="10dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_arrow_up"
+                    app:backgroundTint="@color/white"
                     app:borderWidth="6dp"
                     app:elevation="16dp"
-                    android:elevation="16dp"
+                    app:fabSize="mini"
                     app:pressedTranslationZ="0dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    />
+                    app:tint="@color/colorAccent" />
             </LinearLayout>
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_list"
                 android:layout_width="match_parent"

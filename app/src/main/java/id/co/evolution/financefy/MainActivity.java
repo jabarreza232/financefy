@@ -27,6 +27,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 
 import androidx.annotation.AttrRes;
 import androidx.annotation.ColorInt;
@@ -259,14 +260,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return typedValue.data;
         }
     }
-    private void changeUINightMode() {
-        String nightMode = tinyDb.getString("night_mode");
-        if (TextUtils.equals(nightMode, "mode_night_yes")) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
-    }
+
 
     private void changeColorBottomNavigation(ModelPrimaryColor modelPrimaryColor) {
         // 1. Tentukan warna aktif yang BENAR
@@ -307,7 +301,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         binding.layout.bnMain.setOnItemSelectedListener(item -> {
             Fragment fragment = null;
             item.setChecked(true);
-            binding.layout.fabAdd.hide();
             showHideFabSavings(false);
             if (isFabOpen) startAnimationFabSavings();
             isUserDailyFinance = user.getCategory().equalsIgnoreCase(getString(R.string.jurnal_keuangan));
@@ -316,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case "arsip":
                     fragment = new FragmentAll();
                     changeFragment(fragment);
-                    binding.layout.fabAdd.show();
+
                     getSupportActionBar().setTitle(getString(R.string.record));
                     break;
                 case "analisa":
@@ -401,52 +394,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startAnimationFabSavings() {
-        ObjectAnimator animatorFabOpen = getObjectAnimator(binding.layout.fabAdd, View.ROTATION, 135, 300);
-        ObjectAnimator animatorFabClose = getObjectAnimator(binding.layout.fabAdd, View.ROTATION, 0, 300);
-        ObjectAnimator animatorFabSavingsTarget = getObjectAnimator(binding.layout.fabAddSavingsTarget, View.ALPHA, 1, 300);
-        ObjectAnimator animatorFabSavingsProgress = getObjectAnimator(binding.layout.fabAddSavingsProgress, View.ALPHA, 1, 300);
-        ObjectAnimator animatorFabSavingsTargetClose = getObjectAnimator(binding.layout.fabAddSavingsTarget, View.ALPHA, 0, 300);
-        ObjectAnimator animatorFabSavingsProgressClose = getObjectAnimator(binding.layout.fabAddSavingsProgress, View.ALPHA, 0, 300);
-        if (!animatorSet.isStarted()) {
-            if (!isFabOpen) {
-                isFabOpen = true;
-                animatorSet.playTogether(animatorFabOpen, animatorFabSavingsTarget, animatorFabSavingsProgress);
-                isShowFabAddSavings(animatorFabSavingsProgress, binding.layout.fabAddSavingsProgress);
-                isShowFabAddSavings(animatorFabSavingsTarget, binding.layout.fabAddSavingsTarget);
-            } else {
-                isFabOpen = false;
-                animatorSet.playTogether(animatorFabSavingsProgressClose, animatorFabSavingsTargetClose, animatorFabClose);
-            }
-            animatorSet.start();
+        // Rotasi & Transparansi
+        float rotation = isFabOpen ? 0f : 135f;
+        float alpha = isFabOpen ? 0f : 1f;
 
-            isHideFabAddSavings(animatorFabSavingsProgressClose, binding.layout.fabAddSavingsProgress);
-            isHideFabAddSavings(animatorFabSavingsTargetClose, binding.layout.fabAddSavingsTarget);
+        // --- MENGATUR JARAK MEKAR (Dalam Pixel) ---
+        // Jika sedang terbuka, kembalikan ke titik 0 (tengah).
+        // Jika tertutup, tembakkan ke atas sejauh -200, dan menyamping sejauh -160 / 160.
+        float translationY = isFabOpen ? 0f : -160f;
+        float translationXTarget = isFabOpen ? 0f : -120f;   // Bergerak ke Kiri
+        float translationXProgress = isFabOpen ? 0f : 120f;  // Bergerak ke Kanan
 
-            animatorSet = new AnimatorSet();
+        // Animasi FAB Utama (Muter)
+        ObjectAnimator rotateMainFab = ObjectAnimator.ofFloat(binding.layout.fabAdd, View.ROTATION, rotation);
 
+        // Animasi Target (Meluncur ke Kiri Atas)
+        ObjectAnimator animTargetY = ObjectAnimator.ofFloat(binding.layout.fabAddSavingsTarget, View.TRANSLATION_Y, translationY);
+        ObjectAnimator animTargetX = ObjectAnimator.ofFloat(binding.layout.fabAddSavingsTarget, View.TRANSLATION_X, translationXTarget);
+        ObjectAnimator animTargetAlpha = ObjectAnimator.ofFloat(binding.layout.fabAddSavingsTarget, View.ALPHA, alpha);
+
+        // Animasi Progress (Meluncur ke Kanan Atas)
+        ObjectAnimator animProgressY = ObjectAnimator.ofFloat(binding.layout.fabAddSavingsProgress, View.TRANSLATION_Y, translationY);
+        ObjectAnimator animProgressX = ObjectAnimator.ofFloat(binding.layout.fabAddSavingsProgress, View.TRANSLATION_X, translationXProgress);
+        ObjectAnimator animProgressAlpha = ObjectAnimator.ofFloat(binding.layout.fabAddSavingsProgress, View.ALPHA, alpha);
+
+        // Gabungkan semua animasi
+        AnimatorSet set = new AnimatorSet();
+        set.playTogether(
+                rotateMainFab,
+                animTargetY, animTargetX, animTargetAlpha,
+                animProgressY, animProgressX, animProgressAlpha
+        );
+        set.setDuration(300);
+        set.setInterpolator(new OvershootInterpolator()); // Efek pantulan pegas
+
+        // Logika Show / Hide
+        if (!isFabOpen) {
+            // BUKA: Munculkan view lalu mulai animasi mekar
+            binding.layout.fabAddSavingsTarget.setVisibility(View.VISIBLE);
+            binding.layout.fabAddSavingsProgress.setVisibility(View.VISIBLE);
+            set.start();
+        } else {
+            // TUTUP: Jalankan animasi kuncup, setelah selesai baru di-GONE
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    super.onAnimationEnd(animation);
+                    binding.layout.fabAddSavingsTarget.setVisibility(View.GONE);
+                    binding.layout.fabAddSavingsProgress.setVisibility(View.GONE);
+                }
+            });
+            set.start();
         }
 
+        isFabOpen = !isFabOpen;
     }
 
-    private void isHideFabAddSavings(ObjectAnimator objectAnimator, ExtendedFloatingActionButton fabSavings) {
-        objectAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                fabSavings.setVisibility(View.GONE);
-            }
-        });
-
-    }
-
-    private void isShowFabAddSavings(ObjectAnimator objectAnimator, ExtendedFloatingActionButton fabSavings) {
-        objectAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                fabSavings.show();
-            }
-        });
-
-    }
 }
