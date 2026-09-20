@@ -1,78 +1,121 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout >
-
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/colorSurface"
-    android:orientation="vertical"
-    android:id="@+id/place_account_savings"
-    android:visibility="gone"
-   >
+    xmlns:tools="http://schemas.android.com/tools">
 
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/place_choose_savings"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="10dp"
-        app:cardElevation="10dp"
-        android:background="@drawable/shape_line_gray">
-
-        <TextView
-            android:background="?attr/selectableItemBackground"
-            android:id="@+id/txt_choose_savings"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:fontFamily="@font/ubuntu_b"
-            android:text="Pilih Tabungan"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:textColor="?android:attr/textColorPrimary" />
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-android:padding="3dp"
-            android:layout_margin="13dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_arrow_drop_down"
-            app:tint="?attr/colorOnSurface"
-            />
-
-
-    </androidx.cardview.widget.CardView>
-    <TextView
-        android:layout_margin="10dp"
-        android:background="@drawable/shape_line_blue"
-        android:textAlignment="center"
-        android:id="@+id/txt_description_saving"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/ubuntu_b"
-        android:text="Target dan progress menabung \n\nWaktu: 2 bulan 30 hari lagi"
-        android:textColor="?android:attr/textColorPrimary"
-        android:padding="10dp"
-        android:textSize="15sp" />
     <LinearLayout
+        android:id="@+id/place_account_savings"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_margin="5dp"
-        android:weightSum="2">
-        <androidx.cardview.widget.CardView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:background="?attr/colorSurface"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <!-- Choose Savings Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/place_choose_savings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            app:cardElevation="10dp"
-            android:background="@drawable/shape_line_gray">
+            android:layout_marginBottom="12dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
+            app:cardBackgroundColor="?attr/colorSurface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/colorGrey30"
+            app:strokeWidth="1dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/img_savings_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/baseline_account_balance_wallet_24"
+                    app:tint="@color/blueColor" />
+
+                <TextView
+                    android:id="@+id/txt_choose_savings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_toEndOf="@id/img_savings_icon"
+                    android:layout_toStartOf="@id/img_dropdown_savings"
+                    android:fontFamily="@font/ubuntu_b"
+                    android:text="Pilih Tabungan"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="15sp" />
+
+                <ImageView
+                    android:id="@+id/img_dropdown_savings"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/ic_arrow_drop_down"
+                    app:tint="?attr/colorOnSurface" />
+
+            </RelativeLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Description / Remaining Time Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_time_remaining"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="@color/bg_action_light"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@drawable/baseline_calendar_today_24"
+                    app:tint="@color/blueColor" />
+
+                <TextView
+                    android:id="@+id/txt_description_saving"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/ubuntu_b"
+                    android:text="Target dan progress menabung"
+                    android:textColor="@color/blueColor"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Main Savings Target Progress Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_target_savings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="?attr/colorSurface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/colorGrey30"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -80,114 +123,159 @@ android:padding="3dp"
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- Icon and Title Section -->
+                <!-- Header Title -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/baseline_account_balance_wallet_24"
+                        app:tint="@color/blueColor" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:fontFamily="@font/ubuntu_b"
+                        android:text="Target Menabung"
+                        android:textColor="@color/blueColor"
+                        android:textSize="15sp" />
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/colorGrey30" />
+
+                <!-- Values Grid: Target vs Collected -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingBottom="16dp">
+                    android:weightSum="2">
 
-                    <ImageView
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:src="@drawable/baseline_account_balance_wallet_24"
-                        app:tint="@color/blueColorLight" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="10dp"
-                        android:fontFamily="@font/lato_bold"
-                        android:text="Target Menabung"
-                        android:textColor="@color/blueColorLight"
-                        android:textSize="18sp" />
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/ubuntu_r"
+                            android:text="Target"
+                            android:textColor="@color/colorGrey"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/txt_target"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/ubuntu_b"
+                            android:text="Rp.0"
+                            android:textColor="?android:attr/textColorPrimary"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/ubuntu_r"
+                            android:text="Terkumpul"
+                            android:textColor="@color/colorGrey"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/txt_progress_value_savings"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="@font/ubuntu_b"
+                            android:text="Rp.0"
+                            android:textColor="@color/colorPrimaryGreen"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
                 </LinearLayout>
 
-                <!-- Divider Line -->
-                <View
+                <!-- Progress Bar -->
+                <ProgressBar
+                    android:id="@+id/progress_bar_target_savings"
+                    style="@android:style/Widget.ProgressBar.Horizontal"
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/colorGrey30" />
+                    android:layout_height="12dp"
+                    android:layout_marginTop="16dp"
+                    android:progressDrawable="@drawable/progress_income_drawable" />
 
-                <!-- Target Savings Amount -->
-                <TextView
-                    android:id="@+id/txt_target"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:fontFamily="@font/ubuntu_r"
-                    android:textStyle="bold"
-                    android:textSize="18sp"
-                    android:text="Rp.50.000"
-                    android:textColor="@color/blueColorLight" />
-
-                <!-- Progress and Percentage Layout -->
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingTop="16dp">
-
-                    <!-- Current Savings Amount -->
-                    <TextView
-                        android:id="@+id/txt_progress_value_savings"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/ubuntu_r"
-                        android:text="Rp.15.000"
-                        android:textColor="@color/colorPrimaryGreen"
-                        android:textSize="15sp" />
-
-                    <!-- Savings Percentage -->
-<!--                    <TextView-->
-<!--                        android:id="@+id/txt_percentage_savings"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_alignParentEnd="true"-->
-<!--                        android:fontFamily="@font/lato_bold"-->
-<!--                        android:padding="10dp"-->
-<!--                        android:text="17%"-->
-<!--                        android:textStyle="bold"-->
-<!--                        android:textColor="@color/colorPrimaryGreen"-->
-<!--                        android:textSize="15sp" />-->
-
-                    <!-- Progress Bar -->
-                    <ProgressBar
-                        android:id="@+id/progress_bar_target_savings"
-                        style="@android:style/Widget.ProgressBar.Horizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/txt_progress_value_savings"
-                        android:layout_marginTop="10dp"
-                        android:layout_marginBottom="10dp"
-                        android:progressDrawable="@drawable/progress_income_drawable" />
-                </RelativeLayout>
-
-                <!-- Description or Additional Info -->
+                <!-- Percentage & encouragement text -->
                 <TextView
                     android:id="@+id/txt_percentage_savings"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
                     android:fontFamily="@font/ubuntu_r"
-                    android:text="Selamat, Anda sudah mencapai 30% dari target menabung Anda!"
+                    android:text="Progress target menabung Anda"
                     android:textColor="@color/colorPrimaryGreen"
-                    android:textSize="14sp" />
+                    android:textSize="13sp" />
+
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Progress History List Container -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_history_savings"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardBackgroundColor="?attr/colorSurface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeColor="@color/colorGrey30"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:fontFamily="@font/ubuntu_b"
+                    android:text="Riwayat Progress Menabung"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="15sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_progress_savings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
-    <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="10dp"
-        app:cardElevation="10dp"
-        >
-    <androidx.recyclerview.widget.RecyclerView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/rv_progress_savings"
-       android:visibility="gone" />
-    </androidx.cardview.widget.CardView>
-</LinearLayout>
 
 </layout>

@@ -19,6 +19,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -188,7 +189,7 @@ public class FragmentAnalysis extends Fragment {
         today.get(Calendar.MONTH);
         prevNextMonth = Calendar.getInstance();
         date_ship_millis = today.getTimeInMillis();
-        filterType = getString(R.string.pemasukan);
+        filterType = getString(R.string.semuanya);
         filterPeriod = getString(R.string.bulanan);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelUser = new ViewModelProvider(this).get(ViewModelUser.class);
@@ -364,7 +365,7 @@ public class FragmentAnalysis extends Fragment {
                 item.setIcon(R.drawable.ic_baseline_pie_chart_24);
                 typeChart = TYPE_CHART.PIE_CHART;
                 if (finances.size() > 0)
-                    new PieChartAsyncTask(financeFilter.listAnalysis(finances, filterType)).execute();
+                    new PieChartAsyncTask(getContext(),financeFilter.listAnalysis(finances, filterType)).execute();
             }
             binding.barChartAnalysis.setVisibility(finances.size() > 0 && typeChart == TYPE_CHART.BAR_CHART ? View.VISIBLE : View.GONE);
             binding.pieChartAnalysis.setVisibility(finances.size() > 0 && typeChart == TYPE_CHART.PIE_CHART ? View.VISIBLE : View.GONE);
@@ -492,7 +493,7 @@ public class FragmentAnalysis extends Fragment {
             new BarChartAsyncTask(finances).execute();
             binding.barChartAnalysis.setVisibility(data.size() > 0 ? View.VISIBLE : View.GONE);
         } else {
-            new PieChartAsyncTask(financeFilter.listAnalysis(finances, filterType)).execute();
+            new PieChartAsyncTask(getContext(),financeFilter.listAnalysis(finances, filterType)).execute();
             binding.pieChartAnalysis.setVisibility(data.size() > 0 ? View.VISIBLE : View.GONE);
         }
     }
@@ -508,46 +509,107 @@ public class FragmentAnalysis extends Fragment {
 //        binding.layoutFinanceJournal.txtTotalAll.setTextColor(total < 0 ? ContextCompat.getColor(getContext(), R.color.red) : ContextCompat.getColor(getContext(), R.color.green));
     }
 
-
     private class PieChartAsyncTask extends AsyncTask<Void, PieDataSet, PieDataSet> {
 
-        List<ModelFinance> data;
-        List<LegendEntry> legendEntries = new ArrayList<>();
-        ArrayList<Integer> colors = new ArrayList<Integer>();
+        private Context context; // Tambahkan Context untuk mengakses Resource (String, Color, Drawable)
+        private List<ModelFinance> data;
+        private List<LegendEntry> legendEntries = new ArrayList<>();
+        private ArrayList<Integer> colors = new ArrayList<>();
 
-        public PieChartAsyncTask(List<ModelFinance> data) {
+        // Update Constructor untuk menerima Context
+        public PieChartAsyncTask(Context context, List<ModelFinance> data) {
+            this.context = context;
             this.data = data;
         }
 
         @Override
         protected PieDataSet doInBackground(Void... voids) {
-            List<PieEntry> entries = new ArrayList<PieEntry>();
+            List<PieEntry> entries = new ArrayList<>();
+            boolean isAll = filterType == null || filterType.equalsIgnoreCase("Semua") || filterType.equalsIgnoreCase("Semuanya") || filterType.equalsIgnoreCase("SEMUANYA");
+            long totalBase = financeFilter.totalValueByType(data, filterType);
 
             for (ModelFinance modelIncome : data) {
-                if (modelIncome.getTipe().contains(filterType))
-                    entries.add(new PieEntry((float) modelIncome.getJumlahValue(), Tools.calculatePercentage(modelIncome.getJumlahValue(), financeFilter.totalValueByType(data, filterType)) + "%"));
+                // Hanya proses data yang sesuai dengan filterType atau jika filterType adalah Semua
+                if (isAll || modelIncome.getTipe().equalsIgnoreCase(filterType) || modelIncome.getTipe().contains(filterType)) {
+                    String category = modelIncome.getKategori();
+                    float value = (float) modelIncome.getJumlahValue();
+
+                    // Menyiapkan Label Persentase
+                    String label = Tools.calculatePercentage(modelIncome.getJumlahValue(), totalBase) + "%";
+
+                    Drawable icon = null;
+                    int color = Color.GRAY; // Warna default jika tidak ada kategori yang cocok
+
+                    // --- LOGIKA PENENTUAN IKON & WARNA PENGELUARAN ---
+                    if (category.contains(context.getString(R.string.belanja_umum))) {
+                        icon = ContextCompat.getDrawable(context, R.drawable.baseline_shopping_basket_24);
+                        color = ContextCompat.getColor(context, R.color.color_shopping);
+                    } else if (category.contains(context.getString(R.string.makanan))) {
+                        icon = ContextCompat.getDrawable(context, R.drawable.baseline_fastfood_24);
+                        color = ContextCompat.getColor(context, R.color.color_food);
+                    } else if (category.contains(context.getString(R.string.pulsa_hp))) {
+                        icon = ContextCompat.getDrawable(context, R.drawable.baseline_phonelink_ring_24);
+                        color = ContextCompat.getColor(context, R.color.color_pulsa);
+                    } else if (category.contains(context.getString(R.string.transportasi))) {
+                        icon = ContextCompat.getDrawable(context, R.drawable.baseline_emoji_transportation_24);
+                        color = ContextCompat.getColor(context, R.color.color_transport);
+                    } else if (category.contains(context.getString(R.string.tagihan))) {
+                        icon = ContextCompat.getDrawable(context, R.drawable.baseline_credit_card_24);
+                        color = ContextCompat.getColor(context, R.color.color_bill);
+                    } else if (category.contains(context.getString(R.string.paket_internet))) {
+                        icon = ContextCompat.getDrawable(context, R.drawable.baseline_language_24);
+                        color = ContextCompat.getColor(context, R.color.color_network);
+                    }
+
+                    // --- LOGIKA PENENTUAN IKON & WARNA PEMASUKAN ---
+                    else if (category.contains(context.getString(R.string.gaji))) {
+                        icon = ContextCompat.getDrawable(context, R.drawable.baseline_account_balance_wallet_24);
+                        color = ContextCompat.getColor(context, R.color.color_gaji);
+                    } else if (category.contains(context.getString(R.string.bonus))) {
+                        icon = ContextCompat.getDrawable(context, R.drawable.baseline_monetization_on_24);
+                        color = ContextCompat.getColor(context, R.color.color_bonus);
+                    } else if (category.contains(context.getString(R.string.hasil_usaha))) {
+                        icon = ContextCompat.getDrawable(context, R.drawable.baseline_business_24);
+                        color = ContextCompat.getColor(context, R.color.color_hasil_usaha);
+                    }
+
+                    // Ubah warna ikon menjadi putih agar kontras dengan warna slice pie chart
+                    if (icon != null) {
+                        icon = androidx.core.graphics.drawable.DrawableCompat.wrap(icon).mutate();
+                        androidx.core.graphics.drawable.DrawableCompat.setTint(icon, Color.WHITE);
+                    }
+
+                    // Masukkan nilai, label, dan IKON ke dalam PieEntry
+                    entries.add(new PieEntry(value, label, icon));
+                    colors.add(color);
+
+                    // Buat LegendEntry sekalian di sini agar ukurannya pas dengan data yang di-filter
+                    legendEntries.add(new LegendEntry(category, Legend.LegendForm.CIRCLE, 10f, 2f, null, color));
+                }
             }
 
             PieDataSet dataSet = new PieDataSet(entries, "");
-            dataSet.setDrawValues(false);
-            dataSet.setColor(Color.rgb(120, 255, 255));
-            dataSet.setValueLineColor(Color.rgb(123, 212, 232));
-            dataSet.setValueTextColor(R.color.white);
 
-            dataSet.setDrawIcons(false);
+            // Pengaturan Gaya M-Banking (Garis & Label di luar)
+            dataSet.setDrawValues(true);
+            dataSet.setValueTextSize(11f);
+            dataSet.setValueTextColor(Color.DKGRAY); // Warna teks persentase
+            dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+            dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+            dataSet.setValueLinePart1OffsetPercentage(80.f);
+            dataSet.setValueLinePart1Length(0.3f);
+            dataSet.setValueLinePart2Length(0.4f);
+            dataSet.setValueLineColor(Color.GRAY);
 
-            dataSet.setSliceSpace(2f);
-            dataSet.setIconsOffset(new MPPointF(10, 40));
-            dataSet.setSelectionShift(3f);
+            // AKTIFKAN IKON
+            dataSet.setDrawIcons(true);
+            // Atur posisi ikon (0,0 berarti persis di tengah-tengah potongan/slice)
+            dataSet.setIconsOffset(new MPPointF(0, 0));
 
-
-            colors.add(Color.rgb(0, 128, 0));
-            colors.add(Color.rgb(139, 0, 0));
-            colors.add(Color.rgb(218, 165, 32));
-            colors.add(Color.rgb(0, 128, 128));
-            colors.add(Color.rgb(255, 69, 0));
-            colors.add(Color.rgb(46, 139, 87));
+            dataSet.setSliceSpace(3f);
+            dataSet.setSelectionShift(5f);
             dataSet.setColors(colors);
+
             return dataSet;
         }
 
@@ -558,55 +620,54 @@ public class FragmentAnalysis extends Fragment {
 
             PieData pieData = new PieData(pieDataSet);
 
-            for (int i = 0; i < data.size(); i++) {
-                legendEntries.add(new LegendEntry(data.get(i).getKategori(), Legend.LegendForm.SQUARE, 10f, 2f, null, colors.get(i % colors.size())));
-            }
+            // Sembunyikan value float aslinya agar yang tampil hanya label persentasenya
+            pieData.setDrawValues(false);
 
             Legend l = binding.pieChartAnalysis.getLegend();
-            l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
-            l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
-            l.setOrientation(Legend.LegendOrientation.VERTICAL);
+            l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+            l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+            l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
             l.setDrawInside(false);
+            l.setWordWrapEnabled(true);
             l.setXEntrySpace(10f);
-            l.setYEntrySpace(0f);
-            l.setYOffset(0f);
-            l.setTextSize(13);
-            l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
+            l.setTextSize(12f);
 
+            // value.resourceId berasal dari tema Anda sebelumnya
+            l.setTextColor(ContextCompat.getColor(context, value.resourceId));
             l.setCustom(legendEntries);
-            binding.pieChartAnalysis.animateXY(2000, 2000);
+
+            binding.pieChartAnalysis.animateXY(1500, 1500);
             binding.pieChartAnalysis.getDescription().setEnabled(false);
             binding.pieChartAnalysis.setCenterText(filterType);
             binding.pieChartAnalysis.setCenterTextSize(17);
-            binding.pieChartAnalysis.setNoDataTextColor(Color.BLACK);
-            binding.pieChartAnalysis.setCenterTextColor(Color.BLACK);
+            binding.pieChartAnalysis.setCenterTextColor(ContextCompat.getColor(context, value.resourceId));
             binding.pieChartAnalysis.setCenterTextTypeface(Typeface.DEFAULT_BOLD);
-            binding.pieChartAnalysis.setPaddingRelative(10, 10, 10, 10);
 
-            binding.pieChartAnalysis.offsetLeftAndRight(0);
-            binding.pieChartAnalysis.setExtraOffsets(0, 0, 30, 0);
-            binding.pieChartAnalysis.getCircleBox().offset(0, 0);
+            // Extra offsets agar teks/garis di luar chart tidak terpotong tepi layar
+            binding.pieChartAnalysis.setExtraOffsets(20f, 0f, 20f, 0f);
 
             binding.pieChartAnalysis.setDrawHoleEnabled(true);
-            binding.pieChartAnalysis.setHoleColor(Color.WHITE);
+            // Transparan agar mendukung Night Mode dengan baik
+            binding.pieChartAnalysis.setHoleColor(Color.TRANSPARENT);
+            binding.pieChartAnalysis.setTransparentCircleColor(Color.TRANSPARENT);
 
-            binding.pieChartAnalysis.setTransparentCircleColor(Color.WHITE);
-            binding.pieChartAnalysis.setTransparentCircleAlpha(110);
+            binding.pieChartAnalysis.setHoleRadius(60f);
+            binding.pieChartAnalysis.setTransparentCircleRadius(63f);
 
-            binding.pieChartAnalysis.setHoleRadius(58f);
-            binding.pieChartAnalysis.setTransparentCircleRadius(61f);
+            // Aktifkan Entry Labels untuk menampilkan label ("...%") yang diset di PieEntry
+            binding.pieChartAnalysis.setDrawEntryLabels(true);
+            binding.pieChartAnalysis.setEntryLabelColor(ContextCompat.getColor(context, value.resourceId));
+            binding.pieChartAnalysis.setEntryLabelTextSize(11f);
 
-            binding.pieChartAnalysis.setDrawCenterText(true);
-            binding.pieChartAnalysis.setEntryLabelColor(Color.WHITE);
             binding.pieChartAnalysis.setRotationAngle(0);
-            // enable rotation of the binding.pieChartAnalysis by touch
             binding.pieChartAnalysis.setRotationEnabled(true);
             binding.pieChartAnalysis.setHighlightPerTapEnabled(true);
+            binding.pieChartAnalysis.highlightValues(null);
+
             binding.pieChartAnalysis.setData(pieData);
             binding.pieChartAnalysis.invalidate();
         }
     }
-
     private class BarChartAsyncTask extends AsyncTask<Void, List<IBarDataSet>, List<IBarDataSet>> {
         // (0.2 + 0.03) * 4 + 0.08 = 1.00 -> interval per "group"
         float groupSpace = 0.08f;
@@ -634,7 +695,10 @@ public class FragmentAnalysis extends Fragment {
             List<IBarDataSet> barDataSets = new ArrayList<>();
 
 
-            if (filterType.equalsIgnoreCase(getString(R.string.pemasukan))) {
+            boolean isAll = filterType == null || filterType.equalsIgnoreCase("Semua") || filterType.equalsIgnoreCase("Semunya") || filterType.equalsIgnoreCase("Semuanya") || filterType.equalsIgnoreCase("SEMUANYA");
+            boolean isIncomeOnly = filterType != null && filterType.equalsIgnoreCase(getString(R.string.pemasukan));
+
+            if (isIncomeOnly) {
                 ArrayList<BarEntry> entriesCompanyResults = new ArrayList<>();
                 ArrayList<BarEntry> entriesBonus = new ArrayList<>();
                 ArrayList<BarEntry> entriesSalary = new ArrayList<>();
@@ -671,7 +735,6 @@ public class FragmentAnalysis extends Fragment {
                 BarDataSet barDataSetBonus = new BarDataSet(entriesBonus, CATEGORY_INCOME.BONUS.name().toLowerCase());
                 BarDataSet barDataSetSalary = new BarDataSet(entriesSalary, CATEGORY_INCOME.GAJI.name().toLowerCase());
 
-
                 barDataSetBonus.setColor(ContextCompat.getColor(getContext(), R.color.color_bonus));
                 barDataSetCompanyResult.setColor(ContextCompat.getColor(getContext(), R.color.color_hasil_usaha));
                 barDataSetSalary.setColor(ContextCompat.getColor(getContext(), R.color.color_gaji));
@@ -679,6 +742,97 @@ public class FragmentAnalysis extends Fragment {
                 barDataSets.add(barDataSetCompanyResult);
                 barDataSets.add(barDataSetBonus);
                 barDataSets.add(barDataSetSalary);
+            } else if (isAll) {
+                ArrayList<BarEntry> entriesCompanyResults = new ArrayList<>();
+                ArrayList<BarEntry> entriesBonus = new ArrayList<>();
+                ArrayList<BarEntry> entriesSalary = new ArrayList<>();
+                ArrayList<BarEntry> entriesGeneralShopping = new ArrayList<>();
+                ArrayList<BarEntry> entriesFood = new ArrayList<>();
+                ArrayList<BarEntry> entriesPulse = new ArrayList<>();
+                ArrayList<BarEntry> entriesTransportation = new ArrayList<>();
+                ArrayList<BarEntry> entriesBill = new ArrayList<>();
+                ArrayList<BarEntry> entriesInternetPackages = new ArrayList<>();
+                barSpace = 0.01f;
+                barWidth = 0.09f;
+
+                for (int i = 0; i < listNestedFinance.size(); i++) {
+                    ModelNestedFinance modelNestedFinance = listNestedFinance.get(i);
+                    List<ModelFinance> listData = financeFilter.listAnalysis(modelNestedFinance.getFinances(), filterType);
+
+                    listDate.add(modelNestedFinance.getDefaultDate());
+                    float fGaji = 0, fBonus = 0, fHasilUsaha = 0;
+                    float fGeneralShopping = 0, fFood = 0, fPulse = 0, fTransportation = 0, fBill = 0, fInternetPackages = 0;
+
+                    for (ModelFinance model : listData) {
+                        if (model.getKategoriWithSeparator().contains(CATEGORY_INCOME.HASIL_USAHA.name().toLowerCase())) {
+                            fHasilUsaha = (float) model.getJumlahValue();
+                        }
+                        if (model.getKategoriWithSeparator().contains(CATEGORY_INCOME.GAJI.name().toLowerCase())) {
+                            fGaji = (float) model.getJumlahValue();
+                        }
+                        if (model.getKategoriWithSeparator().contains(CATEGORY_INCOME.BONUS.name().toLowerCase())) {
+                            fBonus = (float) model.getJumlahValue();
+                        }
+                        if (model.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.BELANJA_UMUM.name().toLowerCase())) {
+                            fGeneralShopping = (float) model.getJumlahValue();
+                        }
+                        if (model.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.MAkANAN.name().toLowerCase())) {
+                            fFood = (float) model.getJumlahValue();
+                        }
+                        if (model.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.PULSA_HP.name().toLowerCase())) {
+                            fPulse = (float) model.getJumlahValue();
+                        }
+                        if (model.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.TRANSPORTASI.name().toLowerCase())) {
+                            fTransportation = (float) model.getJumlahValue();
+                        }
+                        if (model.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.PAKET_INTERNET.name().toLowerCase())) {
+                            fInternetPackages = (float) model.getJumlahValue();
+                        }
+                        if (model.getKategoriWithSeparator().contains(CATEGORY_EXPENSE.TAGIHAN.name().toLowerCase())) {
+                            fBill = (float) model.getJumlahValue();
+                        }
+                    }
+
+                    entriesCompanyResults.add(new BarEntry(i, fHasilUsaha, CATEGORY_INCOME.HASIL_USAHA.name().toLowerCase()));
+                    entriesBonus.add(new BarEntry(i, fBonus, CATEGORY_INCOME.BONUS.name().toLowerCase()));
+                    entriesSalary.add(new BarEntry(i, fGaji, CATEGORY_INCOME.GAJI.name().toLowerCase()));
+                    entriesGeneralShopping.add(new BarEntry(i, fGeneralShopping, CATEGORY_EXPENSE.BELANJA_UMUM.name().toLowerCase()));
+                    entriesFood.add(new BarEntry(i, fFood, CATEGORY_EXPENSE.MAkANAN.name().toLowerCase()));
+                    entriesPulse.add(new BarEntry(i, fPulse, CATEGORY_EXPENSE.PULSA_HP.name().toLowerCase()));
+                    entriesTransportation.add(new BarEntry(i, fTransportation, CATEGORY_EXPENSE.TRANSPORTASI.name().toLowerCase()));
+                    entriesBill.add(new BarEntry(i, fBill, CATEGORY_EXPENSE.TAGIHAN.name().toLowerCase()));
+                    entriesInternetPackages.add(new BarEntry(i, fInternetPackages, CATEGORY_EXPENSE.PAKET_INTERNET.name().toLowerCase()));
+                }
+
+                BarDataSet barDataSetCompanyResult = new BarDataSet(entriesCompanyResults, CATEGORY_INCOME.HASIL_USAHA.name().toLowerCase());
+                BarDataSet barDataSetBonus = new BarDataSet(entriesBonus, CATEGORY_INCOME.BONUS.name().toLowerCase());
+                BarDataSet barDataSetSalary = new BarDataSet(entriesSalary, CATEGORY_INCOME.GAJI.name().toLowerCase());
+                BarDataSet barDataSetGeneralShopping = new BarDataSet(entriesGeneralShopping, CATEGORY_EXPENSE.BELANJA_UMUM.name().toLowerCase());
+                BarDataSet barDataSetFood = new BarDataSet(entriesFood, CATEGORY_EXPENSE.MAkANAN.name().toLowerCase());
+                BarDataSet barDataSetPulse = new BarDataSet(entriesPulse, CATEGORY_EXPENSE.PULSA_HP.name().toLowerCase());
+                BarDataSet barDataSetTransportation = new BarDataSet(entriesTransportation, CATEGORY_EXPENSE.TRANSPORTASI.name().toLowerCase());
+                BarDataSet barDataSetBill = new BarDataSet(entriesBill, CATEGORY_EXPENSE.TAGIHAN.name().toLowerCase());
+                BarDataSet barDataSetInternetPackages = new BarDataSet(entriesInternetPackages, CATEGORY_EXPENSE.PAKET_INTERNET.name().toLowerCase());
+
+                barDataSetCompanyResult.setColor(ContextCompat.getColor(getContext(), R.color.color_hasil_usaha));
+                barDataSetBonus.setColor(ContextCompat.getColor(getContext(), R.color.color_bonus));
+                barDataSetSalary.setColor(ContextCompat.getColor(getContext(), R.color.color_gaji));
+                barDataSetGeneralShopping.setColor(ContextCompat.getColor(getContext(), R.color.color_shopping));
+                barDataSetFood.setColor(ContextCompat.getColor(getContext(), R.color.color_food));
+                barDataSetPulse.setColor(ContextCompat.getColor(getContext(), R.color.color_pulsa));
+                barDataSetTransportation.setColor(ContextCompat.getColor(getContext(), R.color.color_transport));
+                barDataSetBill.setColor(ContextCompat.getColor(getContext(), R.color.color_bill));
+                barDataSetInternetPackages.setColor(ContextCompat.getColor(getContext(), R.color.color_network));
+
+                barDataSets.add(barDataSetCompanyResult);
+                barDataSets.add(barDataSetBonus);
+                barDataSets.add(barDataSetSalary);
+                barDataSets.add(barDataSetGeneralShopping);
+                barDataSets.add(barDataSetFood);
+                barDataSets.add(barDataSetPulse);
+                barDataSets.add(barDataSetTransportation);
+                barDataSets.add(barDataSetBill);
+                barDataSets.add(barDataSetInternetPackages);
             } else {
                 ArrayList<BarEntry> entriesGeneralShopping = new ArrayList<>();
                 ArrayList<BarEntry> entriesFood = new ArrayList<>();

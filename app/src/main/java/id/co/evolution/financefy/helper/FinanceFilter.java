@@ -119,11 +119,14 @@ public class FinanceFilter {
     }
 
     public long totalValueByType(List<ModelFinance> data, String type) {
+        if (type == null) return 0;
+        boolean isAll = type.equalsIgnoreCase("Semua") || type.equalsIgnoreCase("Semuanya") || type.equalsIgnoreCase("SEMUANYA");
         long value = 0;
-        for (ModelFinance modelFinance : data)
-            if (modelFinance.getTipe().equalsIgnoreCase(type))
+        for (ModelFinance modelFinance : data) {
+            if (isAll || modelFinance.getTipe().equalsIgnoreCase(type)) {
                 value += (long) modelFinance.getJumlahValue();
-
+            }
+        }
         return value;
     }
 
@@ -154,20 +157,24 @@ public class FinanceFilter {
             hashsetCategory.add(modelFinance.getKategori());
         }
 
+        long totalBase = totalValueByType(data, type);
+
         for (String category : hashsetCategory) {
             ModelFinance modelFinance = new ModelFinance();
             modelFinance.setKategori(category);
             double totalValue = 0;
             String date = null;
+            String actualTipe = null;
             for (ModelFinance finance : data) {
-                if (category.contains(finance.getKategori())) {
+                if (category.equals(finance.getKategori()) || category.contains(finance.getKategori())) {
                     totalValue = totalValue + finance.getJumlahValue();
                     date = finance.getDate();
+                    actualTipe = finance.getTipe();
                 }
             }
             modelFinance.setJumlah(totalValue);
-            modelFinance.setTotalValue(totalValueByType(data, type));
-            modelFinance.setTipe(type);
+            modelFinance.setTotalValue(totalBase);
+            modelFinance.setTipe(actualTipe != null ? actualTipe : type);
             modelFinance.setDate(date);
             list.add(modelFinance);
         }

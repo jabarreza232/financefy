@@ -1,112 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:tools="http://schemas.android.com/tools">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:background="?attr/selectableItemBackground"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp">
 
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- Baris 1: Kategori (Kiri) & Nominal (Kanan) -->
+        <TextView
+            android:id="@+id/txt_kategori"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:orientation="vertical">
+            android:layout_marginEnd="8dp"
+            android:fontFamily="@font/ubuntu_b"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/txt_jumlah"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Makanan" />
 
+        <TextView
+            android:id="@+id/txt_jumlah"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/ubuntu_b"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Rp 15.000" />
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp">
+        <!-- Baris 2: Progress Bar (Kiri) & Persentase (Kanan) -->
+        <ProgressBar
+            android:id="@+id/progress_finance"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="6dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="12dp"
+            android:progressDrawable="@drawable/progress_income_drawable"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/txt_percentage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/txt_kategori"
+            tools:progress="45" />
 
-                <RelativeLayout
-                    android:id="@+id/rl_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/txt_percentage">
+        <TextView
+            android:id="@+id/txt_percentage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/ubuntu_r"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="@+id/progress_finance"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/progress_finance"
+            tools:text="17%" />
 
-                    <TextView
-                        android:id="@+id/txt_kategori"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:layout_toStartOf="@id/txt_jumlah"
-                        android:fontFamily="@font/ubuntu_b"
-                        android:textColor="?android:textColorPrimary"
-                        android:textSize="15sp"
-                        tools:text="Makanan" />
+        <!-- Elemen cadangan (disembunyikan) jika masih terikat dengan kode Java Anda -->
+        <TextView
+            android:id="@+id/txt_jumlah_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:ignore="MissingConstraints" />
 
+        <TextView
+            android:id="@+id/txt_percentage_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            tools:ignore="MissingConstraints" />
 
-                    <TextView
-                        android:id="@+id/txt_jumlah"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:layout_marginTop="7dp"
-                        android:fontFamily="@font/ubuntu_r"
-                        android:textColor="?android:textColorPrimary"
-                        android:textSize="13sp"
-                        tools:text="Rp.15000" />
-
-                    <TextView
-                        android:id="@+id/txt_jumlah_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/txt_kategori"
-                        android:layout_marginTop="7dp"
-                        android:fontFamily="@font/ubuntu_r"
-                        android:textColor="?android:textColorPrimary"
-                        android:textSize="13sp"
-                        android:visibility="gone"
-                        tools:text="Rp.15000" />
-                    <TextView
-                        android:layout_marginTop="7dp"
-                        android:id="@+id/txt_percentage_2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/ubuntu_r"
-                        android:layout_below="@id/txt_jumlah_2"
-                        android:text="17%"
-                        android:padding="3dp"
-                        android:visibility="gone"
-                        android:textColor="?android:textColorPrimary"
-                        android:textSize="13sp" />
-
-                </RelativeLayout>
-
-                <ProgressBar
-                    android:id="@+id/progress_finance"
-                    style="@android:style/Widget.ProgressBar.Horizontal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/rl_text"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginEnd="5dp"
-                    android:layout_toStartOf="@id/txt_percentage"
-                    android:progressDrawable="@drawable/progress_income_drawable"
-                    tools:ignore="UnusedAttribute" />
-
-                <TextView
-                    android:id="@+id/txt_percentage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:fontFamily="@font/ubuntu_r"
-                    android:padding="10dp"
-                    android:text="17%"
-                    android:textColor="?android:textColorPrimary"
-                    android:textSize="13sp" />
-
-            </RelativeLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="10dp"
-                android:background="@color/colorGrey30" />
-        </LinearLayout>
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

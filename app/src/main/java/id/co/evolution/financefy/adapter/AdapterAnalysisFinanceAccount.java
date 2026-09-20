@@ -74,7 +74,7 @@ public class AdapterAnalysisFinanceAccount extends RecyclerView.Adapter<AdapterA
         holder.binding.progressFinance.setMax(100);
         Log.e("TAG", "onBindViewHolder: "+data.get(i).getTotalValue());
 
-        holder.binding.progressFinance.setProgressDrawable(ContextCompat.getDrawable(context,R.drawable.progress_account_drawable));
+        holder.binding.progressFinance.setProgressDrawable(ContextCompat.getDrawable(context,R.drawable.progress_income_drawable));
     }
 
     @Override

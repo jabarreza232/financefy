@@ -8,8 +8,10 @@ import android.text.TextWatcher
 import android.view.*
 import android.widget.*
 import androidx.cardview.widget.CardView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
@@ -33,7 +35,7 @@ class DialogCreateUser(
     lateinit var dialogCreateUserCallback: DialogCreateUserCallback
     var jumlah = ""
     var type = ""
-    var type_currency = ""
+    var type_currency = "IDR"
     var category = ""
     var date_target = ""
     var proccess_value = ""
@@ -53,7 +55,7 @@ class DialogCreateUser(
     private var tilTarget: TextInputLayout
     private var etTitle: TextInputEditText
     private var tilTitle: TextInputLayout
-    private var placeTarget: RelativeLayout
+    private var placeTarget: ConstraintLayout
     private var placeDate: RelativeLayout
     private var placeTypeCurrencyTarget: RelativeLayout
     private var txtType: TextView
@@ -64,8 +66,8 @@ class DialogCreateUser(
     private var viewLineHeaderSavings: View
     private var txtCategory: TextView
     private var txtHeader: TextView
-    private var btnSubmit: CardView
-    private var btnCalculator: Button
+    private var btnSubmit: MaterialButton
+    private var btnCalculator: CardView
     private var btnClose: ImageView
     private var imgDropDownTypeCurrency: ImageView
     private var imgDropDownCategory: ImageView
@@ -130,7 +132,7 @@ class DialogCreateUser(
         txtHeader.text = textHeader
 
         txtHeaderTargetSavings.text = textHeaderSavings
-        Tools.setBackgroundTintView(btnCalculator, modelPrimaryColor)
+//        Tools.setBackgroundTintView(btnCalculator, modelPrimaryColor)
 
         if (!isAddAccount) {
             txtTypeCurrency.isEnabled = false
@@ -163,6 +165,11 @@ class DialogCreateUser(
                 }
             }
             }
+        }else {
+
+            type_currency = "IDR"
+            txtTypeCurrency.text = type_currency
+            locale = Tools.getLocaleIDN()
         }
 
         etTarget addTextChangedListener object : TextWatcher {

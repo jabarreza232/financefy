@@ -657,12 +657,11 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             dialogSavings.showDialogSavings(savingsTargetData);
         });
     }
-
     private class PieChartAsyncTask extends AsyncTask<Void, PieDataSet, PieDataSet> {
 
         List<ModelSavingsProgress> data;
         List<LegendEntry> legendEntries = new ArrayList<>();
-        ArrayList<Integer> colors = new ArrayList<Integer>();
+        ArrayList<Integer> colors = new ArrayList<>();
 
         public PieChartAsyncTask(List<ModelSavingsProgress> data) {
             this.data = data;
@@ -671,31 +670,41 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         @SuppressLint("NewApi")
         @Override
         protected PieDataSet doInBackground(Void... voids) {
-            List<PieEntry> entries = new ArrayList<PieEntry>();
+            List<PieEntry> entries = new ArrayList<>();
 
             for (ModelSavingsProgress modelSavingsProgress : data) {
                 Random rand = new Random();
                 float r = rand.nextFloat();
                 float g = rand.nextFloat();
                 float b = rand.nextFloat();
-                entries.add(new PieEntry((float) modelSavingsProgress.getProcessValue(), Tools.calculatePercentage(modelSavingsProgress.getProcessValue(), modelSavings.getTargetValue()) + "%"));
+
+                // Masukkan judul sebagai label, dan persentase/nilai sebagai value
+                entries.add(new PieEntry(
+                        (float) modelSavingsProgress.getProcessValue(),
+                        modelSavingsProgress.getTitle() // Nama tabungan akan jadi label
+                ));
                 colors.add(Color.rgb(r, g, b));
             }
 
             PieDataSet dataSet = new PieDataSet(entries, "");
-            dataSet.setDrawValues(false);
-            dataSet.setColor(Color.rgb(120, 255, 255));
-            dataSet.setValueLineColor(Color.rgb(123, 212, 232));
-            dataSet.setValueTextColor(R.color.white);
+
+            // 1. AKTIFKAN DRAW VALUES
+            dataSet.setDrawValues(true);
+            dataSet.setValueTextSize(12f);
+            // Gunakan warna yang kontras, atau sesuaikan dengan tema
+            dataSet.setValueTextColor(Color.DKGRAY);
+
+            // 2. KONFIGURASI GARIS PENUNJUK (M-Banking Style)
+            dataSet.setXValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+            dataSet.setYValuePosition(PieDataSet.ValuePosition.OUTSIDE_SLICE);
+            dataSet.setValueLinePart1OffsetPercentage(80.f);
+            dataSet.setValueLinePart1Length(0.3f);
+            dataSet.setValueLinePart2Length(0.4f);
+            dataSet.setValueLineColor(Color.GRAY); // Warna garis penunjuk
 
             dataSet.setDrawIcons(false);
-
-            dataSet.setSliceSpace(2f);
-            dataSet.setIconsOffset(new MPPointF(10, 40));
-            dataSet.setSelectionShift(3f);
-
-
-
+            dataSet.setSliceSpace(3f); // Jarak antar potongan diperlebar sedikit
+            dataSet.setSelectionShift(5f);
 
             dataSet.setColors(colors);
             return dataSet;
@@ -707,54 +716,53 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
 
             PieData pieData = new PieData(pieDataSet);
 
+            // Pengaturan Legend (Opsional jika label sudah jelas di luar chart)
             for (int i = 0; i < data.size(); i++) {
-                legendEntries.add(new LegendEntry(data.get(i).getTitle(), Legend.LegendForm.SQUARE, 10f, 2f, null, colors.get(i % colors.size())));
+                legendEntries.add(new LegendEntry(data.get(i).getTitle(), Legend.LegendForm.CIRCLE, 10f, 2f, null, colors.get(i % colors.size())));
             }
 
             Legend l = binding.pieChartAnalysis.getLegend();
-            l.setVerticalAlignment(Legend.LegendVerticalAlignment.TOP);
-            l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.RIGHT);
-            l.setOrientation(Legend.LegendOrientation.VERTICAL);
+            l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+            l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+            l.setOrientation(Legend.LegendOrientation.HORIZONTAL);
             l.setDrawInside(false);
-            l.setXEntrySpace(10f);
-            l.setYEntrySpace(0f);
-            l.setYOffset(0f);
-            l.setTextSize(13);
-            l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
-
+            l.setWordWrapEnabled(true);
+            l.setTextColor(ContextCompat.getColor(getContext(), value.resourceId));
             l.setCustom(legendEntries);
-            binding.pieChartAnalysis.animateXY(2000, 2000);
+
+            binding.pieChartAnalysis.animateXY(1500, 1500); // Durasi dipercepat sedikit agar lebih responsif
             binding.pieChartAnalysis.getDescription().setEnabled(false);
-            binding.pieChartAnalysis.setCenterText("Menabung");
-            binding.pieChartAnalysis.setCenterTextSize(17);
+
+            binding.pieChartAnalysis.setCenterText("Total\nTabungan");
+            binding.pieChartAnalysis.setCenterTextSize(16);
             binding.pieChartAnalysis.setCenterTextColor(ContextCompat.getColor(getContext(), R.color.blackTextColor));
             binding.pieChartAnalysis.setCenterTextTypeface(Typeface.DEFAULT_BOLD);
-            binding.pieChartAnalysis.setPaddingRelative(10, 10, 10, 10);
+            binding.pieChartAnalysis.setExtraOffsets(20f, 0f, 20f, 0f); // Beri ruang agar teks luar tidak terpotong layar
 
-            binding.pieChartAnalysis.offsetLeftAndRight(0);
-            binding.pieChartAnalysis.setExtraOffsets(0, 0, 30, 0);
-            binding.pieChartAnalysis.getCircleBox().offset(0, 0);
-
+            // 3. PENGATURAN LUBANG TENGAH (Mendukung Dark Mode)
             binding.pieChartAnalysis.setDrawHoleEnabled(true);
-            binding.pieChartAnalysis.setHoleColor(Color.WHITE);
+            // Ubah warna lubang menjadi transparan agar aman saat Night Mode
+            binding.pieChartAnalysis.setHoleColor(Color.TRANSPARENT);
+            binding.pieChartAnalysis.setTransparentCircleColor(Color.TRANSPARENT);
 
-            binding.pieChartAnalysis.setTransparentCircleColor(Color.WHITE);
-            binding.pieChartAnalysis.setTransparentCircleAlpha(110);
+            binding.pieChartAnalysis.setHoleRadius(65f); // Lubang diperbesar ala M-Banking
+            binding.pieChartAnalysis.setTransparentCircleRadius(68f);
 
-            binding.pieChartAnalysis.setHoleRadius(58f);
-            binding.pieChartAnalysis.setTransparentCircleRadius(61f);
+            // 4. PENGATURAN LABEL ENTRY
+            binding.pieChartAnalysis.setDrawEntryLabels(true);
+            binding.pieChartAnalysis.setEntryLabelColor(Color.DKGRAY);
+            binding.pieChartAnalysis.setEntryLabelTextSize(11f);
 
-            binding.pieChartAnalysis.setDrawCenterText(true);
-            binding.pieChartAnalysis.setEntryLabelColor(Color.WHITE);
-            binding.pieChartAnalysis.setRotationAngle(0);
-            // enable rotation of the binding.pieChartAnalysis by touch
             binding.pieChartAnalysis.setRotationEnabled(true);
             binding.pieChartAnalysis.setHighlightPerTapEnabled(true);
+
+            // Mematikan highlight saat chart pertama kali di-load
+            binding.pieChartAnalysis.highlightValues(null);
+
             binding.pieChartAnalysis.setData(pieData);
             binding.pieChartAnalysis.invalidate();
         }
     }
-
     private class BarChartAsyncTask extends AsyncTask<Void, List<IBarDataSet>, List<IBarDataSet>> {
 
 

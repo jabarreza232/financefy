@@ -49,17 +49,17 @@ public class ViewModelFinance extends ViewModel {
     }
 
     public LiveData<List<ModelFinance>> getFinanceByTypeAndMonth(String type, String month, int id_user, String type_currency) {
-        if (type.equalsIgnoreCase(Tools.TYPE_FILTER.SEMUANYA.toString()))
+        if (type == null || type.equalsIgnoreCase(Tools.TYPE_FILTER.SEMUANYA.toString()) || type.equalsIgnoreCase("Semua") || type.equalsIgnoreCase("Semuanya"))
             return financeRepository.getFinanceByMonth(month, id_user, type_currency);
         else
             return financeRepository.getFinanceByTypeAndMonth(type, month, id_user, type_currency);
     }
 
     public LiveData<List<ModelFinance>> getFinanceByTypeAndWeek(String type, List<String> date, int id_user, String type_currency) {
-        if (type.equalsIgnoreCase(Tools.TYPE_FILTER.SEMUANYA.toString()))
+        if (type == null || type.equalsIgnoreCase(Tools.TYPE_FILTER.SEMUANYA.toString()) || type.equalsIgnoreCase("Semua") || type.equalsIgnoreCase("Semuanya"))
             return financeRepository.getFinanceByWeek(date, id_user, type_currency);
         else
-        return financeRepository.getFinanceByTypeAndWeek(type, date, id_user, type_currency);
+            return financeRepository.getFinanceByTypeAndWeek(type, date, id_user, type_currency);
     }
 
     public void inputUpdateFinance(String type, ModelFinance modelFinance) {

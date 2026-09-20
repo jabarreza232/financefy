@@ -41,7 +41,7 @@ open class DialogFilterFinance(
         isAnalysis.let {
             when (it) {
                 true -> {
-                    listFilterTypeValue = listFilterType.subList(0, 2)
+                    listFilterTypeValue = listFilterType
                     txtNominal.visibility = View.GONE
                 }
                 false -> {

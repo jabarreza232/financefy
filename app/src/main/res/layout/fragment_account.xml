@@ -8,123 +8,159 @@
         android:layout_height="match_parent">
 
         <androidx.core.widget.NestedScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        <LinearLayout
+            android:id="@+id/nested_scroll_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?attr/colorSurface"
-            android:orientation="vertical"
-            tools:context=".fragment.FragmentAll">
+            android:clipToPadding="false"
+            android:fillViewport="true">
 
-
-
-
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@drawable/shape_line_gray"
-                app:cardElevation="10dp">
+                android:background="?attr/colorSurface"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:paddingBottom="88dp">
 
-                <RelativeLayout
+                <!-- Active Account Summary Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_user_profile"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp">
+                    android:layout_marginBottom="12dp"
+                    app:cardBackgroundColor="?attr/colorSurface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/colorGrey30"
+                    app:strokeWidth="1dp">
 
-                    <TextView
-                        android:id="@+id/txt_name"
+                    <RelativeLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_toStartOf="@id/img_more"
-                        android:fontFamily="@font/ubuntu_b"
-                        android:text="@string/sample_name"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="15sp" />
+                        android:padding="16dp">
 
-                    <ImageView
-                        android:id="@+id/img_more"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentEnd="true"
-                        android:src="@drawable/ic_baseline_more_vert_24"
-                        app:tint="?attr/colorOnSurface" />
+                        <ImageView
+                            android:id="@+id/img_account_avatar"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:background="@drawable/shape_circle"
+                            android:backgroundTint="@color/bg_action_light"
+                            android:padding="10dp"
+                            android:src="@drawable/ic_baseline_account_balance_wallet_24"
+                            app:tint="@color/blueColor" />
 
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerVertical="true"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_toEndOf="@id/img_account_avatar"
+                            android:layout_toStartOf="@id/img_more"
+                            android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/txt_description"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/txt_name"
-                        android:layout_toStartOf="@id/img_more"
-                        android:fontFamily="@font/ubuntu_r"
-                        android:text="Pribadi - Menabung"
-                        android:layout_marginTop="5dp"
-                        android:textStyle="bold"
-                        android:textColor="@color/blueColorLight"
-                        android:textSize="13sp" />
+                            <TextView
+                                android:id="@+id/txt_name"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:fontFamily="@font/ubuntu_b"
+                                android:maxLines="1"
+                                android:text="@string/sample_name"
+                                android:textColor="?android:attr/textColorPrimary"
+                                android:textSize="16sp" />
 
-                </RelativeLayout>
+                            <TextView
+                                android:id="@+id/txt_description"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:background="@drawable/shape_bg_soft"
+                                android:fontFamily="@font/ubuntu_r"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="2dp"
+                                android:text="Pribadi - Menabung"
+                                android:textColor="@color/blueColor"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
 
+                        </LinearLayout>
 
-            </androidx.cardview.widget.CardView>
-            <androidx.cardview.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/shape_line_gray"
-                android:layout_margin="10dp"
-                app:cardElevation="10dp"
-                >
+                        <ImageView
+                            android:id="@+id/img_more"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:padding="6dp"
+                            android:src="@drawable/ic_baseline_more_vert_24"
+                            app:tint="?attr/colorOnSurface" />
 
-                <Spinner
-                    android:id="@+id/spin_choose_account"
+                    </RelativeLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Account Switcher Dropdown Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/card_choose_account"
                     android:layout_width="match_parent"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="5dp"
-                    android:layout_height="60dp"
-                    android:ellipsize="end"
-                    android:textSize="15sp"
-                    android:inputType="none"
-                    android:dropDownSelector="@drawable/ic_arrow_drop_down"
-                    android:backgroundTint="?attr/colorOnSurface"
-                    />
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardBackgroundColor="?attr/colorSurface"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/colorGrey30"
+                    app:strokeWidth="1dp">
 
-            </androidx.cardview.widget.CardView>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="12dp">
 
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginBottom="4dp"
+                            android:fontFamily="@font/ubuntu_b"
+                            android:text="@string/choose_account"
+                            android:textColor="@color/colorGrey"
+                            android:textSize="12sp" />
 
+                        <Spinner
+                            android:id="@+id/spin_choose_account"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:backgroundTint="?attr/colorOnSurface"
+                            android:dropDownSelector="@drawable/ic_arrow_drop_down"
+                            android:ellipsize="end"
+                            android:inputType="none"
+                            android:textSize="15sp" />
 
+                    </LinearLayout>
 
-            <include
-                android:id="@+id/layout_account_savings"
-                layout="@layout/layout_account_savings" />
-            <include
-                android:id="@+id/layout_account_finance_journal"
-                layout="@layout/layout_account_finance_journal" />
-        </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Included Savings View -->
+                <include
+                    android:id="@+id/layout_account_savings"
+                    layout="@layout/layout_account_savings" />
+
+                <!-- Included Finance Journal View -->
+                <include
+                    android:id="@+id/layout_account_finance_journal"
+                    layout="@layout/layout_account_finance_journal" />
+
+            </LinearLayout>
+
         </androidx.core.widget.NestedScrollView>
-        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-            android:id="@+id/fab_add_account"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:gravity="center"
-            android:padding="10dp"
-            android:visibility="gone"
-            android:text="Tambah Akun Baru"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            app:backgroundTint="@color/blueColor"
-            app:icon="@drawable/ic_add"
-            app:iconGravity="end"
-            app:iconSize="24dp"
-            app:iconTint="@color/white" />
+
+
+
     </RelativeLayout>
+
 </layout>

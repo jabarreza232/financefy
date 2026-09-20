@@ -164,24 +164,28 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         viewModelSavings = new ViewModelProvider(this).get(ViewModelSavings.class);
         viewModelFinance = new ViewModelProvider(this).get(ViewModelFinance.class);
         viewModelSavingsProgress = new ViewModelProvider(this).get(ViewModelSavingsProgress.class);
-        helperNotification=new HelperNotification(getContext());
+        helperNotification = new HelperNotification(getContext());
 
         viewModelSavingsProgress.init(savingsProgressRepository);
         viewModelUser.init(userRepository);
         viewModelFinance.init(financeRepository);
         viewModelSavings.init(savingsRepository);
 
-        //get the spinner from the xml.
+
+
+        // Initialize user data and spinner
         refreshDataUser(null, null);
-
-        refreshDataUserByCategory();
-
 
         binding.spinChooseAccount.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                setDataUser(dataUser.get(i));
-                refreshDataUserByCategory();
+                if (dataUser != null && i >= 0 && i < dataUser.size()) {
+                    ModelUser selectedUser = dataUser.get(i);
+                    if (mainActivity.user == null || selectedUser.getId() != mainActivity.user.getId()) {
+                        setDataUser(selectedUser);
+                        refreshDataUserByCategory();
+                    }
+                }
             }
 
             @Override
@@ -190,15 +194,11 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             }
         });
 
-
-        binding.fabAddAccount.setOnClickListener(view12 -> {
-            showDialogAddAccount(true);
-        });
-
         binding.imgMore.setOnClickListener(v -> {
             showDialogChoose();
         });
-        binding.layoutAccountFinanceJournal.imgChooseFilter.setOnClickListener(v->{
+
+        binding.layoutAccountFinanceJournal.imgChooseFilter.setOnClickListener(v -> {
             showMenu(v);
         });
     }
@@ -212,12 +212,13 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             refreshDataFinance();
         }
     }
-    private void showDataIncome(List<ModelFinance>data){
+
+    private void showDataIncome(List<ModelFinance> data) {
         ModelFinance income1 = new ModelFinance(0, getString(R.string.pemasukan), getString(R.string.gaji), 100);
         ModelFinance income2 = new ModelFinance(0, getString(R.string.pemasukan), getString(R.string.bonus), 100);
         ModelFinance income3 = new ModelFinance(0, getString(R.string.pemasukan), getString(R.string.hasil_usaha), 100);
         dataIncome = new ArrayList<>();
-        if(financeFilter.listIncome(data).size()>0){
+        if (financeFilter.listIncome(data).size() > 0) {
             dataIncome = financeFilter.listIncome(data);
             dataIncome = financeFilter.listAnalysis(dataIncome, getString(R.string.pemasukan));
             if (!isDuplicate(dataIncome, income1)) {
@@ -229,8 +230,7 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             if (!isDuplicate(dataIncome, income3)) {
                 dataIncome.add(income3);
             }
-        }else{
-
+        } else {
             dataIncome.add(income1);
             dataIncome.add(income2);
             dataIncome.add(income3);
@@ -240,23 +240,9 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         adapterIncome.setLayoutAnalysis(AdapterAnalysisFinanceAccount.LAYOUT_ANALYSIS.FROM_ACCOUNT);
         binding.layoutAccountFinanceJournal.rvIncome.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.layoutAccountFinanceJournal.rvIncome.setAdapter(adapterIncome);
-        binding.layoutAccountFinanceJournal.rvIncome.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy < 0 && !binding.fabAddAccount.isShown())
-                    binding.fabAddAccount.show();
-                else if (dy > 0 && binding.fabAddAccount.isShown() && !((MainActivity) getActivity()).isFabOpen)
-                    binding.fabAddAccount.hide();
-            }
-
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-        });
         adapterIncome.notifyDataSetChanged();
     }
+
     private boolean isDuplicate(List<ModelFinance> list, ModelFinance data) {
         for (ModelFinance item : list) {
             if (item.equals(data)) {
@@ -265,7 +251,8 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         }
         return false;
     }
-    private void showDataExpense(List<ModelFinance>data){
+
+    private void showDataExpense(List<ModelFinance> data) {
         ModelFinance expense1 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.belanja_umum), 100);
         ModelFinance expense2 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.makanan), 100);
         ModelFinance expense3 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.pulsa_hp), 100);
@@ -273,25 +260,25 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         ModelFinance expense5 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.tagihan), 100);
         ModelFinance expense6 = new ModelFinance(0, getString(R.string.pengeluaran), getString(R.string.paket_internet), 100);
         dataExpense = new ArrayList<>();
-        if(financeFilter.listExpense(data).size()>0){
+        if (financeFilter.listExpense(data).size() > 0) {
             dataExpense = financeFilter.listExpense(data);
             dataExpense = financeFilter.listAnalysis(dataExpense, getString(R.string.pengeluaran));
-            if (!isDuplicate(dataExpense,expense1)) {
+            if (!isDuplicate(dataExpense, expense1)) {
                 dataExpense.add(expense1);
             }
-            if (!isDuplicate(dataExpense,expense2)) {
+            if (!isDuplicate(dataExpense, expense2)) {
                 dataExpense.add(expense2);
             }
-            if (!isDuplicate(dataExpense,expense3)) {
+            if (!isDuplicate(dataExpense, expense3)) {
                 dataExpense.add(expense3);
             }
-            if (!isDuplicate(dataExpense,expense4)) {
+            if (!isDuplicate(dataExpense, expense4)) {
                 dataExpense.add(expense4);
             }
-            if (!isDuplicate(dataExpense,expense5)) {
+            if (!isDuplicate(dataExpense, expense5)) {
                 dataExpense.add(expense5);
             }
-            if(!isDuplicate(dataExpense,expense6)){
+            if (!isDuplicate(dataExpense, expense6)) {
                 dataExpense.add(expense6);
             }
         } else {
@@ -308,56 +295,40 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
         adapterExpense.setLayoutAnalysis(AdapterAnalysisFinanceAccount.LAYOUT_ANALYSIS.FROM_ACCOUNT);
         binding.layoutAccountFinanceJournal.rvExpense.setLayoutManager(new LinearLayoutManager(getActivity()));
         binding.layoutAccountFinanceJournal.rvExpense.setAdapter(adapterExpense);
-        binding.layoutAccountFinanceJournal.rvExpense.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy < 0 && !binding.fabAddAccount.isShown())
-                    binding.fabAddAccount.show();
-                else if (dy > 0 && binding.fabAddAccount.isShown() && !((MainActivity) getActivity()).isFabOpen)
-                    binding.fabAddAccount.hide();
-            }
-
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-        });
         adapterExpense.notifyDataSetChanged();
     }
+
     private void showDialogChoose() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Pilih Opsi");
 
-        final String[] tipe = count_users>1? new String[]{"Ubah Akun", "Hapus Akun"} : new String[]{"Ubah Akun"};
-
+        final String[] tipe = count_users > 1 ? new String[]{"Ubah Akun", "Hapus Akun"} : new String[]{"Ubah Akun"};
 
         builder.setItems(tipe, (dialog, which) -> {
             switch (tipe[which]) {
                 case "Ubah Akun":
-//                    mPositionItem = position;
                     showDialogAddAccount(false);
                     dialog.dismiss();
                     break;
                 case "Hapus Akun":
-//                    viewModelFinance.removeFinance(data.get(position));
-//                    dataFinance.remove(position);
-//                    binding.rvList.getAdapter().notifyDataSetChanged();
-
+                    if (count_users <= 1) {
+                        dialog.dismiss();
+                        break;
+                    }
                     new UserRepository.RemoveUser(mainActivity.user, userRepository.userDao).execute();
-                    if(mainActivity.modelSavings.getId()>0)
-                    new SavingsProgressRepository.RemoveSavings(savingsProgressRepository.savingsDao, mainActivity.modelSavings.getId()).execute();
-
+                    if (mainActivity.modelSavings != null && mainActivity.modelSavings.getId() > 0) {
+                        new SavingsProgressRepository.RemoveSavings(savingsProgressRepository.savingsDao, mainActivity.modelSavings.getId()).execute();
+                    }
                     new SavingsRepository.RemoveSavings(savingsRepository.savingsDao, mainActivity.user.getId()).execute();
-
                     new FinanceRepository.RemoveFinance(financeRepository.financeDao, mainActivity.user.getId()).execute();
 
                     int selectedPositionUser = dataUser.indexOf(mainActivity.user);
-                    mainActivity.user = dataUser.get((selectedPositionUser == 0 ? 1 : selectedPositionUser - 1));
-
-                    refreshDataUser(mainActivity.user, null);
-
-                    refreshDataUserByCategory();
+                    if (selectedPositionUser != -1 && dataUser.size() > 1) {
+                        int nextIndex = selectedPositionUser == 0 ? 1 : selectedPositionUser - 1;
+                        mainActivity.user = dataUser.get(nextIndex);
+                        refreshDataUser(mainActivity.user, null);
+                        refreshDataUserByCategory();
+                    }
                     dialog.dismiss();
                     break;
             }
@@ -535,57 +506,62 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
     }
 
     private void setDataSavings(ModelSavings modelSavings) {
+        if (modelSavings == null) return;
         mainActivity.modelSavings = modelSavings;
-        viewModelSavingsProgress.findTotalProcessValueByIdSavings(modelSavings.getId(),mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings1 -> {
-            int progressValue = modelSavings1!=null?modelSavings1:0;
+        viewModelSavingsProgress.findTotalProcessValueByIdSavings(modelSavings.getId(), mainActivity.user.getType_currency()).observe(getViewLifecycleOwner(), modelSavings1 -> {
+            int progressValue = modelSavings1 != null ? modelSavings1 : 0;
 
-            if (progressValue>=0) {
+            if (progressValue >= 0) {
                 modelSavings.setProcessValue(progressValue);
-                viewModelSavings.inputUpdateSavings("update",modelSavings);
+                viewModelSavings.inputUpdateSavings("update", modelSavings);
                 double percentage = calculatePercentage((double) progressValue, (double) modelSavings.getTargetValue());
-                String txtPercentage = percentage >= 100 ? "100%": percentage + "%";
-
+                String txtPercentage = percentage >= 100 ? "100%" : String.format(Locale.US, "%.1f%%", percentage);
 
                 tinyDb.putObject("savings", modelSavings);
-                if(modelSavings.getDate_target()!=null){
-                    long restOfTheDay =Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
+                if (modelSavings.getDate_target() != null) {
+                    long restOfTheDay = Tools.getRestOfTheDay(Tools.getFormattedDateSimple(today.getTimeInMillis()), modelSavings.getDate_target());
 
                     long remainingDaysAfterYears = restOfTheDay % 365;
                     long months = remainingDaysAfterYears / 30;
                     long remainingDays = remainingDaysAfterYears % 30;
 
-                    if(restOfTheDay>0){
-                        if(restOfTheDay>=365){
+                    if (restOfTheDay > 0) {
+                        if (restOfTheDay >= 365) {
                             long years = restOfTheDay / 365;
-                            binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: "+years+" tahun "+months+" bulan " + remainingDays + " hari");
-                        }else if(restOfTheDay>=30){
-                            binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: "+months+" bulan " + remainingDays + " hari");
-                        }else {
+                            binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: " + years + " tahun " + months + " bulan " + remainingDays + " hari");
+                        } else if (restOfTheDay >= 30) {
+                            binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: " + months + " bulan " + remainingDays + " hari");
+                        } else {
                             binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: " + remainingDays + " hari");
                         }
+                    } else {
+                        binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: Selesai");
                     }
-                    else
-                        binding.layoutAccountSavings.txtDescriptionSaving.setText("Waktu tersisa: selesai");
-
                 }
                 binding.layoutAccountSavings.txtChooseSavings.setText(modelSavings.getTitle());
                 binding.layoutAccountSavings.txtTarget.setText(Tools.convertToCurrency(modelSavings.getTargetValue(), locale));
                 binding.layoutAccountSavings.txtProgressValueSavings.setText(Tools.convertToCurrency(progressValue, locale));
-                binding.layoutAccountSavings.txtPercentageSavings.setText("Selamat, Anda sudah mencapai "+txtPercentage+" dari target menabung Anda!");
+                binding.layoutAccountSavings.txtPercentageSavings.setText("Selamat, Anda sudah mencapai " + txtPercentage + " dari target menabung Anda!");
                 binding.layoutAccountSavings.progressBarTargetSavings.setProgress((int) Tools.calculatePercentage(progressValue, modelSavings.getTargetValue()));
                 binding.layoutAccountSavings.progressBarTargetSavings.setMax(100);
 
                 viewModelSavingsProgress.findAllSavingsByIdSavings(modelSavings.getId(), modelSavings.getType_currency()).observe(getViewLifecycleOwner(), dataSavings -> {
-                    List<ModelSavingsProgress>savingsData = new ArrayList<>(dataSavings);
+                    List<ModelSavingsProgress> savingsData = new ArrayList<>(dataSavings);
 
                     savingsData = savingsFilter.listAnalysis(savingsData);
 
-                    adapter = new AdapterAnalysisSavings(getActivity(), savingsData);
-                    adapter.setLocale(locale);
-                    adapter.setTotalValue(modelSavings.getTargetValue());
-                    binding.layoutAccountSavings.rvProgressSavings.setLayoutManager(new LinearLayoutManager(getActivity()));
-                    binding.layoutAccountSavings.rvProgressSavings.setAdapter(adapter);
-                    adapter.notifyDataSetChanged();
+                    if (savingsData.size() > 0) {
+                        binding.layoutAccountSavings.cardHistorySavings.setVisibility(View.VISIBLE);
+                        binding.layoutAccountSavings.rvProgressSavings.setVisibility(View.VISIBLE);
+                        adapter = new AdapterAnalysisSavings(getActivity(), savingsData);
+                        adapter.setLocale(locale);
+                        adapter.setTotalValue(modelSavings.getTargetValue());
+                        binding.layoutAccountSavings.rvProgressSavings.setLayoutManager(new LinearLayoutManager(getActivity()));
+                        binding.layoutAccountSavings.rvProgressSavings.setAdapter(adapter);
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        binding.layoutAccountSavings.cardHistorySavings.setVisibility(View.GONE);
+                    }
                 });
             }
         });
@@ -599,16 +575,24 @@ public class FragmentAccount extends Fragment implements CallbackOnActivityResul
             int itemId = menuItem.getItemId();
             if (itemId == R.id.all) {
                 binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pengeluaran dan pemasukan");
-                binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.VISIBLE);
-                binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.VISIBLE);
+                binding.layoutAccountFinanceJournal.cardExpense.setVisibility(View.VISIBLE);
+                binding.layoutAccountFinanceJournal.cardIncome.setVisibility(View.VISIBLE);
+                binding.layoutAccountFinanceJournal.rvExpense.setVisibility(View.VISIBLE);
+                binding.layoutAccountFinanceJournal.rvIncome.setVisibility(View.VISIBLE);
             } else if (itemId == R.id.expense) {
                 binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pengeluaran");
-                binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.VISIBLE);
-                binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.GONE);
+                binding.layoutAccountFinanceJournal.cardExpense.setVisibility(View.VISIBLE);
+                binding.layoutAccountFinanceJournal.rvExpense.setVisibility(View.VISIBLE);
+                // Sembunyikan KARTU Pemasukan, bukan LinearLayout-nya
+                binding.layoutAccountFinanceJournal.cardIncome.setVisibility(View.GONE);
+                binding.layoutAccountFinanceJournal.rvIncome.setVisibility(View.GONE);
             } else if (itemId == R.id.income) {
                 binding.layoutAccountFinanceJournal.txtLabelIncomeExpense.setText("Total pemasukan");
-                binding.layoutAccountFinanceJournal.llExpense.setVisibility(View.GONE);
-                binding.layoutAccountFinanceJournal.llIncome.setVisibility(View.VISIBLE);
+                // Sembunyikan KARTU Pengeluaran, bukan LinearLayout-nya
+                binding.layoutAccountFinanceJournal.cardExpense.setVisibility(View.GONE);
+                binding.layoutAccountFinanceJournal.rvExpense.setVisibility(View.GONE);
+                binding.layoutAccountFinanceJournal.cardIncome.setVisibility(View.VISIBLE);
+                binding.layoutAccountFinanceJournal.rvIncome.setVisibility(View.VISIBLE);
             }
             return true;
         });

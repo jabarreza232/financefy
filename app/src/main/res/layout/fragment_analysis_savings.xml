@@ -22,10 +22,7 @@
                 android:background="?attr/colorSurface"
                 android:orientation="vertical"
                 tools:context=".fragment.FragmentAll">
-                <FrameLayout
-                    android:id="@+id/fl_header_wrapper"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+
                 <LinearLayout
                     android:id="@+id/ll_app_bar"
                     android:layout_width="match_parent"
@@ -33,6 +30,10 @@
                     android:layout_marginBottom="16dp"
                     android:background="@color/colorPrimary"
                     android:orientation="vertical">
+                    <FrameLayout
+                        android:id="@+id/fl_header_wrapper"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
                     <LinearLayout
                         android:id="@+id/ll_header_content"
                         android:layout_width="match_parent"
@@ -139,6 +140,8 @@
                             android:id="@+id/layout_savings_progress"
                             layout="@layout/layout_savings_progress" />
                     </LinearLayout>
+                    </FrameLayout>
+
                     <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/btn_toggle"
                         android:layout_width="wrap_content"
@@ -154,7 +157,6 @@
                         app:pressedTranslationZ="0dp"
                         app:tint="@color/colorAccent" />
                 </LinearLayout>
-                </FrameLayout>
 
                 <com.github.mikephil.charting.charts.PieChart
                     android:id="@+id/pie_chart_analysis"
