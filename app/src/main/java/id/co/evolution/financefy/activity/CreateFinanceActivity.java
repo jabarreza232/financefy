@@ -602,7 +602,6 @@ public class CreateFinanceActivity extends BaseFinanceActivity implements View.O
                                 tokenMaksimal = matcher.group(2);  // Hasil: 1024
                             }
 
-                            // 2. Susun Pesan Peringatan dengan 2 Saran
                             userFriendlyMessage = "Teks dari struk ini terlalu panjang untuk dibaca oleh kecerdasan buatan (AI) saat ini.\n\n" +
                                     "Kapasitas teks (Input): " + tokenDipakai + " / " + tokenMaksimal + " Token.\n\n" +
                                     "💡 Saran Solusi:\n" +

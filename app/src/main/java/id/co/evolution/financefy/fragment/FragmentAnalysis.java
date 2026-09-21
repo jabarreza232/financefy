@@ -16,6 +16,7 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -29,6 +30,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.transition.TransitionManager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -39,6 +41,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.components.Legend;
@@ -65,8 +69,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -282,7 +289,159 @@ public class FragmentAnalysis extends Fragment {
         Log.e("TAG", "cek_enum_category: " + new Gson().toJson(CATEGORY_INCOME.BONUS.name()));
         initiateSayHaloWithTime();
     }
+    private void renderLedgerReporting(List<ModelFinance> data) {
+        binding.llLedgerContainer.removeAllViews();
+        Map<String, Long> ledgerMap = new LinkedHashMap<>();
+        long saldoBersih = 0;
 
+        for (ModelFinance item : data) {
+            long currentVal = ledgerMap.getOrDefault(item.getKategori(), 0L);
+            ledgerMap.put(item.getKategori(), (long) (currentVal + item.getJumlahValue()));
+
+            if (item.getTipe().equalsIgnoreCase("Pemasukan")) {
+                saldoBersih += item.getJumlahValue();
+            } else {
+                saldoBersih -= item.getJumlahValue();
+            }
+        }
+
+        int[] attrs = new int[] { android.R.attr.textColorPrimary };
+        TypedArray ta = requireContext().obtainStyledAttributes(attrs);
+        int colorPrimaryText = ta.getColor(0, Color.BLACK);
+        ta.recycle();
+        for (Map.Entry<String, Long> entry : ledgerMap.entrySet()) {
+            RelativeLayout row = new RelativeLayout(requireContext());
+            row.setPadding(0, 12, 0, 12);
+
+            // Teks Kiri (Nama Kategori/Pengeluaran)
+            TextView txtName = new TextView(requireContext());
+            txtName.setText(entry.getKey());
+            txtName.setTextColor(colorPrimaryText);
+
+            RelativeLayout.LayoutParams paramsName = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            paramsName.addRule(RelativeLayout.ALIGN_PARENT_START);
+            row.addView(txtName, paramsName);
+
+            // Teks Kanan (Jumlah)
+            TextView txtAmount = new TextView(requireContext());
+            txtAmount.setText(Tools.convertToCurrency((double) entry.getValue(), locale));
+            txtAmount.setTypeface(null, Typeface.BOLD);
+            txtAmount.setTextColor(colorPrimaryText);
+
+            RelativeLayout.LayoutParams paramsAmt = new RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            paramsAmt.addRule(RelativeLayout.ALIGN_PARENT_END);
+            row.addView(txtAmount, paramsAmt);
+
+            binding.llLedgerContainer.addView(row);
+        }
+
+        binding.txtNetBalance.setText(Tools.convertToCurrency((double) saldoBersih, locale));
+    }
+    private void resetAiGeneratorUI() {
+        TransitionManager.beginDelayedTransition(binding.nsView);
+
+
+
+        binding.cardAiInsight.setVisibility(View.GONE);
+
+        binding.txtAiInsight.setText("Menganalisis pola keuangan Anda...");
+    }
+    private void setupAIGenerator() {
+        binding.btnGenerateAi.setOnClickListener(v -> {
+            TransitionManager.beginDelayedTransition(binding.nsView);
+
+            binding.btnGenerateAi.setVisibility(View.GONE);
+            binding.cardAiInsight.setVisibility(View.VISIBLE);
+
+            generateSmartInsight(dataFinance);
+        });
+    }
+    private void generateSmartInsight(List<ModelFinance> data) {
+        long totalPemasukan = 0;
+        long totalPengeluaran = 0;
+
+        Map<String, Long> pengeluaranKategori = new HashMap<>();
+        Map<String, Long> pemasukanKategori = new HashMap<>();
+
+        for (ModelFinance item : data) {
+            if (item.getTipe().equalsIgnoreCase(getString(R.string.pemasukan))) {
+                totalPemasukan += item.getJumlahValue();
+                long currentCatTotal = pemasukanKategori.getOrDefault(item.getKategori(), 0L);
+                pemasukanKategori.put(item.getKategori(), currentCatTotal + (long) item.getJumlahValue());
+            } else {
+                totalPengeluaran += item.getJumlahValue();
+                long currentCatTotal = pengeluaranKategori.getOrDefault(item.getKategori(), 0L);
+                pengeluaranKategori.put(item.getKategori(), currentCatTotal + (long) item.getJumlahValue());
+            }
+        }
+
+        String kategoriAndalan = "";
+        long maxPemasukan = 0;
+        for (Map.Entry<String, Long> entry : pemasukanKategori.entrySet()) {
+            if (entry.getValue() > maxPemasukan) {
+                maxPemasukan = entry.getValue();
+                kategoriAndalan = entry.getKey();
+            }
+        }
+
+        String kategoriBocor = "";
+        long maxPengeluaran = 0;
+        for (Map.Entry<String, Long> entry : pengeluaranKategori.entrySet()) {
+            if (entry.getValue() > maxPengeluaran) {
+                maxPengeluaran = entry.getValue();
+                kategoriBocor = entry.getKey();
+            }
+        }
+
+        StringBuilder insight = new StringBuilder();
+
+        if (totalPemasukan == 0 && totalPengeluaran == 0) {
+            binding.txtAiInsight.setText("Belum ada data transaksi untuk dianalisis. Tambahkan transaksi pertama Anda!");
+            return;
+        }
+
+        // 2. Analisis Arus Kas Global
+        if (totalPemasukan == 0 && totalPengeluaran > 0) {
+            insight.append("⚠️ Peringatan: Belum ada pemasukan yang tercatat, tetapi arus uang keluar terus berjalan. ");
+        } else if (totalPengeluaran == 0 && totalPemasukan > 0) {
+            insight.append("🌟 Sempurna! Ada dana masuk tanpa ada pengeluaran yang tercatat. ");
+        } else if (totalPengeluaran > totalPemasukan) {
+            insight.append("⚠️ Arus kas negatif (Defisit). Pengeluaran Anda sudah melebihi total pemasukan. ");
+        } else if (totalPemasukan > (totalPengeluaran * 2)) {
+            insight.append("🌟 Keuangan sangat sehat! Anda berhasil menahan biaya hidup di bawah 50% dari pendapatan. ");
+        } else {
+            insight.append("📈 Arus kas stabil dan berimbang. ");
+        }
+
+        if (!kategoriAndalan.isEmpty()) {
+            insight.append("\n\n💰 Sumber dana terbesar dari '").append(kategoriAndalan)
+                    .append("' (").append(Tools.convertToCurrency((double)maxPemasukan, locale)).append("). ");
+
+            if (kategoriAndalan.equalsIgnoreCase(getString(R.string.bonus))) {
+                insight.append("Karena didominasi Bonus, pastikan tidak menjadikan ini patokan dana tetap bulan depan.");
+            }
+        }
+
+        // 4. Analisis Pengeluaran
+        if (!kategoriBocor.isEmpty()) {
+            if (!kategoriAndalan.isEmpty()) {
+                insight.append("\n💸 Namun, pengeluaran paling besar tersedot ke '");
+            } else {
+                insight.append("\n💸 Pengeluaran paling besar tersedot ke '");
+            }
+
+            insight.append(kategoriBocor)
+                    .append("' (").append(Tools.convertToCurrency((double)maxPengeluaran, locale)).append("). ");
+
+            if (kategoriBocor.equalsIgnoreCase(getString(R.string.makanan)) || kategoriBocor.equalsIgnoreCase(getString(R.string.belanja_umum))) {
+                insight.append("Pertimbangkan untuk mengerem frekuensi belanja ini agar uang lebih awet.");
+            }
+        }
+
+        binding.txtAiInsight.setText(insight.toString().trim());
+    }
     private void initiateSayHaloWithTime() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
         String now = simpleDateFormat.format(new Date());
@@ -496,6 +655,15 @@ public class FragmentAnalysis extends Fragment {
             new PieChartAsyncTask(getContext(),financeFilter.listAnalysis(finances, filterType)).execute();
             binding.pieChartAnalysis.setVisibility(data.size() > 0 ? View.VISIBLE : View.GONE);
         }
+        showHideLedgerReporting(data.size() > 0 ? View.VISIBLE : View.GONE);
+
+        setupAIGenerator();
+            resetAiGeneratorUI();
+            renderLedgerReporting(data);
+    }
+    private void showHideLedgerReporting(int visibility){
+        binding.cardLedger.setVisibility(visibility);
+        binding.btnGenerateAi.setVisibility(visibility);
     }
 
 
@@ -536,7 +704,7 @@ public class FragmentAnalysis extends Fragment {
 
                     // Menyiapkan Label Persentase
                     String label = Tools.calculatePercentage(modelIncome.getJumlahValue(), totalBase) + "%";
-
+//                    String label = category + "\n" + Tools.calculatePercentage(modelIncome.getJumlahValue(), totalBase) + "%";
                     Drawable icon = null;
                     int color = Color.GRAY; // Warna default jika tidak ada kategori yang cocok
 
@@ -576,11 +744,11 @@ public class FragmentAnalysis extends Fragment {
                     // Ubah warna ikon menjadi putih agar kontras dengan warna slice pie chart
                     if (icon != null) {
                         icon = androidx.core.graphics.drawable.DrawableCompat.wrap(icon).mutate();
-                        androidx.core.graphics.drawable.DrawableCompat.setTint(icon, Color.WHITE);
+                        androidx.core.graphics.drawable.DrawableCompat.setTint(icon, color);
                     }
 
                     // Masukkan nilai, label, dan IKON ke dalam PieEntry
-                    entries.add(new PieEntry(value, label, icon));
+                    entries.add(new PieEntry(value, label, icon, category));
                     colors.add(color);
 
                     // Buat LegendEntry sekalian di sini agar ukurannya pas dengan data yang di-filter
@@ -601,11 +769,9 @@ public class FragmentAnalysis extends Fragment {
             dataSet.setValueLinePart2Length(0.4f);
             dataSet.setValueLineColor(Color.GRAY);
 
-            // AKTIFKAN IKON
             dataSet.setDrawIcons(true);
-            // Atur posisi ikon (0,0 berarti persis di tengah-tengah potongan/slice)
-            dataSet.setIconsOffset(new MPPointF(0, 0));
 
+            dataSet.setIconsOffset(new MPPointF(0, 50f));
             dataSet.setSliceSpace(3f);
             dataSet.setSelectionShift(5f);
             dataSet.setColors(colors);
@@ -630,22 +796,26 @@ public class FragmentAnalysis extends Fragment {
             l.setDrawInside(false);
             l.setWordWrapEnabled(true);
             l.setXEntrySpace(10f);
-            l.setTextSize(12f);
 
-            // value.resourceId berasal dari tema Anda sebelumnya
+            // --- TAMBAHKAN BARIS INI ---
+            l.setYOffset(15f); // Mendorong teks legend sedikit ke bawah
+
+            l.setTextSize(12f);
             l.setTextColor(ContextCompat.getColor(context, value.resourceId));
             l.setCustom(legendEntries);
+            binding.pieChartAnalysis.getLegend().setEnabled(false);
 
             binding.pieChartAnalysis.animateXY(1500, 1500);
             binding.pieChartAnalysis.getDescription().setEnabled(false);
             binding.pieChartAnalysis.setCenterText(filterType);
-            binding.pieChartAnalysis.setCenterTextSize(17);
             binding.pieChartAnalysis.setCenterTextColor(ContextCompat.getColor(context, value.resourceId));
             binding.pieChartAnalysis.setCenterTextTypeface(Typeface.DEFAULT_BOLD);
 
             // Extra offsets agar teks/garis di luar chart tidak terpotong tepi layar
-            binding.pieChartAnalysis.setExtraOffsets(20f, 0f, 20f, 0f);
+            binding.pieChartAnalysis.setCenterTextSize(14f);
 
+            // 2. Kembalikan ExtraOffsets ke nilai yang wajar agar PieChart TIDAK MENYUSUT
+            binding.pieChartAnalysis.setExtraOffsets(20f, 20f, 20f, 20f);
             binding.pieChartAnalysis.setDrawHoleEnabled(true);
             // Transparan agar mendukung Night Mode dengan baik
             binding.pieChartAnalysis.setHoleColor(Color.TRANSPARENT);
@@ -666,6 +836,30 @@ public class FragmentAnalysis extends Fragment {
 
             binding.pieChartAnalysis.setData(pieData);
             binding.pieChartAnalysis.invalidate();
+
+            binding.pieChartAnalysis.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+                @Override
+                public void onValueSelected(Entry e, Highlight h) {
+                    if (e instanceof PieEntry) {
+                        PieEntry pieEntry = (PieEntry) e;
+
+                        String categoryName = (String) pieEntry.getData();
+                        float amount = pieEntry.getValue();
+
+                        String textDetail = categoryName + "\n" + Tools.convertToCurrency((double) amount, locale);
+
+                        binding.pieChartAnalysis.setCenterText(textDetail);
+                        binding.pieChartAnalysis.setCenterTextSize(16f); // Sedikit dibesarkan agar menonjol
+                    }
+                }
+
+                @Override
+                public void onNothingSelected() {
+                    // Kembalikan ke teks default jika pengguna mengklik area luar grafik
+                    binding.pieChartAnalysis.setCenterText(filterType);
+                    binding.pieChartAnalysis.setCenterTextSize(14f);
+                }
+            });
         }
     }
     private class BarChartAsyncTask extends AsyncTask<Void, List<IBarDataSet>, List<IBarDataSet>> {
@@ -941,7 +1135,7 @@ public class FragmentAnalysis extends Fragment {
             l.setWordWrapEnabled(true);
             l.setYOffset(6f);
             l.setTextColor(ContextCompat.getColor(getContext(),value.resourceId));
-
+            binding.barChartAnalysis.getLegend().setEnabled(false);
 
             XAxis xAxis = binding.barChartAnalysis.getXAxis();
             xAxis.setGranularity(1f);
