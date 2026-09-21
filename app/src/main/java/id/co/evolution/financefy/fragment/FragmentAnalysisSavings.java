@@ -69,8 +69,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Random;
 
 import javax.inject.Inject;
@@ -705,7 +707,6 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
             dataSet.setDrawIcons(false);
             dataSet.setSliceSpace(3f); // Jarak antar potongan diperlebar sedikit
             dataSet.setSelectionShift(5f);
-
             dataSet.setColors(colors);
             return dataSet;
         }
@@ -732,12 +733,13 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
 
             binding.pieChartAnalysis.animateXY(1500, 1500); // Durasi dipercepat sedikit agar lebih responsif
             binding.pieChartAnalysis.getDescription().setEnabled(false);
+            binding.pieChartAnalysis.getLegend().setEnabled(false);
 
             binding.pieChartAnalysis.setCenterText("Total\nTabungan");
             binding.pieChartAnalysis.setCenterTextSize(16);
             binding.pieChartAnalysis.setCenterTextColor(ContextCompat.getColor(getContext(), R.color.blackTextColor));
             binding.pieChartAnalysis.setCenterTextTypeface(Typeface.DEFAULT_BOLD);
-            binding.pieChartAnalysis.setExtraOffsets(20f, 0f, 20f, 0f); // Beri ruang agar teks luar tidak terpotong layar
+            binding.pieChartAnalysis.setExtraOffsets(20f, 20f, 20f, 20f); // Beri ruang agar teks luar tidak terpotong layar
 
             // 3. PENGATURAN LUBANG TENGAH (Mendukung Dark Mode)
             binding.pieChartAnalysis.setDrawHoleEnabled(true);
@@ -776,21 +778,55 @@ public class FragmentAnalysisSavings extends Fragment implements CallbackOnActiv
         @Override
         protected List<IBarDataSet> doInBackground(Void... voids) {
             listDate = new ArrayList<>();
-
             List<IBarDataSet> barDataSets = new ArrayList<>();
             ArrayList<BarEntry> entriesSavings = new ArrayList<>();
 
-
             List<ModelSavingsProgress> listData = savingsFilter.listAnalysis(data);
-            listData = savingsFilter.filterPeriodSavingProgress("Terlama",listData);
+            listData = savingsFilter.filterPeriodSavingProgress("Terlama", listData);
 
-            int index=0;
+            // --- MULAI PERBAIKAN LOGIKA TANGGAL ---
+
+            // Map untuk menampung total jumlah berdasarkan tanggal
+            Map<String, Float> groupedValues = new LinkedHashMap<>();
+            // Map untuk menggabungkan judul-judul (titles) di tanggal yang sama
+            Map<String, StringBuilder> groupedTitles = new LinkedHashMap<>();
+
             for (ModelSavingsProgress modelIncome : listData) {
-                Spanned data = Html.fromHtml(Tools.convertDateFormat(modelIncome.getDate_progress_savings())+"<br>"+modelIncome.getTitle().toLowerCase());
-                entriesSavings.add(new BarEntry(index, modelIncome.getProcessValue(), data.toString()));
-                listDate.add(modelIncome.getTitle());
+                // Ambil tanggal sebagai Kunci (Key)
+                String dateStr = Tools.convertDateFormat(modelIncome.getDate_progress_savings());
+                float val = (float) modelIncome.getProcessValue();
+                String title = modelIncome.getTitle().toLowerCase();
+
+                if (groupedValues.containsKey(dateStr)) {
+                    // Jika tanggal sudah ada, tambahkan nominalnya (sum)
+                    groupedValues.put(dateStr, groupedValues.get(dateStr) + val);
+
+                    // Gabungkan judulnya (contoh: "beli laptop, beli mouse")
+                    groupedTitles.get(dateStr).append(", ").append(title);
+                } else {
+                    // Jika tanggal belum ada, buat entri baru
+                    groupedValues.put(dateStr, val);
+                    groupedTitles.put(dateStr, new StringBuilder(title));
+                }
+            }
+
+            // Pindahkan dari Map ke BarEntry
+            int index = 0;
+            for (String dateStr : groupedValues.keySet()) {
+                float totalProcessValue = groupedValues.get(dateStr);
+                String titles = groupedTitles.get(dateStr).toString();
+
+                // Gabungkan Tanggal dan Judul ke dalam objek data
+                Spanned dataSpanned = Html.fromHtml(dateStr + "<br>" + titles);
+
+                entriesSavings.add(new BarEntry(index, totalProcessValue, dataSpanned.toString()));
+
+                // Simpan tanggal untuk label Sumbu X (X-Axis)
+                listDate.add(dateStr);
                 index++;
             }
+
+            // --- AKHIR PERBAIKAN ---
 
             BarDataSet barDataSetBonus = new BarDataSet(entriesSavings, "");
             barDataSetBonus.setColor(ContextCompat.getColor(getContext(), R.color.blueColor));
