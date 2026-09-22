@@ -185,13 +185,18 @@ public class FragmentSettings extends Fragment {
 //                requestPermission();
 //            }
 //        });
-         modelFile = new File(requireContext().getExternalFilesDir(null), "Qwen2_0.5B_Instruct.litertlm");
- // 2. Aksi ketika CardView ditekan (Tampilkan Dialog)
-        if (modelFile.exists()) {
+        String modelName = tinyDb.getString("model_name");
+        boolean isModelReady = false;
+
+        if (!modelName.isEmpty()) {
+            modelFile = new File(requireContext().getExternalFilesDir(null), modelName);
+            isModelReady = modelFile.exists();
+        }
+
+        binding.switchLlm.setEnabled(isModelReady);
+
+        if (isModelReady) {
             binding.imgArrowLlm.setImageResource(R.drawable.ic_baseline_settings_24);
-            binding.switchLlm.setEnabled(true);
-        }else{
-            binding.switchLlm.setEnabled(false);
         }
         binding.cvDownloadLlm.setOnClickListener(v -> {
            processDownload();
@@ -207,10 +212,9 @@ public class FragmentSettings extends Fragment {
                     "Scan AI aktif. Privasi data Anda terjaga." :
                     "Mode Scan AI dinonaktifkan.";
 
-            // Membuat Snackbar (menggunakan requireView() karena ini di dalam Fragment)
             Snackbar snackbar = Snackbar.make(requireView(), pesan, Snackbar.LENGTH_SHORT);
 
-            // (PENTING) Jika Snackbar tertutup oleh Bottom Navigation, gunakan Anchor View:
+
              View bottomNav = requireActivity().findViewById(R.id.bn_main);
              snackbar.setAnchorView(bottomNav);
 
@@ -413,7 +417,8 @@ public class FragmentSettings extends Fragment {
         }
     }
     private void processDownload() {
-        if (modelFile.exists()) {
+
+        if (modelFile!=null&&modelFile.exists()) {
             showDialogLlmSettings();
             return;
         }
@@ -427,19 +432,36 @@ public class FragmentSettings extends Fragment {
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
-
+        RadioGroup rgModels = dialogView.findViewById(R.id.rg_llm_models);
         dialogView.findViewById(R.id.btn_cancel_dialog).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btn_download_dialog).setOnClickListener(v -> {
             dialog.dismiss();
-            executeDownload();
+            int selectedId = rgModels.getCheckedRadioButtonId();
+            String url="";
+            String fileName="";
+            if (selectedId == R.id.rb_qwen) {
+                 url ="https://huggingface.co/litert-community/Qwen2.5-1.5B-Instruct/resolve/main/Qwen2.5-1.5B-Instruct_multi-prefill-seq_q8_ekv4096.litertlm?download=true";
+                fileName = "Qwen2_1.5B_Instruct.litertlm";
+                tinyDb.putString("model_name",fileName);
+                executeDownload(url,fileName);
+            } else if (selectedId == R.id.rb_qwen3) {
+                url ="https://huggingface.co/litert-community/Qwen3-1.7B/resolve/main/Qwen3_1.7B.litertlm?download=true";
+                fileName = "Qwen3_1.7B.litertlm";
+
+                tinyDb.putString("model_name",fileName);
+
+                executeDownload(url,fileName);
+
+            } else {
+                // Jaga-jaga jika tidak ada yang dipilih
+                Toast.makeText(getContext(), "Silakan pilih model terlebih dahulu", Toast.LENGTH_SHORT).show();
+            }
         });
 
         dialog.show();
     }
 
-    private void executeDownload() {
-        String url = "https://huggingface.co/litert-community/Qwen2.5-1.5B-Instruct/resolve/main/Qwen2.5-1.5B-Instruct_multi-prefill-seq_q8_ekv4096.litertlm?download=true";
-        String fileName = "Qwen2_0.5B_Instruct.litertlm";
+    private void executeDownload(String url, String fileName) {
 
         // Set UI awal
         binding.progressBarLlm.setVisibility(View.VISIBLE);
@@ -487,12 +509,14 @@ public class FragmentSettings extends Fragment {
             switch (state.status) {
                 case DownloadState.IDLE:
                     // Cek ketersediaan file seperti kode awal Anda
-                    File modelFile = new File(requireContext().getExternalFilesDir(null), "Qwen2_0.5B_Instruct.litertlm");
-                    if (modelFile.exists()) {
-                        setUITerunduh();
-                    } else {
-                        setUIBelumTerunduh();
+                    if(!tinyDb.getString("model_name").isEmpty()){
+                        if (modelFile.exists()) {
+                            setUITerunduh();
+                        } else {
+                            setUIBelumTerunduh();
+                        }
                     }
+
                     break;
 
                 case DownloadState.RUNNING:

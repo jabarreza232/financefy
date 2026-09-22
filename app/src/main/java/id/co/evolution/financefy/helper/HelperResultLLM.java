@@ -54,6 +54,8 @@ import id.co.evolution.financefy.model.ModelPrimaryColor;
 public class HelperResultLLM {
     private Engine litertEngine;
     private Conversation litertConversation;
+
+    private String fileModelName;
     public interface MethodCallback{
         void onResultLLM(HashMap<String,String>map);
     }
@@ -73,8 +75,9 @@ public class HelperResultLLM {
     }
 
     public void initLlmInference(Context context) {
-        File modelFile = new File(context.getExternalFilesDir(null), "Qwen2_0.5B_Instruct.litertlm");
         TinyDb tinyDb = new TinyDb(context);
+        fileModelName = tinyDb.getString("model_name");
+        File modelFile = new File(context.getExternalFilesDir(null), fileModelName);
         if (modelFile.exists()) {
             new Thread(() -> {
                 try {
